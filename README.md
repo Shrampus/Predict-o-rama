@@ -32,7 +32,15 @@ npm install
 npm run dev
 ```
 
+## Tailwind CSS (Frontend Styling)
 
+Tailwind CSS is installed in the frontend. It lets you style UI directly in JSX using utility classes like `p-4`, `text-lg`, and `bg-blue-600`.
+
+Where to look:
+- `frontend/tailwind.config.js` for Tailwind setup
+- `frontend/src/index.css` (and/or `frontend/src/styles/index.css`) for `@tailwind` directives
+
+Tip: when building new UI, prefer Tailwind utility classes first, then add custom CSS only when needed.
 
 # Running the Backend
 
