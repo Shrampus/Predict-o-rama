@@ -27,6 +27,16 @@ export function MainLayout() {
             >
               Predictions
             </NavLink>
+
+            <NavLink
+              to="/Tournaments"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
+              }
+            >
+              Tournaments
+            </NavLink>
+          
           </nav>
         </div>
       </header>
