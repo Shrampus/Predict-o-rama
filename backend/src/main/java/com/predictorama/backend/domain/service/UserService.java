@@ -2,7 +2,7 @@ package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.domain.entity.Role;
 import com.predictorama.backend.domain.entity.User;
-import com.predictorama.backend.domain.port.UserRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;

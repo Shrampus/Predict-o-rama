@@ -3,7 +3,7 @@ package com.predictorama.backend.adapter.persistence.adapter;
 import com.predictorama.backend.adapter.persistence.mapper.GroupMapper;
 import com.predictorama.backend.adapter.persistence.repository.GroupJpaRepository;
 import com.predictorama.backend.domain.entity.Group;
-import com.predictorama.backend.domain.port.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

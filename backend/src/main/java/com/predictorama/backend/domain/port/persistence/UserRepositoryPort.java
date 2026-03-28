@@ -1,4 +1,4 @@
-package com.predictorama.backend.domain.port;
+package com.predictorama.backend.domain.port.persistence;
 
 import com.predictorama.backend.domain.entity.User;
 

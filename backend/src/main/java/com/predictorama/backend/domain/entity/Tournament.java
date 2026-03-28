@@ -15,7 +15,7 @@ public class Tournament {
     private String description;
     private Sport sport;
 
-    private enum Sport{
+    public enum Sport{
         FOOTBALL
     }
 }

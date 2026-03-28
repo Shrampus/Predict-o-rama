@@ -12,7 +12,7 @@ public class Score {
     private Integer awayScore;
     private ScoreType scoreType;
 
-    private enum ScoreType{
-        NORMAL_TIME, FULL_TIME
+    public enum ScoreType{
+        NORMAL_TIME, FULL_TIME, PENALTIES
     }
 }

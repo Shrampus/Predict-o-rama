@@ -1,8 +1,8 @@
 package com.predictorama.backend.config;
 
-import com.predictorama.backend.domain.port.GroupMemberRepositoryPort;
-import com.predictorama.backend.domain.port.GroupRepositoryPort;
-import com.predictorama.backend.domain.port.UserRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.GroupService;
 import com.predictorama.backend.domain.service.UserService;
 import org.springframework.context.annotation.Bean;

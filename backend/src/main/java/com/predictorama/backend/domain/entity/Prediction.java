@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -15,8 +16,8 @@ public class Prediction {
     private UUID userId;
     private UUID matchId;
     private UUID groupId;
-    private Score predictedScore;
-    private Team predictedWinner;
+    private List<Score> predictedScores;
+    private Winner predictedWinner;
     private Instant submittedAt;
     private Integer result;
 }

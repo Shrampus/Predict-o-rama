@@ -3,7 +3,7 @@ package com.predictorama.backend.adapter.persistence.adapter;
 import com.predictorama.backend.adapter.persistence.mapper.UserMapper;
 import com.predictorama.backend.adapter.persistence.repository.UserJpaRepository;
 import com.predictorama.backend.domain.entity.User;
-import com.predictorama.backend.domain.port.UserRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,8 +3,8 @@ package com.predictorama.backend.domain.service;
 import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.entity.GroupMember;
 import com.predictorama.backend.domain.entity.Role;
-import com.predictorama.backend.domain.port.GroupMemberRepositoryPort;
-import com.predictorama.backend.domain.port.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
