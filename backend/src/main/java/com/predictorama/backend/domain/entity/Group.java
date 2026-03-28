@@ -1,0 +1,18 @@
+package com.predictorama.backend.domain.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.util.UUID;
+
+@Getter
+@Builder
+@AllArgsConstructor
+public class Group {
+    private UUID id;
+    private UUID ownerId;
+    private UUID inviteCode;
+    private String name;
+    private String description;
+}
