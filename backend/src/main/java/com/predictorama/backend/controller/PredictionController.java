@@ -1,21 +1,22 @@
 package com.predictorama.backend.controller;
 
+import com.predictorama.backend.controller.dto.PredictionPageResponseDto;
+import com.predictorama.backend.domain.service.PredictionPageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/predictions")
+@RequiredArgsConstructor
 public class PredictionController {
 
+    private final PredictionPageService predictionPageService;
+
     @GetMapping
-    public Map<String, Object> getPredictions() {
-        return Map.of(
-                "message", "Predictions endpoint placeholder",
-                "data", List.of()
-        );
+    public PredictionPageResponseDto getPredictions(@RequestParam String competition) {
+        return predictionPageService.getPredictionPage(competition);
     }
 }
