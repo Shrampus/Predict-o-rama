@@ -1,8 +1,8 @@
 package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.adapter.external.footballdata.FootballDataApiAdapter;
-import com.predictorama.backend.controller.dto.PredictionPageMatchDto;
-import com.predictorama.backend.controller.dto.PredictionPageResponseDto;
+import com.predictorama.backend.adapter.rest.dto.PredictionPageMatchDto;
+import com.predictorama.backend.adapter.rest.dto.PredictionPageResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

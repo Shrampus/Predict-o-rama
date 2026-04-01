@@ -1,4 +1,4 @@
-package com.predictorama.backend.controller.dto;
+package com.predictorama.backend.adapter.rest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

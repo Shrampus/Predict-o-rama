@@ -1,6 +1,6 @@
-package com.predictorama.backend.controller;
+package com.predictorama.backend.adapter.rest.controller;
 
-import com.predictorama.backend.controller.dto.PredictionPageResponseDto;
+import com.predictorama.backend.adapter.rest.dto.PredictionPageResponseDto;
 import com.predictorama.backend.domain.service.PredictionPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

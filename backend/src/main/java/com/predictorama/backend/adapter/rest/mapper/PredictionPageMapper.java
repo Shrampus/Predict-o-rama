@@ -1,6 +1,6 @@
-package com.predictorama.backend.controller.mapper;
+package com.predictorama.backend.adapter.rest.mapper;
 
-import com.predictorama.backend.controller.dto.PredictionPageMatchDto;
+import com.predictorama.backend.adapter.rest.dto.PredictionPageMatchDto;
 import com.predictorama.backend.domain.entity.Match;
 
 public class PredictionPageMapper {
