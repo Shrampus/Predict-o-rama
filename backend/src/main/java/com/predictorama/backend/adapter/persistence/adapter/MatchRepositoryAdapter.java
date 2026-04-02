@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,38 +38,50 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
     public Match save(Match match) {
         log.debug("Saving match - id={}, name={}", match.getId(), match.getName());
         MatchEntity saved = jpaRepository.save(MatchMapper.toEntity(match));
+
         matchScoreRepository.deleteByMatchId(saved.getId());
         List<MatchScoreEntity> scoreEntities = match.getScores().stream()
                 .map(score -> MatchScoreMapper.toEntity(saved.getId(), score))
                 .toList();
         matchScoreRepository.saveAll(scoreEntities);
+
         log.debug("Match saved - id={}, scores={}", saved.getId(), scoreEntities.size());
-        List<Score> scores = scoreEntities.stream().map(MatchScoreMapper::toDomain).toList();
+        List<Score> scores = scoreEntities.stream()
+                .map(MatchScoreMapper::toDomain)
+                .toList();
+
         return MatchMapper.toDomain(saved, scores, match.getHomeTeam(), match.getAwayTeam());
     }
 
     @Override
     public Optional<Match> findById(UUID id) {
-        return jpaRepository.findById(id).map(entity -> toMatch(entity));
+        return jpaRepository.findById(id).map(this::toMatch);
     }
 
     @Override
     public List<Match> findByTournamentId(UUID tournamentId) {
         return jpaRepository.findByTournamentId(tournamentId).stream()
-                .map(entity -> toMatch(entity))
+                .map(this::toMatch)
                 .toList();
     }
 
     @Override
     public List<Match> findByTournamentIdAndMatchStatus(UUID tournamentId, Match.MatchStatus matchStatus) {
         return jpaRepository.findByTournamentIdAndMatchStatus(tournamentId, matchStatus).stream()
-                .map(entity -> toMatch(entity))
+                .map(this::toMatch)
+                .toList();
+    }
+
+    @Override
+    public List<Match> findByKickoffTimeBetween(Instant from, Instant to) {
+        return jpaRepository.findByKickoffTimeBetween(from, to).stream()
+                .map(this::toMatch)
                 .toList();
     }
 
     @Override
     public Optional<Match> findByExternalId(String externalId) {
-        return jpaRepository.findByExternalId(externalId).map(entity -> toMatch(entity));
+        return jpaRepository.findByExternalId(externalId).map(this::toMatch);
     }
 
     private Match toMatch(MatchEntity entity) {
