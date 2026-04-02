@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TimeBadgeFunction from './TimeBadge';
 import WinnerButton from './WinnerButton';
 import type { WinningTeam, Prediction, Match } from '../TournamentConstants';
+import { getTeamLabel } from '../TournamentConstants';
 
 function deriveWinner(home: number, away: number): WinningTeam {
     if (home > away) return 'Home';
@@ -9,13 +10,15 @@ function deriveWinner(home: number, away: number): WinningTeam {
     return 'Draw';
 }
 
+const DEFAULT_PREDICTION: Prediction = { home: 0, away: 0, winningTeam: 'Draw', saved: false };
+
 function MatchCard({
     match,
-    prediction,
+    prediction = DEFAULT_PREDICTION,
     onPredict,
 }: {
     match: Match;
-    prediction: Prediction;
+    prediction?: Prediction;
     onPredict: (id: number, home: number, away: number, winningTeam: WinningTeam) => void;
 }) {
     const [home, setHome] = useState(prediction.home);
@@ -40,13 +43,13 @@ function MatchCard({
             <div className="flex-1 flex flex-col items-center sm:items-end gap-2 text-center sm:text-right">
                 <span className="text-5xl">{match.homeTeam.flag}</span>
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{match.homeTeam.label}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{getTeamLabel(match.homeTeam.name, match.homeTeam.isHost)}</p>
                     <h3 className="text-xl font-black tracking-tight">{match.homeTeam.name}</h3>
                 </div>
             </div>
 
             {/* Score inputs and winner selector */}
-            <div className="flex flex-col items-center gap-4 bg-slate-50 rounded-2xl p-4 min-w-[200px]">
+            <div className="flex flex-col items-center gap-4 bg-slate-50 rounded-2xl p-4 min-w-[50px]">
                 {/* {Score} */}
                 <div className="flex items-center gap-4">
                     <input
@@ -104,7 +107,7 @@ function MatchCard({
             <div className="flex-1 flex flex-col items-center sm:items-start gap-2 text-center sm:text-left">
                 <span className="text-5xl">{match.awayTeam.flag}</span>
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{match.awayTeam.label}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{getTeamLabel(match.awayTeam.name)}</p>
                     <h3 className="text-xl font-black tracking-tight">{match.awayTeam.name}</h3>
                 </div>
             </div>
