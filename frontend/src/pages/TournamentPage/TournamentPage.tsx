@@ -1,4 +1,9 @@
 import { useState } from 'react';
+
+import HeroBanner from './Components/HeroBanner';
+import MatchCard from './Components/MatchCard';
+import StandingsTable from './Components/StandingsTable';
+import Tabs from './Components/Tabs';
 import { matches } from './TournamentConstants';
 import type { Prediction, WinningTeam } from './TournamentConstants';
 
@@ -9,11 +14,8 @@ const matchesByGroup = groups.map((group) => ({
         .filter((m) => m.group === group)
         .sort((a, b) => a.datetime.localeCompare(b.datetime)),
 }));
-import HeroBanner from './Components/HeroBanner';
-import Tabs from './Components/Tabs';
-import MatchCard from './Components/MatchCard';
-import StandingsTable from './Components/StandingsTable';
-import BentoBoxes from './Components/BentoBoxes';
+
+
 
 function TournamentPage() {
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
@@ -72,7 +74,7 @@ function TournamentPage() {
 
                     {/* Sidebar */}
                     <div className="laptop:col-span-4 space-y-6">
-                        <BentoBoxes />
+                        {/* <BentoBoxes /> */}
                     </div>
                 </div>
             )}

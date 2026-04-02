@@ -1,8 +1,9 @@
 import { useState } from 'react';
+
 import TimeBadgeFunction from './TimeBadge';
 import WinnerButton from './WinnerButton';
-import type { WinningTeam, Prediction, Match } from '../TournamentConstants';
 import { getTeamLabel } from '../TournamentConstants';
+import type { WinningTeam, Prediction, Match } from '../TournamentConstants';
 
 function deriveWinner(home: number, away: number): WinningTeam {
     if (home > away) return 'Home';
