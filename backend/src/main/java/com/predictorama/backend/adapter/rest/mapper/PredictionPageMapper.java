@@ -11,8 +11,8 @@ public class PredictionPageMapper {
                 .externalMatchId(match.getExternalId())
                 .homeTeamName(match.getHomeTeam().getName())
                 .awayTeamName(match.getAwayTeam().getName())
-                .homeTeamImage(null)
-                .awayTeamImage(null)
+                .homeTeamImage(match.getHomeTeam().getImageUrl())
+                .awayTeamImage(match.getAwayTeam().getImageUrl())
                 .kickoffTime(match.getKickoffTime())
                 .matchStatus(match.getMatchStatus().name())
                 .build();
