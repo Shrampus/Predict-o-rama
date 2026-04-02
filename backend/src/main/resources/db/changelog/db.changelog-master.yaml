@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/003-create-groups.yaml
   - include:
       file: db/changelog/004-create-core-tables.yaml
+  - include:
+      file: db/changelog/005-add-team-image-url.yaml

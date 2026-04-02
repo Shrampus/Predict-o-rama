@@ -19,4 +19,7 @@ public class TeamEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 }

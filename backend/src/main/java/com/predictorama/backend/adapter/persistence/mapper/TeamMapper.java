@@ -9,6 +9,7 @@ public class TeamMapper {
         return Team.builder()
                 .id(entity.getId())
                 .name(entity.getName())
+                .imageUrl(entity.getImageUrl())
                 .build();
     }
 
@@ -16,6 +17,7 @@ public class TeamMapper {
         return TeamEntity.builder()
                 .id(team.getId())
                 .name(team.getName())
+                .imageUrl(team.getImageUrl())
                 .build();
     }
 }
