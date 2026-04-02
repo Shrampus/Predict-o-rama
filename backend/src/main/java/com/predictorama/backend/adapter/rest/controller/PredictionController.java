@@ -1,6 +1,7 @@
 package com.predictorama.backend.adapter.rest.controller;
 
 import com.predictorama.backend.adapter.rest.dto.PredictionPageResponseDto;
+import com.predictorama.backend.adapter.rest.mapper.PredictionPageMapper;
 import com.predictorama.backend.domain.service.PredictionPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,12 @@ public class PredictionController {
 
     @GetMapping
     public PredictionPageResponseDto getPredictions(@RequestParam String competition) {
-        return predictionPageService.getPredictionPage(competition);
+        var matches = predictionPageService.getPredictionPageMatches(competition);
+
+        return PredictionPageResponseDto.builder()
+                .matches(matches.stream()
+                        .map(PredictionPageMapper::toDto)
+                        .toList())
+                .build();
     }
 }
