@@ -1,5 +1,6 @@
-
 import { NavLink, Outlet } from 'react-router-dom';
+
+import { ROUTE_PATHS } from '../../app/routePaths';
 
 export function MainLayout() {
   return (
@@ -10,7 +11,7 @@ export function MainLayout() {
 
           <nav aria-label="Primary" className="flex items-center gap-2">
             <NavLink
-              to="/"
+              to={ROUTE_PATHS.home}
               end
               className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
@@ -20,7 +21,7 @@ export function MainLayout() {
             </NavLink>
 
             <NavLink
-              to="/Predictions"
+              to={ROUTE_PATHS.predictions}
               className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
               }
@@ -29,7 +30,7 @@ export function MainLayout() {
             </NavLink>
 
             <NavLink
-              to="/Tournaments"
+              to={ROUTE_PATHS.tournaments}
               className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
               }
