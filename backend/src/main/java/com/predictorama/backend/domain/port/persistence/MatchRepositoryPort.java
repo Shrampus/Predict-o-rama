@@ -17,6 +17,8 @@ public interface MatchRepositoryPort {
 
     List<Match> findByTournamentIdAndMatchStatus(UUID tournamentId, Match.MatchStatus matchStatus);
 
+    List<Match> findByTournamentIdAndKickoffTimeBetween(UUID tournamentId, Instant from, Instant to);
+
     List<Match> findByKickoffTimeBetween(Instant from, Instant to);
 
     Optional<Match> findByExternalId(String externalId);

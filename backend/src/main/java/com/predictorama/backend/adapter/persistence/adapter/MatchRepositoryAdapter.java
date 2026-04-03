@@ -73,6 +73,16 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
     }
 
     @Override
+    public List<Match> findByTournamentIdAndKickoffTimeBetween(UUID tournamentId, Instant from, Instant to) {
+        return jpaRepository.findByTournamentId(tournamentId).stream()
+                .filter(entity -> entity.getKickoffTime() != null)
+                .filter(entity -> !entity.getKickoffTime().isBefore(from))
+                .filter(entity -> !entity.getKickoffTime().isAfter(to))
+                .map(this::toMatch)
+                .toList();
+    }
+
+    @Override
     public List<Match> findByKickoffTimeBetween(Instant from, Instant to) {
         return jpaRepository.findByKickoffTimeBetween(from, to).stream()
                 .map(this::toMatch)

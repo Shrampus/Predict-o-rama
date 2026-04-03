@@ -28,11 +28,11 @@ public class PredictionPageService {
         Instant now = Instant.now();
         Instant in28Days = now.plus(28, ChronoUnit.DAYS);
 
-        List<Match> existingMatches = matchRepositoryPort.findByTournamentId(tournament.getId()).stream()
-                .filter(match -> match.getKickoffTime() != null)
-                .filter(match -> !match.getKickoffTime().isBefore(now))
-                .filter(match -> !match.getKickoffTime().isAfter(in28Days))
-                .toList();
+        List<Match> existingMatches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
+                tournament.getId(),
+                now,
+                in28Days
+        );
 
         if (!existingMatches.isEmpty()) {
             log.info(
