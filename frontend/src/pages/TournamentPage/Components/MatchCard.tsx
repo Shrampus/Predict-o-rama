@@ -3,7 +3,7 @@ import { useState } from 'react';
 import TimeBadge from './TimeBadge';
 import WinnerButton from './WinnerButton';
 import TeamDisplay from './TeamDisplay';
-import { deriveWinner, DEFAULT_PREDICTION, formatKickoffTime, deriveTimeStyle } from './matchCardUtils';
+import { deriveWinner, DEFAULT_PREDICTION, formatKickoffTime, deriveTimeStyle } from '../utils/matchCardUtils';
 import type { WinningTeam, Prediction} from '../TournamentConstants';
 import type { PredictionPageMatch } from '../../../services/predictionsApi';
 

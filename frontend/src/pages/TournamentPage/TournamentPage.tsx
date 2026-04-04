@@ -11,6 +11,7 @@ import Tabs from './Components/Tabs';
 
 function TournamentPage() {
     const { matches, isLoading, error } = useTournamentMatches('UEFA_EURO_2024');
+    const tournamentName = 'UEFA_EURO_2024'.replace(/_/g, ' ');
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
     const liveMatchCount = matches.filter( m => m.matchStatus === 'LIVE').length; 
 
@@ -21,7 +22,7 @@ function TournamentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <HeroBanner
                 season="Summer 2024 Series"
-                name="EURO CHAMPIONS CUP"
+                name={tournamentName}
                 phase="Group Stage Phase"
                 liveMatchCount={liveMatchCount}
             />
