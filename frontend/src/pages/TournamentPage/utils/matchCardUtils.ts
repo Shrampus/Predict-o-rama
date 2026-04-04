@@ -1,5 +1,5 @@
-import type { WinningTeam, Prediction } from '../TournamentConstants';
 import type { PredictionPageMatch } from '../../../services/predictionsApi';
+import type { WinningTeam, Prediction } from '../TournamentConstants';
 
 export function deriveWinner(homeScore: number, awayScore: number): WinningTeam {
     if (homeScore > awayScore) return 'Home';
