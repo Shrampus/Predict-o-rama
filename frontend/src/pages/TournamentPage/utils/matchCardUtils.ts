@@ -1,4 +1,5 @@
 import type { WinningTeam, Prediction } from '../TournamentConstants';
+import type { PredictionPageMatch } from '../../../services/predictionsApi';
 
 export function deriveWinner(homeScore: number, awayScore: number): WinningTeam {
     if (homeScore > awayScore) return 'Home';
@@ -21,3 +22,16 @@ export function deriveTimeStyle(matchStatus: string): string {
 }
 
 export const DEFAULT_PREDICTION: Prediction = { home: 0, away: 0, winningTeam: 'Draw', saved: false };
+
+export function buildPrediction(match: PredictionPageMatch): Prediction {
+    if (match.predictedHomeScore === null || match.predictedAwayScore === null) {
+        return DEFAULT_PREDICTION;
+    }
+    const winnerMap: Record<string, WinningTeam> = { HOME: 'Home', AWAY: 'Away', DRAW: 'Draw' };
+    return {
+        home: match.predictedHomeScore,
+        away: match.predictedAwayScore,
+        winningTeam: match.predictedWinner ? winnerMap[match.predictedWinner] : deriveWinner(match.predictedHomeScore, match.predictedAwayScore),
+        saved: true,
+    };
+}

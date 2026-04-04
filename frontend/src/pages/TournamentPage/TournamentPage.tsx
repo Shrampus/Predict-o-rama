@@ -4,13 +4,14 @@ import HeroBanner from './Components/HeroBanner';
 import MatchCard from './Components/MatchCard';
 import StandingsTable from './Components/StandingsTable';
 import Tabs from './Components/Tabs';
+import { buildPrediction } from './utils/matchCardUtils';
 
 
 
 
 
 function TournamentPage() {
-    const { matches, isLoading, error } = useTournamentMatches('UEFA_EURO_2024');
+    const { matches, isLoading, error } = useTournamentMatches('CL', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
     const tournamentName = 'UEFA_EURO_2024'.replace(/_/g, ' ');
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
     const liveMatchCount = matches.filter( m => m.matchStatus === 'LIVE').length; 
@@ -46,7 +47,7 @@ function TournamentPage() {
                         {error && <p className="text-red-500">{error}</p>}
                         {!isLoading && !error && matches.length === 0 && <p>No matches available.</p>}
                         {!isLoading && !error && matches.map((match) => (
-                            <MatchCard key={match.matchId} match={match} />
+                            <MatchCard key={match.matchId} match={match} prediction={buildPrediction(match)} />
                         ))}
                     </div>
 

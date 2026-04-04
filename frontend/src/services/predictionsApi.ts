@@ -17,7 +17,7 @@ export type PredictionPageResponse = {
     matches: PredictionPageMatch[];
 }
 
-export async function getPredictions(competition: string): Promise<PredictionPageResponse> {
-    const response = await fetch('/api/predictions?competition=' + competition);
+export async function getPredictions(competition: string, userId: string, groupId: string): Promise<PredictionPageResponse> {
+    const response = await fetch(`/api/predictions?competition=${competition}&userId=${userId}&groupId=${groupId}`);
     return response.json();
 }   
