@@ -23,6 +23,11 @@ public class PredictionPageService {
     private final CompetitionCatalog competitionCatalog;
 
     public List<Match> getPredictionPageMatches(String competition) {
+        if (!competitionCatalog.isSupportedCompetition(competition)) {
+            log.warn("Rejected unsupported competition code={} on prediction page request", competition);
+            return List.of();
+        }
+
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
 
         Instant now = Instant.now();
