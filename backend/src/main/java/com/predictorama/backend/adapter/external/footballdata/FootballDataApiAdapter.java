@@ -13,8 +13,10 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -66,7 +68,7 @@ public class FootballDataApiAdapter implements FootballDataPort {
             }
 
             return response.getMatches().stream()
-                    .map(this::toDomainMatch)
+                    .flatMap(matchResponse -> toDomainMatch(matchResponse, competition).stream())
                     .toList();
 
         } catch (FootballDataApiException e) {
@@ -92,28 +94,101 @@ public class FootballDataApiAdapter implements FootballDataPort {
         }
     }
 
-    private Match toDomainMatch(FootballDataMatchResponse matchResponse) {
-        return Match.builder()
+    private List<Match> toDomainMatch(FootballDataMatchResponse matchResponse, String competition) {
+        if (matchResponse == null) {
+            log.warn("Skipping football-data match for competition={} because matchResponse is null", competition);
+            return List.of();
+        }
+
+        if (matchResponse.getId() == null) {
+            log.warn("Skipping football-data match for competition={} because id is null", competition);
+            return List.of();
+        }
+
+        if (matchResponse.getUtcDate() == null || matchResponse.getUtcDate().isBlank()) {
+            log.warn(
+                    "Skipping football-data match for competition={} externalId={} because utcDate is missing",
+                    competition,
+                    matchResponse.getId()
+            );
+            return List.of();
+        }
+
+        if (matchResponse.getHomeTeam() == null) {
+            log.warn(
+                    "Skipping football-data match for competition={} externalId={} because homeTeam is missing",
+                    competition,
+                    matchResponse.getId()
+            );
+            return List.of();
+        }
+
+        if (matchResponse.getAwayTeam() == null) {
+            log.warn(
+                    "Skipping football-data match for competition={} externalId={} because awayTeam is missing",
+                    competition,
+                    matchResponse.getId()
+            );
+            return List.of();
+        }
+
+        String homeTeamName = normalize(matchResponse.getHomeTeam().getName());
+        String awayTeamName = normalize(matchResponse.getAwayTeam().getName());
+
+        if (homeTeamName == null) {
+            log.warn(
+                    "Skipping football-data match for competition={} externalId={} because homeTeam.name is missing",
+                    competition,
+                    matchResponse.getId()
+            );
+            return List.of();
+        }
+
+        if (awayTeamName == null) {
+            log.warn(
+                    "Skipping football-data match for competition={} externalId={} because awayTeam.name is missing",
+                    competition,
+                    matchResponse.getId()
+            );
+            return List.of();
+        }
+
+        Instant kickoffTime;
+        try {
+            kickoffTime = Instant.parse(matchResponse.getUtcDate());
+        } catch (DateTimeParseException e) {
+            log.warn(
+                    "Skipping football-data match for competition={} externalId={} because utcDate is invalid value={}",
+                    competition,
+                    matchResponse.getId(),
+                    matchResponse.getUtcDate()
+            );
+            return List.of();
+        }
+
+        Match match = Match.builder()
                 .id(UUID.randomUUID()) // temporary until persisted
                 .tournamentId(null)
-                .name(matchResponse.getHomeTeam().getName() + " vs " + matchResponse.getAwayTeam().getName())
+                .name(homeTeamName + " vs " + awayTeamName)
                 .description(null)
                 .homeTeam(Team.builder()
                         .id(UUID.randomUUID())
-                        .name(matchResponse.getHomeTeam().getName())
-                        .imageUrl(matchResponse.getHomeTeam().getCrest())
+                        .name(homeTeamName)
+                        .imageUrl(normalize(matchResponse.getHomeTeam().getCrest()))
                         .build())
                 .awayTeam(Team.builder()
                         .id(UUID.randomUUID())
-                        .name(matchResponse.getAwayTeam().getName())
-                        .imageUrl(matchResponse.getAwayTeam().getCrest())
+                        .name(awayTeamName)
+                        .imageUrl(normalize(matchResponse.getAwayTeam().getCrest()))
                         .build())
                 .matchStatus(mapStatus(matchResponse.getStatus()))
-                .kickoffTime(Instant.parse(matchResponse.getUtcDate()))
+                .kickoffTime(kickoffTime)
                 .scores(List.of())
                 .winner(null)
                 .externalId(String.valueOf(matchResponse.getId()))
                 .build();
+
+        return List.of(match);
     }
 
     private Match.MatchStatus mapStatus(String status) {
@@ -124,5 +199,14 @@ public class FootballDataApiAdapter implements FootballDataPort {
             case "CANCELLED", "POSTPONED", "SUSPENDED" -> Match.MatchStatus.CANCELLED;
             default -> Match.MatchStatus.SCHEDULED;
         };
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }
