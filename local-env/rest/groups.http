@@ -1,0 +1,18 @@
+POST http://localhost:8080/api/groups
+Content-Type: application/json
+
+{
+  "ownerId": "18ec2bee-b454-45c3-bff2-c92ddc269f59",
+  "name": "Group {{$timestamp}}",
+  "description": "Description"
+}
+
+###
+
+POST http://localhost:8080/api/groups/join
+Content-Type: application/json
+
+{
+  "userId": "a751b05c-ac97-47a5-921c-3f71af784418",
+  "inviteCode": "77877d60-43cb-43a3-8e53-133e9586e22e"
+}
