@@ -23,4 +23,9 @@ public class PredictionPageMatchDto {
 
     private Instant kickoffTime;
     private String matchStatus;
+
+    private UUID predictionId;
+    private Integer predictedHomeScore;
+    private Integer predictedAwayScore;
+    private String predictedWinner;
 }
