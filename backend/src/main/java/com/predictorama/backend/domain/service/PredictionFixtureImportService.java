@@ -28,6 +28,11 @@ public class PredictionFixtureImportService {
     private final CompetitionCatalog competitionCatalog;
 
     public List<Match> importUpcomingMatches(String competition) {
+        if (!competitionCatalog.isSupportedCompetition(competition)) {
+            log.warn("Rejected fixture import for unsupported competition code={}", competition);
+            return List.of();
+        }
+
         Tournament tournament = getOrCreateTournament(competition);
 
         return footballDataPort.getUpcomingMatches(competition).stream()
@@ -36,6 +41,10 @@ public class PredictionFixtureImportService {
     }
 
     public Tournament getOrCreateTournament(String competition) {
+        if (!competitionCatalog.isSupportedCompetition(competition)) {
+            throw new IllegalArgumentException("Unsupported competition code: " + competition);
+        }
+
         String tournamentName = competitionCatalog.toTournamentName(competition);
 
         return tournamentRepositoryPort.findAll().stream()
