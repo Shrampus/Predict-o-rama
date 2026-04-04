@@ -25,6 +25,10 @@ services:
       - DB_USERNAME=predictorama
       - DB_PASSWORD=predictorama
       - FOOTBALL_DATA_API_KEY=${FOOTBALL_DATA_API_KEY}
+      - FIXTURE_SYNC_ENABLED=true
+      - FIXTURE_SYNC_INITIAL_DELAY=15s
+      - FIXTURE_SYNC_FIXED_DELAY=1m
+      - FIXTURE_SYNC_COMPETITIONS=WC,EC,CL,PL,BL1,DED,BSA,PD,FL1,ELC,PPL,SA
     depends_on:
       db:
         condition: service_healthy

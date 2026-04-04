@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -36,6 +37,7 @@ public class PredictionFixtureImportService {
         Tournament tournament = getOrCreateTournament(competition);
 
         return footballDataPort.getUpcomingMatches(competition).stream()
+                .filter(this::isValidExternalMatch)
                 .map(match -> saveOrUpdateMatch(match, tournament))
                 .toList();
     }
@@ -65,7 +67,50 @@ public class PredictionFixtureImportService {
                 });
     }
 
+    private boolean isValidExternalMatch(Match match) {
+        if (match == null) {
+            log.warn("Skipping imported match because it is null");
+            return false;
+        }
+
+        if (isBlank(match.getExternalId())) {
+            log.warn("Skipping imported match because externalId is missing");
+            return false;
+        }
+
+        if (match.getKickoffTime() == null) {
+            log.warn("Skipping imported match externalId={} because kickoffTime is missing", match.getExternalId());
+            return false;
+        }
+
+        if (match.getHomeTeam() == null) {
+            log.warn("Skipping imported match externalId={} because homeTeam is missing", match.getExternalId());
+            return false;
+        }
+
+        if (match.getAwayTeam() == null) {
+            log.warn("Skipping imported match externalId={} because awayTeam is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getHomeTeam().getName())) {
+            log.warn("Skipping imported match externalId={} because homeTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getName())) {
+            log.warn("Skipping imported match externalId={} because awayTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        return true;
+    }
+
     private Team saveOrGetTeam(Team incomingTeam) {
+        if (incomingTeam == null || isBlank(incomingTeam.getName())) {
+            throw new IllegalArgumentException("Cannot save team with missing name");
+        }
+
         return teamRepositoryPort.findByName(incomingTeam.getName())
                 .map(existingTeam -> {
                     String existingImage = existingTeam.getImageUrl();
@@ -73,7 +118,7 @@ public class PredictionFixtureImportService {
 
                     boolean imageChanged =
                             incomingImage != null &&
-                            (existingImage == null || !existingImage.equals(incomingImage));
+                            !Objects.equals(existingImage, incomingImage);
 
                     if (!imageChanged) {
                         return existingTeam;
@@ -150,5 +195,9 @@ public class PredictionFixtureImportService {
 
     private String buildMatchName(Team homeTeam, Team awayTeam) {
         return homeTeam.getName() + " vs " + awayTeam.getName();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }
