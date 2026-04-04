@@ -1,32 +1,21 @@
 import { useState } from 'react';
-
+import { useTournamentMatches } from './hooks/useTournamentMatches';
 import HeroBanner from './Components/HeroBanner';
 import MatchCard from './Components/MatchCard';
 import StandingsTable from './Components/StandingsTable';
 import Tabs from './Components/Tabs';
-import { matches } from './TournamentConstants';
-import type { Prediction, WinningTeam } from './TournamentConstants';
 
-const groups = Array.from(new Set(matches.map((m) => m.group)));
-const matchesByGroup = groups.map((group) => ({
-    group,
-    matches: matches
-        .filter((m) => m.group === group)
-        .sort((a, b) => a.datetime.localeCompare(b.datetime)),
-}));
+
 
 
 
 function TournamentPage() {
+    const { matches, isLoading, error } = useTournamentMatches('UEFA_EURO_2024');
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
-    const [predictions, setPredictions] = useState<Record<number, Prediction>>({
-        1: { home: 0, away: 0, winningTeam: 'Draw', saved: false },
-        2: { home: 1, away: 2, winningTeam: 'Away', saved: false },
-    });
+    const liveMatchCount = matches.filter( m => m.matchStatus === 'LIVE').length; 
 
-    function handlePredict(id: number, home: number, away: number, winningTeam: WinningTeam) {
-        setPredictions((prev) => ({ ...prev, [id]: { home, away, saved: true, winningTeam } }));
-    }
+
+
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -34,7 +23,7 @@ function TournamentPage() {
                 season="Summer 2024 Series"
                 name="EURO CHAMPIONS CUP"
                 phase="Group Stage Phase"
-                liveMatchCount={128}
+                liveMatchCount={liveMatchCount}
             />
 
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -52,23 +41,11 @@ function TournamentPage() {
                                 View Calendar
                             </span>
                         </div>
-
-                        {matchesByGroup.map(({ group, matches: groupMatches }) => (
-                            <div key={group}>
-                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
-                                    Group {group}
-                                </h3>
-                                <div className="space-y-4">
-                                    {groupMatches.map((match) => (
-                                        <MatchCard
-                                            key={match.id}
-                                            match={match}
-                                            prediction={predictions[match.id]}
-                                            onPredict={handlePredict}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
+                        {isLoading && <p>Loading matches...</p>}    
+                        {error && <p className="text-red-500">{error}</p>}
+                        {!isLoading && !error && matches.length === 0 && <p>No matches available.</p>}
+                        {!isLoading && !error && matches.map((match) => (
+                            <MatchCard key={match.matchId} match={match} />
                         ))}
                     </div>
 

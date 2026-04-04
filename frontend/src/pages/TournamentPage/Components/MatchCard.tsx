@@ -3,18 +3,18 @@ import { useState } from 'react';
 import TimeBadge from './TimeBadge';
 import WinnerButton from './WinnerButton';
 import TeamDisplay from './TeamDisplay';
-import { deriveWinner, DEFAULT_PREDICTION } from './matchCardUtils';
-import { getTeamLabel } from '../TournamentConstants';
-import type { WinningTeam, Prediction, Match } from '../TournamentConstants';
+import { deriveWinner, DEFAULT_PREDICTION, formatKickoffTime, deriveTimeStyle } from './matchCardUtils';
+import type { WinningTeam, Prediction} from '../TournamentConstants';
+import type { PredictionPageMatch } from '../../../services/predictionsApi';
 
 function MatchCard({
     match,
     prediction = DEFAULT_PREDICTION,
     onPredict,
 }: {
-    match: Match;
+    match: PredictionPageMatch;
     prediction?: Prediction;
-    onPredict: (id: number, home: number, away: number, winningTeam: WinningTeam) => void;
+    onPredict?: (id: string, home: number, away: number, winningTeam: WinningTeam) => void;
 }) {
     const [homeScore, setHomeScore] = useState(prediction.home);
     const [awayScore, setAwayScore] = useState(prediction.away);
@@ -35,9 +35,9 @@ function MatchCard({
             <div className="absolute top-0 left-0 w-1 h-full bg-green-700 opacity-0 group-hover:opacity-100 transition-opacity" />
 
             <TeamDisplay
-                flag={match.homeTeam.flag}
-                label={getTeamLabel(match.homeTeam.name, match.homeTeam.isHost)}
-                name={match.homeTeam.name}
+                imageUrl={match.homeTeamImage}
+                label=''
+                name={match.homeTeamName}
                 align="right"
             />
 
@@ -67,7 +67,7 @@ function MatchCard({
                         isActive={winningTeam === 'Home'}
                         onClick={() => setWinningTeam('Home')}
                     >
-                        {match.homeTeam.name}
+                        {match.homeTeamName}
                     </WinnerButton>
                     <WinnerButton
                         isActive={winningTeam === 'Draw'}
@@ -79,13 +79,13 @@ function MatchCard({
                         isActive={winningTeam === 'Away'}
                         onClick={() => setWinningTeam('Away')}
                     >
-                        {match.awayTeam.name}
+                        {match.awayTeamName}
                     </WinnerButton>
                 </div>
 
                 {/* Submit */}
                 <button
-                    onClick={() => onPredict(match.id, homeScore, awayScore, winningTeam)}
+                    onClick={() => onPredict?.(match.matchId, homeScore, awayScore, winningTeam)}
                     className={`w-full px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-transform active:scale-95 ${
                         prediction.saved
                             ? 'bg-green-700 text-white'
@@ -97,13 +97,13 @@ function MatchCard({
             </div>
 
             <TeamDisplay
-                flag={match.awayTeam.flag}
-                label={getTeamLabel(match.awayTeam.name)}
-                name={match.awayTeam.name}
+                imageUrl={match.awayTeamImage}
+                label=''
+                name={match.awayTeamName}
                 align="left"
             />
 
-            <TimeBadge time={match.time} timeStyle={match.timeStyle} />
+            <TimeBadge time={formatKickoffTime(match.kickoffTime)} timeStyle={deriveTimeStyle(match.matchStatus)} />
         </div>
     );
 }
