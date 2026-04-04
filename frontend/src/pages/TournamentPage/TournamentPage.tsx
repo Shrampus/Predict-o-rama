@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useTournamentMatches } from './hooks/useTournamentMatches';
+
+import { buildPrediction } from './utils/matchCardUtils';
 import HeroBanner from './Components/HeroBanner';
 import MatchCard from './Components/MatchCard';
 import StandingsTable from './Components/StandingsTable';
 import Tabs from './Components/Tabs';
-import { buildPrediction } from './utils/matchCardUtils';
+import { useTournamentMatches } from './hooks/useTournamentMatches';
 
 
 

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
+import type { PredictionPageMatch } from '../../../services/predictionsApi';
+import type { WinningTeam, Prediction } from '../TournamentConstants';
+import { deriveWinner, DEFAULT_PREDICTION, formatKickoffTime, deriveTimeStyle } from '../utils/matchCardUtils';
+import TeamDisplay from './TeamDisplay';
 import TimeBadge from './TimeBadge';
 import WinnerButton from './WinnerButton';
-import TeamDisplay from './TeamDisplay';
-import { deriveWinner, DEFAULT_PREDICTION, formatKickoffTime, deriveTimeStyle } from '../utils/matchCardUtils';
-import type { WinningTeam, Prediction} from '../TournamentConstants';
-import type { PredictionPageMatch } from '../../../services/predictionsApi';
 
 function MatchCard({
     match,
