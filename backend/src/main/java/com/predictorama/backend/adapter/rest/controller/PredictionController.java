@@ -4,22 +4,23 @@ import com.predictorama.backend.adapter.rest.dto.CreatePredictionRequest;
 import com.predictorama.backend.adapter.rest.dto.PredictionResponse;
 import com.predictorama.backend.domain.entity.Prediction;
 import com.predictorama.backend.domain.entity.Score;
+import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.service.PredictionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/predictions")
+@RequiredArgsConstructor
 public class PredictionController {
 
     private final PredictionService predictionService;
 
-    @Autowired
-    public PredictionController(PredictionService predictionService) {
-        this.predictionService = predictionService;
-    }
+    private final PredictionRepositoryPort predictionRepositoryPort;
+
+
 
     @PostMapping
     public PredictionResponse createPrediction(@RequestBody CreatePredictionRequest request) {
