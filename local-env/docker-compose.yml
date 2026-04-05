@@ -1,0 +1,50 @@
+services:
+  frontend:
+    build: ../frontend
+    container_name: predictorama-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    container_name: predictorama-backend
+    command: ./mvnw spring-boot:run
+    volumes:
+      - ../backend:/app
+      - ~/.m2:/root/.m2
+    ports:
+      - "8080:8080"
+    environment:
+      - ALLOWED_ORIGIN=http://localhost
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_URL=jdbc:postgresql://db:5432/predictorama
+      - DB_USERNAME=predictorama
+      - DB_PASSWORD=predictorama
+      - FOOTBALL_DATA_API_KEY=${FOOTBALL_DATA_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    container_name: predictorama-db
+    environment:
+      POSTGRES_DB: predictorama
+      POSTGRES_USER: predictorama
+      POSTGRES_PASSWORD: predictorama
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U predictorama -d predictorama" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

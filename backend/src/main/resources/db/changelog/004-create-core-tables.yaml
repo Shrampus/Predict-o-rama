@@ -1,0 +1,257 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-create-teams
+      author: hlp
+      changes:
+        - createTable:
+            tableName: teams
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+
+  - changeSet:
+      id: 004-create-tournaments
+      author: hlp
+      changes:
+        - createTable:
+            tableName: tournaments
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(500)
+              - column:
+                  name: sport
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+
+  - changeSet:
+      id: 004-create-matches
+      author: hlp
+      changes:
+        - createTable:
+            tableName: matches
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tournament_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_matches_tournament
+                    references: tournaments(id)
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(500)
+              - column:
+                  name: home_team_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_matches_home_team
+                    references: teams(id)
+              - column:
+                  name: away_team_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_matches_away_team
+                    references: teams(id)
+              - column:
+                  name: match_status
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: kickoff_time
+                  type: timestamp with time zone
+              - column:
+                  name: winner
+                  type: varchar(50)
+              - column:
+                  name: external_id
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+
+  - changeSet:
+      id: 004-create-match-scores
+      author: hlp
+      changes:
+        - createTable:
+            tableName: match_scores
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: match_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_match_scores_match
+                    references: matches(id)
+              - column:
+                  name: score_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: home_score
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: away_score
+                  type: integer
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: match_scores
+            columnNames: match_id, score_type
+            constraintName: uq_match_scores_match_type
+
+  - changeSet:
+      id: 004-create-predictions
+      author: hlp
+      changes:
+        - createTable:
+            tableName: predictions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_predictions_user
+                    references: users(id)
+              - column:
+                  name: match_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_predictions_match
+                    references: matches(id)
+              - column:
+                  name: group_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_predictions_group
+                    references: groups(id)
+              - column:
+                  name: predicted_winner
+                  type: varchar(50)
+              - column:
+                  name: submitted_at
+                  type: timestamp with time zone
+              - column:
+                  name: result
+                  type: integer
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+
+        - addUniqueConstraint:
+            tableName: predictions
+            columnNames: user_id, match_id, group_id
+            constraintName: uq_predictions_user_match_group
+
+  - changeSet:
+      id: 004-create-prediction-scores
+      author: hlp
+      changes:
+        - createTable:
+            tableName: prediction_scores
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: prediction_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_prediction_scores_prediction
+                    references: predictions(id)
+              - column:
+                  name: score_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: home_score
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: away_score
+                  type: integer
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: prediction_scores
+            columnNames: prediction_id, score_type
+            constraintName: uq_prediction_scores_prediction_type
