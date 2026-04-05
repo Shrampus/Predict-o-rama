@@ -1,16 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+
+import { AuthContext } from './authContextDef';
 import { authApi } from '../services/authApi';
 import type { CurrentUser } from '../services/authApi';
-
-interface AuthContextValue {
-  currentUser: CurrentUser | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
@@ -38,10 +31,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
-  return ctx;
 }

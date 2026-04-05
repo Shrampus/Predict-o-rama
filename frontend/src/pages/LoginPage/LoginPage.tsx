@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+
 import { ROUTE_PATHS } from '../../app/routePaths';
+import { useAuth } from '../../context/useAuth';
 
 const TEST_USERS = [
   { email: 'alice@test.com', password: '***', role: 'ADMIN' },

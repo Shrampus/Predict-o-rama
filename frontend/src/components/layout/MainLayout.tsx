@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../app/routePaths';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 export function MainLayout() {
   const { currentUser, logout } = useAuth();
