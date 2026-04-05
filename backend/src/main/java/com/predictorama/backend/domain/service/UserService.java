@@ -11,9 +11,17 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepositoryPort userRepository;
+    // TODO: remove default password once real auth (Google OAuth) is in place
+    private final String defaultPasswordHash;
 
     public User createUser(String username, String email) {
-        User user = new User(UUID.randomUUID(), username, email, Role.USER);
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .username(username)
+                .email(email)
+                .systemRole(Role.USER)
+                .passwordHash(defaultPasswordHash)
+                .build();
         return userRepository.save(user);
     }
 }

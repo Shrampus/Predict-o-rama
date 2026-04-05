@@ -18,7 +18,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = new InMemoryUserRepository();
-        userService = new UserService(userRepository);
+        userService = new UserService(userRepository, "hashed-default");
     }
 
     @Test

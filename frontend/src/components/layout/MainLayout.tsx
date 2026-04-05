@@ -1,8 +1,17 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../app/routePaths';
+import { useAuth } from '../../context/useAuth';
 
 export function MainLayout() {
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate(ROUTE_PATHS.login);
+  }
+
   return (
     <div>
       <header>
@@ -37,8 +46,17 @@ export function MainLayout() {
             >
               Tournaments
             </NavLink>
-          
           </nav>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">{currentUser?.username}</span>
+            <button
+              onClick={handleLogout}
+              className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
