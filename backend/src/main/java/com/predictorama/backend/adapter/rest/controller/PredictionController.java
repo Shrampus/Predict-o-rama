@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/predictions")
@@ -36,28 +35,16 @@ public class PredictionController {
         Prediction savedPrediction = predictionService.createPrediction(prediction);
 
         PredictionResponse response = new PredictionResponse();
-        response.userName = "Placeholder";
-        response.groupName = "Placeholder";
-        response.matchResult = "Placeholder";
-        response.predictedScore = savedPrediction.getPredictedScores().getFirst().getScore();
+        response.userName = "To do Ada";
+        response.groupName = "To do Ada";
+        response.matchResult = "To do Ada";
+        response.predictedScoreHome = savedPrediction.getPredictedScores().getFirst().getScore();
+        response.predictedScoreAway = savedPrediction.getPredictedScores().getFirst().getScore();
         response.isWinner = savedPrediction.getPredictedWinner() != null;
 
         return response;
     }
 
-    @GetMapping("/user/{userId}")
-    public List<PredictionResponse> getPredictionsByUser(@PathVariable UUID userId) {
 
-        List<Prediction> predictions = predictionService.getPredictionsByUser(userId);
 
-        return predictions.stream().map(pred -> {
-            PredictionResponse response = new PredictionResponse();
-            response.userName = "Placeholder";
-            response.groupName = "Placeholder";
-            response.matchResult = "Placeholder";
-            response.predictedScore = pred.getPredictedScores().getFirst().getScore();
-            response.isWinner = pred.getPredictedWinner() != null;
-            return response;
-        }).toList();
-    }
 }

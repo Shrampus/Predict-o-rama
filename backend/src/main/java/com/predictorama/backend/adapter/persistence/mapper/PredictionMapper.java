@@ -1,3 +1,4 @@
+
 package com.predictorama.backend.adapter.persistence.mapper;
 
 import com.predictorama.backend.adapter.persistence.entity.PredictionEntity;

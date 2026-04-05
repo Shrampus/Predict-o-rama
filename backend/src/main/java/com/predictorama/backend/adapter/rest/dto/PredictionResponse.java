@@ -5,7 +5,8 @@ public class PredictionResponse {
     public String userName;
     public String groupName;
     public String matchResult;
-    public int predictedScore;
+    public int predictedScoreHome;
+    public int predictedScoreAway;
     public boolean isWinner;
 
     public PredictionResponse() {}
