@@ -7,3 +7,9 @@ databaseChangeLog:
       file: db/changelog/003-create-groups.yaml
   - include:
       file: db/changelog/004-create-core-tables.yaml
+  - include:
+      file: db/changelog/005-add-team-image-url.yaml
+  - include:
+      file: db/changelog/006-add-password-hash-to-users.yaml
+  - include:
+      file: db/changelog/007-seed-test-users.yaml
