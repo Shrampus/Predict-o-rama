@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-seed-test-users
+      author: dev
+      context: dev
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: '00000000-0000-0000-0000-000000000001' }
+              - column: { name: username, value: alice }
+              - column: { name: email, value: alice@test.com }
+              - column: { name: system_role, value: ADMIN }
+              - column: { name: password_hash, value: '$2a$10$GJZJ2XQatQweZwfBRixGg.zSeZS6v/j56UshpHtXuPn4HuDMYBUVe' }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: '00000000-0000-0000-0000-000000000002' }
+              - column: { name: username, value: bob }
+              - column: { name: email, value: bob@test.com }
+              - column: { name: system_role, value: USER }
+              - column: { name: password_hash, value: '$2a$10$GJZJ2XQatQweZwfBRixGg.zSeZS6v/j56UshpHtXuPn4HuDMYBUVe' }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: '00000000-0000-0000-0000-000000000003' }
+              - column: { name: username, value: carol }
+              - column: { name: email, value: carol@test.com }
+              - column: { name: system_role, value: USER }
+              - column: { name: password_hash, value: '$2a$10$GJZJ2XQatQweZwfBRixGg.zSeZS6v/j56UshpHtXuPn4HuDMYBUVe' }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: '00000000-0000-0000-0000-000000000004' }
+              - column: { name: username, value: dave }
+              - column: { name: email, value: dave@test.com }
+              - column: { name: system_role, value: USER }
+              - column: { name: password_hash, value: '$2a$10$GJZJ2XQatQweZwfBRixGg.zSeZS6v/j56UshpHtXuPn4HuDMYBUVe' }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: '00000000-0000-0000-0000-000000000005' }
+              - column: { name: username, value: eve }
+              - column: { name: email, value: eve@test.com }
+              - column: { name: system_role, value: USER }
+              - column: { name: password_hash, value: '$2a$10$GJZJ2XQatQweZwfBRixGg.zSeZS6v/j56UshpHtXuPn4HuDMYBUVe' }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }

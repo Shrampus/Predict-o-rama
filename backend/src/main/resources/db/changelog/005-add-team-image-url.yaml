@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-add-team-image-url
+      author: yourname
+      changes:
+        - addColumn:
+            tableName: teams
+            columns:
+              - column:
+                  name: image_url
+                  type: varchar(500)
