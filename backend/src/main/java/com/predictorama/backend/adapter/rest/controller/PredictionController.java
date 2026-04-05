@@ -34,7 +34,6 @@ public class PredictionController {
 
     private final PredictionService predictionService;
 
-    private final PredictionRepositoryPort predictionRepositoryPort;
 
 
 
