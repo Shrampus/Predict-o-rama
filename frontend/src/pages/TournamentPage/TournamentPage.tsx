@@ -9,18 +9,12 @@ import { useTournamentMatches } from './hooks/useTournamentMatches';
 import { buildPrediction } from './utils/matchCardUtils';
 
 
-
-
-
 function TournamentPage() {
     const user = useCurrentUser();
     const { matches, isLoading, error } = useTournamentMatches('CL', user?.id ?? '', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
     const tournamentName = 'UEFA_EURO_2024'.replace(/_/g, ' ');
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
     const liveMatchCount = matches.filter( m => m.matchStatus === 'LIVE').length; 
-
-
-
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
