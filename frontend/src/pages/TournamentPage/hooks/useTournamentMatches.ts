@@ -26,6 +26,7 @@ export function useTournamentMatches(competition: string, groupId: string) {
 
     useEffect(() => {
         fetchMatches();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- run when competition/groupId change; fetchMatches is not stable
     }, [competition, groupId]);
 
     return { matches, tournamentName, isLoading, error, refetch: fetchMatches };
