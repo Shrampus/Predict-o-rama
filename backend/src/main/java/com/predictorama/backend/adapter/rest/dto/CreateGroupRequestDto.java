@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateGroupRequest {
+public class CreateGroupRequestDto {
     private UUID ownerId;
     private String name;
     private String description;

@@ -2,6 +2,7 @@ package com.predictorama.backend.adapter.persistence.repository;
 
 import com.predictorama.backend.adapter.persistence.entity.GroupMemberEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,5 +16,6 @@ public interface GroupMemberJpaRepository extends JpaRepository<GroupMemberEntit
 
     Optional<GroupMemberEntity> findByGroupIdAndUserId(UUID groupId, UUID userId);
 
+    @Transactional
     void deleteByGroupIdAndUserId(UUID groupId, UUID userId);
 }
