@@ -5,20 +5,50 @@ import MatchCard from './components/MatchCard';
 import StandingsTable from './components/StandingsTable';
 import Tabs from './components/Tabs';
 import { useTournamentMatches } from './hooks/useTournamentMatches';
-import { buildPrediction } from './utils/matchCardUtils';
+import type { WinningTeam } from './TournamentConstants';
+import type { TournamentMatchPrediction } from '../../services/predictionsApi';
+import { savePrediction, winningTeamToApiWinner } from '../../services/predictionsApi';
 
-
-
-
+const COMPETITION = 'CL';
+const GROUP_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 function TournamentPage() {
-    const { matches, isLoading, error } = useTournamentMatches('CL', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
-    const tournamentName = 'UEFA_EURO_2024'.replace(/_/g, ' ');
+    const { matches, tournamentName, isLoading, error, refetch } = useTournamentMatches(
+        COMPETITION,
+        GROUP_ID
+    );
+
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
-    const liveMatchCount = matches.filter( m => m.matchStatus === 'LIVE').length; 
+    const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
+    const liveMatchCount = matches.filter((match) => match.matchStatus === 'LIVE').length;
 
+    async function handlePredict(
+        matchId: string,
+        homeScore: number,
+        awayScore: number,
+        winningTeam: WinningTeam
+    ) {
+        try {
+            setSavingMatchId(matchId);
+            setSaveError(null);
 
+            await savePrediction({
+                groupId: GROUP_ID,
+                matchId,
+                homeScore,
+                awayScore,
+                predictedWinner: winningTeamToApiWinner[winningTeam],
+            });
+
+            await refetch();
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Failed to save prediction');
+        } finally {
+            setSavingMatchId(null);
+        }
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -44,12 +74,22 @@ function TournamentPage() {
                                 View Calendar
                             </span>
                         </div>
-                        {isLoading && <p>Loading matches...</p>}    
+
+                        {isLoading && <p>Loading matches...</p>}
                         {error && <p className="text-red-500">{error}</p>}
+                        {saveError && <p className="text-red-500">{saveError}</p>}
                         {!isLoading && !error && matches.length === 0 && <p>No matches available.</p>}
-                        {!isLoading && !error && matches.map((match) => (
-                            <MatchCard key={match.matchId} match={match} prediction={buildPrediction(match)} />
-                        ))}
+
+                        {!isLoading &&
+                            !error &&
+                            matches.map((match: TournamentMatchPrediction) => (
+                                <MatchCard
+                                    key={`${match.matchId}-${match.predictedHomeScore}-${match.predictedAwayScore}-${match.predictedWinner}`}
+                                    match={match}
+                                    onPredict={handlePredict}
+                                    isSaving={savingMatchId === match.matchId}
+                                />
+                            ))}
                     </div>
 
                     {/* Sidebar */}
