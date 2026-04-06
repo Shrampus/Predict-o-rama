@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-import HeroBanner from './Components/HeroBanner';
-import MatchCard from './Components/MatchCard';
-import StandingsTable from './Components/StandingsTable';
-import Tabs from './Components/Tabs';
+import HeroBanner from './components/HeroBanner';
+import MatchCard from './components/MatchCard';
+import StandingsTable from './components/StandingsTable';
+import Tabs from './components/Tabs';
 import { useTournamentMatches } from './hooks/useTournamentMatches';
 import { buildPrediction } from './utils/matchCardUtils';
 
