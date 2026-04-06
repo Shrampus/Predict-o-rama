@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/006-add-password-hash-to-users.yaml
   - include:
       file: db/changelog/007-seed-test-users.yaml
+  - include:
+      file: db/changelog/008-seed-test-groups.yaml
