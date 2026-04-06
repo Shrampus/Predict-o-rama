@@ -1,31 +1,20 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import com.predictorama.backend.adapter.rest.SessionService;
 import com.predictorama.backend.adapter.rest.dto.CreatePredictionRequest;
 import com.predictorama.backend.adapter.rest.dto.PredictionResponse;
+import com.predictorama.backend.adapter.rest.dto.TournamentPredictionsResponse;
+import com.predictorama.backend.adapter.rest.mapper.TournamentPredictionsRestMapper;
 import com.predictorama.backend.domain.entity.Prediction;
 import com.predictorama.backend.domain.entity.Score;
-import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.service.PredictionService;
+import com.predictorama.backend.domain.service.TournamentPredictionQueryService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import com.predictorama.backend.adapter.rest.dto.PredictionPageResponseDto;
-import com.predictorama.backend.adapter.rest.mapper.PredictionPageMapper;
-import com.predictorama.backend.domain.entity.Prediction;
-import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
-import com.predictorama.backend.domain.service.PredictionPageService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/predictions")
@@ -33,70 +22,55 @@ import java.util.stream.Collectors;
 public class PredictionController {
 
     private final PredictionService predictionService;
-
-
-
+    private final TournamentPredictionQueryService tournamentPredictionQueryService;
+    private final SessionService sessionService;
 
     @PostMapping
-    public PredictionResponse createPrediction(@RequestBody CreatePredictionRequest request) {
+    public PredictionResponse createPrediction(
+            @Valid @RequestBody CreatePredictionRequest request,
+            HttpSession session
+    ) {
+        UUID userId = sessionService.getUserIdOrThrow(session);
 
-        Prediction prediction = Prediction.builder()
-                .userId(request.userId)
-                .matchId(request.matchId)
-                .groupId(request.groupId)
-                .predictedScores(List.of(new Score(request.homeScore, request.awayScore)))
-                .predictedWinner(null)
-                .build();
+        Prediction savedPrediction = predictionService.savePrediction(
+                userId,
+                request.getGroupId(),
+                request.getMatchId(),
+                request.getHomeScore(),
+                request.getAwayScore(),
+                request.getPredictedWinner()
+        );
 
-        Prediction savedPrediction = predictionService.createPrediction(prediction);
-
-        PredictionResponse response = new PredictionResponse();
-        response.userName = "To do Ada";
-        response.groupName = "To do Ada";
-        response.matchResult = "To do Ada";
-        response.predictedScoreHome = savedPrediction.getPredictedScores().getFirst().getScore();
-        response.predictedScoreAway = savedPrediction.getPredictedScores().getFirst().getScore();
-        response.isWinner = savedPrediction.getPredictedWinner() != null;
-
-        return response;
+        return toResponse(savedPrediction);
     }
-
-
-
-    private final PredictionPageService predictionPageService;
-    private final PredictionRepositoryPort predictionRepositoryPort;
 
     @GetMapping
-    public PredictionPageResponseDto getPredictions(
+    public TournamentPredictionsResponse getTournamentPredictions(
             @RequestParam String competition,
-            @RequestParam(required = false) UUID userId,
-            @RequestParam(required = false) UUID groupId
+            @RequestParam UUID groupId,
+            HttpSession session
     ) {
-        var matches = predictionPageService.getPredictionPageMatches(competition);
+        UUID userId = sessionService.getUserIdOrThrow(session);
 
-        Map<UUID, Prediction> predictionsByMatchId = loadPredictionsByMatchId(userId, groupId);
-
-        return PredictionPageResponseDto.builder()
-                .matches(matches.stream()
-                        .map(match -> PredictionPageMapper.toDto(match, predictionsByMatchId.get(match.getId())))
-                        .toList())
-                .build();
+        return TournamentPredictionsRestMapper.toResponse(
+                tournamentPredictionQueryService.getTournamentPredictions(
+                        competition,
+                        userId,
+                        groupId
+                )
+        );
     }
 
-    private Map<UUID, Prediction> loadPredictionsByMatchId(UUID userId, UUID groupId) {
-        if (userId == null || groupId == null) {
-            return Map.of();
-        }
+    private PredictionResponse toResponse(Prediction prediction) {
+        Score score = prediction.requirePrimaryPredictedScore();
 
-        List<Prediction> predictions = predictionRepositoryPort.findByUserId(userId).stream()
-                .filter(prediction -> groupId.equals(prediction.getGroupId()))
-                .toList();
-
-        return predictions.stream()
-                .collect(Collectors.toMap(
-                        Prediction::getMatchId,
-                        Function.identity(),
-                        (first, second) -> first
-                ));
+        return new PredictionResponse(
+                prediction.getId(),
+                prediction.getMatchId(),
+                score.getHomeScore(),
+                score.getAwayScore(),
+                prediction.getPredictedWinner(),
+                prediction.getSubmittedAt()
+        );
     }
 }
