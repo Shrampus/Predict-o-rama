@@ -4,6 +4,7 @@ import HeroBanner from './Components/HeroBanner';
 import MatchCard from './Components/MatchCard';
 import StandingsTable from './Components/StandingsTable';
 import Tabs from './Components/Tabs';
+import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTournamentMatches } from './hooks/useTournamentMatches';
 import { buildPrediction } from './utils/matchCardUtils';
 
@@ -12,7 +13,8 @@ import { buildPrediction } from './utils/matchCardUtils';
 
 
 function TournamentPage() {
-    const { matches, isLoading, error } = useTournamentMatches('CL', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    const user = useCurrentUser();
+    const { matches, isLoading, error } = useTournamentMatches('CL', user?.id ?? '', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
     const tournamentName = 'UEFA_EURO_2024'.replace(/_/g, ' ');
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
     const liveMatchCount = matches.filter( m => m.matchStatus === 'LIVE').length; 
