@@ -86,11 +86,7 @@ Dev credentials (hardcoded in `local-env/docker-compose.yml`):
 | `POSTGRES_USER`   | predictorama   |
 | `POSTGRES_PASSWORD` | predictorama |
 
-The backend loads **`FOOTBALL_DATA_API_KEY`** for the [football-data.org](https://www.football-data.org/) client (upcoming fixtures for supported competitions). For Docker, copy `local-env/.env.example` to `local-env/.env` and set a real key.
-
 The database uses a named volume (`pgdata`) that persists across `docker compose down` / `up`. To wipe the DB and start fresh, use `docker compose down -v`.
-
-On the **`dev`** Liquibase context, migrations may seed test users and a test group (see `007-seed-test-users.yaml`, `008-seed-test-groups.yaml`) so local prediction flows have stable UUIDs.
 
 To stop:
 
@@ -100,9 +96,9 @@ docker compose down
 
 ---
 
-# API (selected endpoints)
+# Current API Endpoints (Skeleton)
 
-## Health
+Health check:
 
 ```
 GET /health
@@ -123,74 +119,26 @@ Response:
 }
 ```
 
-## Auth (session cookie)
+Predictions placeholder:
 
-Login establishes an HTTP session; prediction endpoints require that session.
+```
+GET /api/predictions
+```
 
-| Method | Path | Notes |
-|--------|------|--------|
-| `POST` | `/api/auth/login` | Body: `{ "email": "…", "password": "…" }` — sets session |
-| `GET` | `/api/auth/me` | Current user, or `401` if not logged in |
-| `POST` | `/api/auth/logout` | Invalidates session |
-
-Example (save cookies to a jar, then reuse). Dev profile seeds users such as `bob@test.com` with password `password123` (see `007-seed-test-users.yaml` / `docs/plans/13-temp-simple-login.md`).
+Example:
 
 ```bash
-curl -c cookies.txt -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d "{\"email\":\"bob@test.com\",\"password\":\"password123\"}"
+curl http://localhost:8080/api/predictions
 ```
 
-## Predictions
-
-Both calls require an authenticated session (send the session cookie, e.g. `-b cookies.txt`).
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
-| `POST` | `/api/predictions` | Create or update a prediction for `(user, group, match)`. |
-
-**`competition`** must be a football-data competition code the app allows (e.g. `CL`, `PL`, `WC`; see `CompetitionCatalog` in the backend).
-
-**`POST` body** (JSON):
+Response:
 
 ```json
 {
-  "groupId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-  "matchId": "…",
-  "homeScore": 2,
-  "awayScore": 1,
-  "predictedWinner": "HOME"
+  "message": "Predictions endpoint placeholder",
+  "data": []
 }
 ```
-
-`predictedWinner` is one of: `HOME`, `AWAY`, `DRAW`.
-
-**`GET` response** shape:
-
-```json
-{
-  "tournamentName": "UEFA Champions League",
-  "matches": [
-    {
-      "matchId": "…",
-      "externalMatchId": "…",
-      "homeTeamName": "…",
-      "awayTeamName": "…",
-      "homeTeamImage": "…",
-      "awayTeamImage": "…",
-      "kickoffTime": "2026-04-10T18:00:00Z",
-      "matchStatus": "SCHEDULED",
-      "predictionId": null,
-      "predictedHomeScore": null,
-      "predictedAwayScore": null,
-      "predictedWinner": null
-    }
-  ]
-}
-```
-
-When the user has already predicted a match, `predictionId` and the `predicted*` fields are set.
 
 ---
 
@@ -233,5 +181,5 @@ To add a new migration:
 
 # Development Notes
 
-* Predictions integrate with PostgreSQL (saved predictions and cached matches/teams) and optionally the football-data API when no matches are cached for the requested window.
+* The backend currently provides only skeleton endpoints to support early frontend development and CI/CD setup.
 * Unit tests should mock the repository layer (no `@SpringBootTest` with a live DB).
