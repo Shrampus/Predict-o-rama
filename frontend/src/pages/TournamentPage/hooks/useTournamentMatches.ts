@@ -12,6 +12,8 @@ export function useTournamentMatches(competition: string, userId: string, groupI
         async function fetchMatches() {
             try {
                 const predictions = await getPredictions(competition, userId, groupId);
+                setIsLoading(true);
+                setError(null);
                 setMatches(predictions.matches);
             } catch {
                 setError("Failed to fetch matches");

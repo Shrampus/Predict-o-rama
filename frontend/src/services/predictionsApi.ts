@@ -19,5 +19,8 @@ export type PredictionPageResponse = {
 
 export async function getPredictions(competition: string, userId: string, groupId: string): Promise<PredictionPageResponse> {
     const response = await fetch(`/api/predictions?competition=${competition}&userId=${userId}&groupId=${groupId}`);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch predictions: ${response.status}`);
+    }
     return response.json();
 }   
