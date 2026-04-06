@@ -1,5 +1,5 @@
+import { LogOut } from 'lucide-react'
 import { useState } from 'react';
-import { LogOut } from 'lucide-react';
 
 import CopyInviteButton from '../../../components/ui/CopyInviteButton';
 import { leaveGroup } from '../../../services/groupApi';

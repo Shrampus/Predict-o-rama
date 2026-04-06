@@ -1,5 +1,5 @@
+import { Check, Copy } from 'lucide-react'
 import { useState } from 'react';
-import { Check, Copy } from 'lucide-react';
 
 type CopyInviteButtonProps = {
   inviteCode: string;
