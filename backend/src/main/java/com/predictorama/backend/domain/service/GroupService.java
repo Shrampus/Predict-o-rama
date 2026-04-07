@@ -3,6 +3,8 @@ package com.predictorama.backend.domain.service;
 import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.entity.GroupMember;
 import com.predictorama.backend.domain.entity.Role;
+import com.predictorama.backend.domain.entity.aggregate.UserGroups;
+import com.predictorama.backend.domain.exception.AlreadyMemberException;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,9 @@ public class GroupService {
     public Optional<GroupMember> joinGroup(UUID userId, UUID inviteCode) {
         return groupRepository.findByInviteCode(inviteCode)
                 .map(group -> {
+                    if (groupMemberRepository.findByGroupIdAndUserId(group.getId(), userId).isPresent()) {
+                        throw new AlreadyMemberException(userId, group.getId());
+                    }
                     GroupMember membership = GroupMember.builder()
                             .id(UUID.randomUUID())
                             .groupId(group.getId())
@@ -53,7 +58,19 @@ public class GroupService {
                 });
     }
 
+    public void leaveGroup(UUID userId, UUID groupId) {
+        groupMemberRepository.deleteByGroupIdAndUserId(groupId, userId);
+    }
+
     public List<GroupMember> getGroupMembers(UUID groupId) {
         return groupMemberRepository.findByGroupId(groupId);
+    }
+
+    public List<UserGroups> getUserGroups(UUID userId) {
+        return groupMemberRepository.findByUserId(userId).stream()
+                .map(membership -> groupRepository.findById(membership.getGroupId())
+                        .map(group -> new UserGroups(group, membership))
+                        .orElseThrow(() -> new IllegalStateException("Group not found for membership: " + membership.getId())))
+                .toList();
     }
 }

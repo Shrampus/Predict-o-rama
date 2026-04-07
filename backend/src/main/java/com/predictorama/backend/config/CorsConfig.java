@@ -21,7 +21,8 @@ public class CorsConfig {
                                 System.getenv().getOrDefault("ALLOWED_ORIGIN", "http://localhost:5173")
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

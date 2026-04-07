@@ -3,6 +3,8 @@ package com.predictorama.backend.adapter.persistence.mapper;
 import com.predictorama.backend.adapter.persistence.entity.PredictionScoreEntity;
 import com.predictorama.backend.domain.entity.Score;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class PredictionScoreMapper {
@@ -23,5 +25,15 @@ public class PredictionScoreMapper {
                 .homeScore(score.getHomeScore())
                 .awayScore(score.getAwayScore())
                 .build();
+    }
+
+    public static List<PredictionScoreEntity> toEntities(UUID predictionId, List<Score> scores) {
+        if (scores == null || scores.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return scores.stream()
+                .map(score -> toEntity(predictionId, score))
+                .toList();
     }
 }

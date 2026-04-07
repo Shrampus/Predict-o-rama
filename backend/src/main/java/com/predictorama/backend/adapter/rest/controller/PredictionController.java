@@ -1,61 +1,76 @@
 package com.predictorama.backend.adapter.rest.controller;
 
-import com.predictorama.backend.adapter.rest.dto.PredictionPageResponseDto;
-import com.predictorama.backend.adapter.rest.mapper.PredictionPageMapper;
+import com.predictorama.backend.adapter.rest.SessionService;
+import com.predictorama.backend.adapter.rest.dto.CreatePredictionRequest;
+import com.predictorama.backend.adapter.rest.dto.PredictionResponse;
+import com.predictorama.backend.adapter.rest.dto.TournamentPredictionsResponse;
+import com.predictorama.backend.adapter.rest.mapper.TournamentPredictionsRestMapper;
 import com.predictorama.backend.domain.entity.Prediction;
-import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
-import com.predictorama.backend.domain.service.PredictionPageService;
+import com.predictorama.backend.domain.entity.Score;
+import com.predictorama.backend.domain.service.PredictionService;
+import com.predictorama.backend.domain.service.TournamentPredictionQueryService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/predictions")
 @RequiredArgsConstructor
 public class PredictionController {
 
-    private final PredictionPageService predictionPageService;
-    private final PredictionRepositoryPort predictionRepositoryPort;
+    private final PredictionService predictionService;
+    private final TournamentPredictionQueryService tournamentPredictionQueryService;
+    private final SessionService sessionService;
 
-    @GetMapping
-    public PredictionPageResponseDto getPredictions(
-            @RequestParam String competition,
-            @RequestParam(required = false) UUID userId,
-            @RequestParam(required = false) UUID groupId
+    @PostMapping
+    public PredictionResponse createPrediction(
+            @Valid @RequestBody CreatePredictionRequest request,
+            HttpSession session
     ) {
-        var matches = predictionPageService.getPredictionPageMatches(competition);
+        UUID userId = sessionService.getUserIdOrThrow(session);
 
-        Map<UUID, Prediction> predictionsByMatchId = loadPredictionsByMatchId(userId, groupId);
+        Prediction savedPrediction = predictionService.savePrediction(
+                userId,
+                request.getGroupId(),
+                request.getMatchId(),
+                request.getHomeScore(),
+                request.getAwayScore(),
+                request.getPredictedWinner()
+        );
 
-        return PredictionPageResponseDto.builder()
-                .matches(matches.stream()
-                        .map(match -> PredictionPageMapper.toDto(match, predictionsByMatchId.get(match.getId())))
-                        .toList())
-                .build();
+        return toResponse(savedPrediction);
     }
 
-    private Map<UUID, Prediction> loadPredictionsByMatchId(UUID userId, UUID groupId) {
-        if (userId == null || groupId == null) {
-            return Map.of();
-        }
+    @GetMapping
+    public TournamentPredictionsResponse getTournamentPredictions(
+            @RequestParam String competition,
+            @RequestParam UUID groupId,
+            HttpSession session
+    ) {
+        UUID userId = sessionService.getUserIdOrThrow(session);
 
-        List<Prediction> predictions = predictionRepositoryPort.findByUserId(userId).stream()
-                .filter(prediction -> groupId.equals(prediction.getGroupId()))
-                .toList();
+        return TournamentPredictionsRestMapper.toResponse(
+                tournamentPredictionQueryService.getTournamentPredictions(
+                        competition,
+                        userId,
+                        groupId
+                )
+        );
+    }
 
-        return predictions.stream()
-                .collect(Collectors.toMap(
-                        Prediction::getMatchId,
-                        Function.identity(),
-                        (first, second) -> first
-                ));
+    private PredictionResponse toResponse(Prediction prediction) {
+        Score score = prediction.requirePrimaryPredictedScore();
+
+        return new PredictionResponse(
+                prediction.getId(),
+                prediction.getMatchId(),
+                score.getHomeScore(),
+                score.getAwayScore(),
+                prediction.getPredictedWinner(),
+                prediction.getSubmittedAt()
+        );
     }
 }

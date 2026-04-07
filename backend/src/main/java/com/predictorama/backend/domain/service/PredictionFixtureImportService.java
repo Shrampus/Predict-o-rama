@@ -36,6 +36,7 @@ public class PredictionFixtureImportService {
         Tournament tournament = getOrCreateTournament(competition);
 
         return footballDataPort.getUpcomingMatches(competition).stream()
+                .filter(this::hasResolvedTeams)
                 .map(match -> saveOrUpdateMatch(match, tournament))
                 .toList();
     }
@@ -63,6 +64,22 @@ public class PredictionFixtureImportService {
                     log.info("Created tournament in DB name={} id={}", savedTournament.getName(), savedTournament.getId());
                     return savedTournament;
                 });
+    }
+
+    private boolean hasResolvedTeams(Match match) {
+        boolean valid =
+                match.getHomeTeam() != null &&
+                match.getAwayTeam() != null &&
+                match.getHomeTeam().getName() != null &&
+                !match.getHomeTeam().getName().isBlank() &&
+                match.getAwayTeam().getName() != null &&
+                !match.getAwayTeam().getName().isBlank();
+
+        if (!valid) {
+            log.info("Skipping unresolved match externalId={} because one or both teams are missing", match.getExternalId());
+        }
+
+        return valid;
     }
 
     private Team saveOrGetTeam(Team incomingTeam) {

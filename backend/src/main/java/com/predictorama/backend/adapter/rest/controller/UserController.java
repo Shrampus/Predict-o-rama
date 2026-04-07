@@ -1,7 +1,7 @@
 package com.predictorama.backend.adapter.rest.controller;
 
-import com.predictorama.backend.adapter.rest.dto.CreateUserRequest;
-import com.predictorama.backend.adapter.rest.dto.UserResponse;
+import com.predictorama.backend.adapter.rest.dto.CreateUserRequestDto;
+import com.predictorama.backend.adapter.rest.dto.UserResponseDto;
 import com.predictorama.backend.adapter.rest.mapper.UserRestMapper;
 import com.predictorama.backend.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,9 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse createUser(@RequestBody CreateUserRequest request) {
+    public UserResponseDto createUser(@RequestBody CreateUserRequestDto request) {
         log.info("POST /api/users - username={}", request.getUsername());
-        UserResponse response = UserRestMapper.toResponse(userService.createUser(request.getUsername(), request.getEmail()));
+        UserResponseDto response = UserRestMapper.toResponse(userService.createUser(request.getUsername(), request.getEmail()));
         log.info("User created - id={}", response.getId());
         return response;
     }
