@@ -35,6 +35,7 @@ public class PredictionRepositoryAdapter implements PredictionRepositoryPort {
         
         PredictionEntity saved = jpaRepository.save(PredictionMapper.toEntity(prediction));
         predictionScoreRepository.deleteByPredictionId(saved.getId());
+        predictionScoreRepository.flush();
 
         List<PredictionScoreEntity> scoreEntities = PredictionScoreMapper.toEntities(
                 saved.getId(),
