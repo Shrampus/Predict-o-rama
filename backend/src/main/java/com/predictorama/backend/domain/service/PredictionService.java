@@ -37,21 +37,16 @@ public class PredictionService {
         Optional<Prediction> existingPrediction =
                 predictionRepository.findByUserIdAndMatchIdAndGroupId(userId, matchId, groupId);
 
-        Prediction prediction = existingPrediction
-                .map(existing -> buildUpdatedPrediction(
-                        existing,
-                        homeScore,
-                        awayScore,
-                        predictedWinner
-                ))
-                .orElseGet(() -> buildNewPrediction(
-                        userId,
-                        groupId,
-                        matchId,
-                        homeScore,
-                        awayScore,
-                        predictedWinner
-                ));
+        Prediction prediction = Prediction.builder()
+                .id(existingPrediction.map(Prediction::getId).orElseGet(UUID::randomUUID))
+                .userId(userId)
+                .matchId(matchId)
+                .groupId(groupId)
+                .predictedScores(List.of(normalTimeScore(homeScore, awayScore)))
+                .predictedWinner(predictedWinner)
+                .submittedAt(Instant.now())
+                .result(existingPrediction.map(Prediction::getResult).orElse(null))
+                .build();
 
         return predictionRepository.save(prediction);
     }
@@ -72,44 +67,6 @@ public class PredictionService {
 
     public List<Prediction> getPredictionsByUser(UUID userId) {
         return predictionRepository.findByUserId(userId);
-    }
-
-    private Prediction buildUpdatedPrediction(
-            Prediction existing,
-            int homeScore,
-            int awayScore,
-            Winner predictedWinner
-    ) {
-        return Prediction.builder()
-                .id(existing.getId())
-                .userId(existing.getUserId())
-                .matchId(existing.getMatchId())
-                .groupId(existing.getGroupId())
-                .predictedScores(List.of(normalTimeScore(homeScore, awayScore)))
-                .predictedWinner(predictedWinner)
-                .submittedAt(Instant.now())
-                .result(existing.getResult())
-                .build();
-    }
-
-    private Prediction buildNewPrediction(
-            UUID userId,
-            UUID groupId,
-            UUID matchId,
-            int homeScore,
-            int awayScore,
-            Winner predictedWinner
-    ) {
-        return Prediction.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .matchId(matchId)
-                .groupId(groupId)
-                .predictedScores(List.of(normalTimeScore(homeScore, awayScore)))
-                .predictedWinner(predictedWinner)
-                .submittedAt(Instant.now())
-                .result(null)
-                .build();
     }
 
     private Score normalTimeScore(int homeScore, int awayScore) {
