@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -40,7 +41,6 @@ public class FootballDataApiAdapter implements FootballDataPort {
                             .path("/competitions/{competition}/matches")
                             .queryParam("dateFrom", dateFrom)
                             .queryParam("dateTo", dateTo)
-                            .queryParam("status", "SCHEDULED")
                             .build(competition))
                     .header("X-Auth-Token", apiKey)
                     .retrieve()
@@ -64,6 +64,11 @@ public class FootballDataApiAdapter implements FootballDataPort {
             }
 
             return response.getMatches().stream()
+                    .filter(match -> {
+                        String status = match.getStatus();
+                        return "SCHEDULED".equals(status) || "TIMED".equals(status);
+                    })
+                    .filter(match -> Instant.parse(match.getUtcDate()).isAfter(Instant.now()))
                     .map(FootballDataMatchMapper::toDomainMatch)
                     .toList();
 
