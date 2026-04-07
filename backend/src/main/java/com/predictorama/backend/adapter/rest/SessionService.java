@@ -16,7 +16,22 @@ public class SessionService {
     }
 
     public Optional<UUID> getUserId(HttpSession session) {
-        return Optional.ofNullable((UUID) session.getAttribute(USER_ID_KEY));
+        Object value = session.getAttribute(USER_ID_KEY);
+
+        if (value == null) {
+            return Optional.empty();
+        }
+
+        if (value instanceof UUID uuid) {
+            return Optional.of(uuid);
+        }
+
+        return Optional.of(UUID.fromString(value.toString()));
+    }
+
+    public UUID getUserIdOrThrow(HttpSession session) {
+        return getUserId(session)
+                .orElseThrow(() -> new IllegalStateException("User is not authenticated."));
     }
 
     public void invalidate(HttpSession session) {

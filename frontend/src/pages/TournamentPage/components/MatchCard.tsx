@@ -1,33 +1,27 @@
 import { useState } from 'react';
 
-import type { PredictionPageMatch } from '../../../services/predictionsApi';
-import type { WinningTeam, Prediction } from '../TournamentConstants';
+import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
+import type { WinningTeam } from '../TournamentConstants';
 import TeamDisplay from './TeamDisplay';
 import TimeBadge from './TimeBadge';
 import WinnerButton from './WinnerButton';
-import { deriveWinner, DEFAULT_PREDICTION, formatKickoffTime, deriveTimeStyle } from '../utils/matchCardUtils';
+import { buildPrediction, deriveTimeStyle, formatKickoffTime, } from '../utils/matchCardUtils';
 
-function MatchCard({
-    match,
-    prediction = DEFAULT_PREDICTION,
-    onPredict,
-}: {
-    match: PredictionPageMatch;
-    prediction?: Prediction;
-    onPredict?: (id: string, home: number, away: number, winningTeam: WinningTeam) => void;
-}) {
+type MatchCardProps = {
+    match: TournamentMatchPrediction;
+    onPredict?: (id: string, home: number, away: number, winningTeam: WinningTeam) => void | Promise<void>;
+    isSaving?: boolean;
+};
+
+function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
+    const prediction = buildPrediction(match);
+
     const [homeScore, setHomeScore] = useState(prediction.home);
     const [awayScore, setAwayScore] = useState(prediction.away);
-    const [winningTeam, setWinningTeam] = useState<WinningTeam>(deriveWinner(prediction.home, prediction.away));
+    const [winningTeam, setWinningTeam] = useState<WinningTeam>(prediction.winningTeam);
 
-    function handleHomeChange(val: number) {
-        setHomeScore(val);
-        setWinningTeam(deriveWinner(val, awayScore));
-    }
-
-    function handleAwayChange(val: number) {
-        setAwayScore(val);
-        setWinningTeam(deriveWinner(homeScore, val));
+    function handlePredictClick() {
+        onPredict?.(match.matchId, homeScore, awayScore, winningTeam);
     }
 
     return (
@@ -36,7 +30,7 @@ function MatchCard({
 
             <TeamDisplay
                 imageUrl={match.homeTeamImage}
-                label=''
+                label=""
                 name={match.homeTeamName}
                 align="right"
             />
@@ -49,7 +43,8 @@ function MatchCard({
                         type="number"
                         min={0}
                         value={homeScore}
-                        onChange={(e) => handleHomeChange(Number(e.target.value))}
+                        onChange={(e) => setHomeScore(Number(e.target.value))}
+                        disabled={isSaving}
                     />
                     <span className="text-slate-400 font-bold">VS</span>
                     <input
@@ -57,7 +52,8 @@ function MatchCard({
                         type="number"
                         min={0}
                         value={awayScore}
-                        onChange={(e) => handleAwayChange(Number(e.target.value))}
+                        onChange={(e) => setAwayScore(Number(e.target.value))}
+                        disabled={isSaving}
                     />
                 </div>
 
@@ -85,20 +81,20 @@ function MatchCard({
 
                 {/* Submit */}
                 <button
-                    onClick={() => onPredict?.(match.matchId, homeScore, awayScore, winningTeam)}
-                    className={`w-full px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-transform active:scale-95 ${
-                        prediction.saved
-                            ? 'bg-green-700 text-white'
-                            : 'bg-orange-600 text-white hover:bg-orange-700'
-                    }`}
+                    onClick={handlePredictClick}
+                    disabled={isSaving}
+                    className={`w-full px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-transform active:scale-95 ${prediction.saved
+                        ? 'bg-green-700 text-white'
+                        : 'bg-orange-600 text-white hover:bg-orange-700'
+                        } ${isSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
-                    {prediction.saved ? '✓ Saved' : 'Predict Now'}
+                    {isSaving ? 'Saving...' : prediction.saved ? '✓ Saved' : 'Predict Now'}
                 </button>
             </div>
 
             <TeamDisplay
                 imageUrl={match.awayTeamImage}
-                label=''
+                label=""
                 name={match.awayTeamName}
                 align="left"
             />

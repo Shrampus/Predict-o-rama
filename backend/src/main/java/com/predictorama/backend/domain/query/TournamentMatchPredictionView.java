@@ -1,5 +1,6 @@
-package com.predictorama.backend.adapter.rest.dto;
+package com.predictorama.backend.domain.query;
 
+import com.predictorama.backend.domain.entity.Winner;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
-public class PredictionPageMatchDto {
+public class TournamentMatchPredictionView {
 
     private UUID matchId;
     private String externalMatchId;
@@ -27,5 +28,5 @@ public class PredictionPageMatchDto {
     private UUID predictionId;
     private Integer predictedHomeScore;
     private Integer predictedAwayScore;
-    private String predictedWinner;
+    private Winner predictedWinner;
 }

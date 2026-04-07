@@ -35,14 +35,13 @@ public class FootballDataApiAdapter implements FootballDataPort {
     public List<Match> getUpcomingMatches(String competition) {
         LocalDate dateFrom = LocalDate.now();
         LocalDate dateTo = dateFrom.plusDays(28);
-
+    
         try {
             FootballDataMatchesResponse response = restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/competitions/{competition}/matches")
                             .queryParam("dateFrom", dateFrom)
                             .queryParam("dateTo", dateTo)
-                            .queryParam("status", "SCHEDULED")
                             .build(competition))
                     .header("X-Auth-Token", apiKey)
                     .retrieve()
@@ -59,20 +58,25 @@ public class FootballDataApiAdapter implements FootballDataPort {
                         );
                     })
                     .body(FootballDataMatchesResponse.class);
-
+    
             if (response == null || response.getMatches() == null) {
                 log.warn("Football-data returned empty response for competition={}", competition);
                 return List.of();
             }
-
+    
             return response.getMatches().stream()
+                    .filter(match -> {
+                        String status = match.getStatus();
+                        return "SCHEDULED".equals(status) || "TIMED".equals(status);
+                    })
+                    .filter(match -> Instant.parse(match.getUtcDate()).isAfter(Instant.now()))
                     .map(this::toDomainMatch)
                     .toList();
-
+    
         } catch (FootballDataApiException e) {
             log.warn("Football-data API request failed for competition={}: {}", competition, e.getMessage());
             return List.of();
-
+    
         } catch (RestClientResponseException e) {
             log.warn(
                     "Football-data HTTP error for competition={}: status={} body={}",
@@ -81,17 +85,17 @@ public class FootballDataApiAdapter implements FootballDataPort {
                     e.getResponseBodyAsString()
             );
             return List.of();
-
+    
         } catch (RestClientException e) {
             log.error("Football-data transport error for competition={}: {}", competition, e.getMessage(), e);
             return List.of();
-
+    
         } catch (Exception e) {
             log.error("Unexpected football-data adapter error for competition={}", competition, e);
             return List.of();
         }
     }
-
+    
     private Match toDomainMatch(FootballDataMatchResponse matchResponse) {
         return Match.builder()
                 .id(UUID.randomUUID()) // temporary until persisted
