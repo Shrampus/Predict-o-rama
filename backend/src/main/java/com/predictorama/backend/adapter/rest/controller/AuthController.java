@@ -2,7 +2,7 @@ package com.predictorama.backend.adapter.rest.controller;
 
 import com.predictorama.backend.adapter.rest.SessionService;
 import com.predictorama.backend.adapter.rest.dto.LoginRequest;
-import com.predictorama.backend.adapter.rest.dto.UserResponse;
+import com.predictorama.backend.adapter.rest.dto.UserResponseDto;
 import com.predictorama.backend.adapter.rest.mapper.UserRestMapper;
 import com.predictorama.backend.domain.service.AuthService;
 import jakarta.servlet.http.HttpSession;
@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,7 +23,7 @@ public class AuthController {
     private final SessionService sessionService;
 
     @PostMapping("/login")
-    public UserResponse login(@RequestBody LoginRequest request, HttpSession session) {
+    public UserResponseDto login(@RequestBody LoginRequest request, HttpSession session) {
         log.info("POST /api/auth/login - email={}", request.email());
         var user = authService.login(request.email(), request.password());
         sessionService.setUserId(session, user.getId());
@@ -34,7 +32,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> me(HttpSession session) {
+    public ResponseEntity<UserResponseDto> me(HttpSession session) {
         return sessionService.getUserId(session)
                 .map(userId -> {
                     var user = authService.getById(userId);

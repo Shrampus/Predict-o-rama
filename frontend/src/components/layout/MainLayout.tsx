@@ -46,6 +46,16 @@ export function MainLayout() {
             >
               Tournaments
             </NavLink>
+
+            <NavLink
+              to={ROUTE_PATHS.groups}
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
+              }
+            >
+              Groups
+            </NavLink>
+
           </nav>
 
           <div className="flex items-center gap-3">

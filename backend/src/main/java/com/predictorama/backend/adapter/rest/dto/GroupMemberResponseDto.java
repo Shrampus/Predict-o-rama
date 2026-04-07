@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
-public class GroupMemberResponse {
+public class GroupMemberResponseDto {
     private UUID id;
     private UUID groupId;
     private UUID userId;

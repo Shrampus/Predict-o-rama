@@ -3,4 +3,5 @@ export const ROUTE_PATHS = {
   predictions: '/predictions',
   tournaments: '/tournaments',
   login: '/login',
+  groups: '/groups',
 } as const;

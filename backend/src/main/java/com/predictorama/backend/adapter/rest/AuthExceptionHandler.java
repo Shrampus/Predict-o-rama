@@ -1,5 +1,6 @@
 package com.predictorama.backend.adapter.rest;
 
+import com.predictorama.backend.domain.exception.AlreadyMemberException;
 import com.predictorama.backend.domain.exception.InvalidCredentialsException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -18,5 +19,10 @@ public class AuthExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Void> handleUserNotFound(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @ExceptionHandler(AlreadyMemberException.class)
+    public ResponseEntity<Void> handleAlreadyMember(AlreadyMemberException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 }

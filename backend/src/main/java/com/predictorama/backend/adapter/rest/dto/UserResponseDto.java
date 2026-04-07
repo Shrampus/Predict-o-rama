@@ -1,13 +1,16 @@
 package com.predictorama.backend.adapter.rest.dto;
 
+import com.predictorama.backend.domain.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class CreateUserRequest {
+public class UserResponseDto {
+    private UUID id;
     private String username;
     private String email;
+    private Role systemRole;
 }
