@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,8 +36,10 @@ public class PredictionRepositoryAdapter implements PredictionRepositoryPort {
         PredictionEntity saved = jpaRepository.save(PredictionMapper.toEntity(prediction));
         predictionScoreRepository.deleteByPredictionId(saved.getId());
 
-        List<PredictionScoreEntity> scoreEntities = toScoreEntities(saved.getId(),
-                prediction.getPredictedScores());
+        List<PredictionScoreEntity> scoreEntities = PredictionScoreMapper.toEntities(
+                saved.getId(),
+                prediction.getPredictedScores()
+        );
         if (!scoreEntities.isEmpty()) {
             predictionScoreRepository.saveAll(scoreEntities);
         }
@@ -94,16 +95,6 @@ public class PredictionRepositoryAdapter implements PredictionRepositoryPort {
     private List<Score> loadScores(UUID predictionId) {
         return predictionScoreRepository.findByPredictionId(predictionId).stream()
                 .map(PredictionScoreMapper::toDomain)
-                .toList();
-    }
-
-    private List<PredictionScoreEntity> toScoreEntities(UUID predictionId, List<Score> scores) {
-        if (scores == null || scores.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return scores.stream()
-                .map(score -> PredictionScoreMapper.toEntity(predictionId, score))
                 .toList();
     }
 }
