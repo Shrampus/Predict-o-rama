@@ -1,6 +1,5 @@
 package com.predictorama.backend.domain.service;
 
-import org.springframework.stereotype.Service;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Team;
 import com.predictorama.backend.domain.entity.Tournament;
@@ -8,9 +7,10 @@ import com.predictorama.backend.domain.port.external.FootballDataPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TeamRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +27,7 @@ public class MatchResultSyncService {
     private final PredictionScoringService predictionScoringService;
 
     private static final Logger log = LoggerFactory.getLogger(MatchResultSyncService.class);
+
 
     private Team saveOrGetTeam(Team incomingTeam) {
         return teamRepositoryPort.findByName(incomingTeam.getName())
@@ -115,4 +116,6 @@ public class MatchResultSyncService {
     private String buildMatchName(Team homeTeam, Team awayTeam) {
         return homeTeam.getName() + " vs " + awayTeam.getName();
     }
+
+    private void syncAllCompetitions() {}
 }

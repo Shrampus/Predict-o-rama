@@ -10,7 +10,7 @@ import java.util.Set;
 @Getter
 @Builder
 @AllArgsConstructor
-public class Ruleset{
+public class Ruleset {
     private UUID id;
     private String name;
     private Set<String> ruleNames;

@@ -1,7 +1,12 @@
 package com.predictorama.backend.adapter.persistence.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class RulesetEntity extends BaseEntity {
 
     @Id
