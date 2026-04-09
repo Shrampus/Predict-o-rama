@@ -1,7 +1,9 @@
 package com.predictorama.backend.adapter.external.footballdata;
 
 import com.predictorama.backend.domain.entity.Match;
+import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
+import com.predictorama.backend.domain.entity.Winner;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +37,7 @@ public class FootballDataApiAdapter implements FootballDataPort {
     public List<Match> getUpcomingMatches(String competition) {
         LocalDate dateFrom = LocalDate.now();
         LocalDate dateTo = dateFrom.plusDays(28);
-    
+
         try {
             FootballDataMatchesResponse response = restClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -48,22 +50,20 @@ public class FootballDataApiAdapter implements FootballDataPort {
                     .onStatus(HttpStatusCode::is4xxClientError, (request, clientResponse) -> {
                         throw new FootballDataApiException(
                                 "Football-data client error: HTTP " + clientResponse.getStatusCode().value()
-                                        + " for competition=" + competition
-                        );
+                                        + " for competition=" + competition);
                     })
                     .onStatus(HttpStatusCode::is5xxServerError, (request, clientResponse) -> {
                         throw new FootballDataApiException(
                                 "Football-data server error: HTTP " + clientResponse.getStatusCode().value()
-                                        + " for competition=" + competition
-                        );
+                                        + " for competition=" + competition);
                     })
                     .body(FootballDataMatchesResponse.class);
-    
+
             if (response == null || response.getMatches() == null) {
                 log.warn("Football-data returned empty response for competition={}", competition);
                 return List.of();
             }
-    
+
             return response.getMatches().stream()
                     .filter(match -> {
                         String status = match.getStatus();
@@ -72,31 +72,102 @@ public class FootballDataApiAdapter implements FootballDataPort {
                     .filter(match -> Instant.parse(match.getUtcDate()).isAfter(Instant.now()))
                     .map(this::toDomainMatch)
                     .toList();
-    
+
         } catch (FootballDataApiException e) {
             log.warn("Football-data API request failed for competition={}: {}", competition, e.getMessage());
             return List.of();
-    
+
         } catch (RestClientResponseException e) {
             log.warn(
                     "Football-data HTTP error for competition={}: status={} body={}",
                     competition,
                     e.getStatusCode().value(),
-                    e.getResponseBodyAsString()
-            );
+                    e.getResponseBodyAsString());
             return List.of();
-    
+
         } catch (RestClientException e) {
             log.error("Football-data transport error for competition={}: {}", competition, e.getMessage(), e);
             return List.of();
-    
+
         } catch (Exception e) {
             log.error("Unexpected football-data adapter error for competition={}", competition, e);
             return List.of();
         }
     }
-    
+
+    @Override
+    public List<Match> getFinishedMatches(String competition) {
+        LocalDate dateFrom = LocalDate.now().minusDays(28);
+        LocalDate dateTo = LocalDate.now();
+
+        try {
+            FootballDataMatchesResponse response = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/competitions/{competition}/matches")
+                            .queryParam("dateFrom", dateFrom)
+                            .queryParam("dateTo", dateTo)
+                            .build(competition))
+                    .header("X-Auth-Token", apiKey)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, (request, clientResponse) -> {
+                        throw new FootballDataApiException(
+                                "Football-data client error: HTTP " + clientResponse.getStatusCode().value()
+                                        + " for competition=" + competition);
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError, (request, clientResponse) -> {
+                        throw new FootballDataApiException(
+                                "Football-data server error: HTTP " + clientResponse.getStatusCode().value()
+                                        + " for competition=" + competition);
+                    })
+                    .body(FootballDataMatchesResponse.class);
+
+            if (response == null || response.getMatches() == null) {
+                log.warn("Football-data returned empty response for competition={}", competition);
+                return List.of();
+            }
+
+            return response.getMatches().stream()
+                    .filter(match -> "FINISHED".equals(match.getStatus()))
+                    .map(this::toDomainMatch)
+                    .toList();
+
+        } catch (FootballDataApiException e) {
+            log.warn("Football-data API request failed for competition={}: {}", competition, e.getMessage());
+            return List.of();
+
+        } catch (RestClientResponseException e) {
+            log.warn(
+                    "Football-data HTTP error for competition={}: status={} body={}",
+                    competition,
+                    e.getStatusCode().value(),
+                    e.getResponseBodyAsString());
+            return List.of();
+
+        } catch (RestClientException e) {
+            log.error("Football-data transport error for competition={}: {}", competition, e.getMessage(), e);
+            return List.of();
+
+        } catch (Exception e) {
+            log.error("Unexpected football-data adapter error for competition={}", competition, e);
+            return List.of();
+        }
+    }
+
     private Match toDomainMatch(FootballDataMatchResponse matchResponse) {
+
+        var scoreResponse = matchResponse.getScore();
+        List<Score> scores = List.of();
+        Winner winner = null;
+
+        if (scoreResponse != null && scoreResponse.getFullTime() != null) {
+            scores = List.of(Score.builder()
+                    .homeScore(scoreResponse.getFullTime().getHome())
+                    .awayScore(scoreResponse.getFullTime().getAway())
+                    .scoreType(Score.ScoreType.FULL_TIME)
+                    .build());
+            winner = mapWinner(scoreResponse.getWinner());
+        }
+
         return Match.builder()
                 .id(UUID.randomUUID()) // temporary until persisted
                 .tournamentId(null)
@@ -114,8 +185,8 @@ public class FootballDataApiAdapter implements FootballDataPort {
                         .build())
                 .matchStatus(mapStatus(matchResponse.getStatus()))
                 .kickoffTime(Instant.parse(matchResponse.getUtcDate()))
-                .scores(List.of())
-                .winner(null)
+                .scores(scores)
+                .winner(winner)
                 .externalId(String.valueOf(matchResponse.getId()))
                 .build();
     }
@@ -127,6 +198,16 @@ public class FootballDataApiAdapter implements FootballDataPort {
             case "FINISHED" -> Match.MatchStatus.COMPLETED;
             case "CANCELLED", "POSTPONED", "SUSPENDED" -> Match.MatchStatus.CANCELLED;
             default -> Match.MatchStatus.SCHEDULED;
+        };
+    }
+
+    private Winner mapWinner(String winner) {
+        if (winner == null) return null;
+        return switch (winner) {
+            case "HOME_TEAM" -> Winner.HOME;
+            case "AWAY_TEAM" -> Winner.AWAY;
+            case "DRAW" -> Winner.DRAW;
+            default -> null;
         };
     }
 }

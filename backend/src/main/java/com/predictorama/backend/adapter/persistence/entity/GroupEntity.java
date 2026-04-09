@@ -30,4 +30,7 @@ public class GroupEntity extends BaseEntity {
     @Column(length = 500)
     private String description;
 
+    @Column(name = "ruleset_id")
+    private UUID rulesetId;
+
 }

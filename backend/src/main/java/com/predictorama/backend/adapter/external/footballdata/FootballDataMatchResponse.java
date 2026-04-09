@@ -11,4 +11,5 @@ public class FootballDataMatchResponse {
     private String status;
     private FootballDataTeamResponse homeTeam;
     private FootballDataTeamResponse awayTeam;
+    private FootballDataScoreResponse score;
 }

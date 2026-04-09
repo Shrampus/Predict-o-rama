@@ -5,16 +5,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.UUID;
+import java.util.Set;
 
 @Getter
 @Builder
 @AllArgsConstructor
-public class Group {
+public class Ruleset{
     private UUID id;
-    private UUID ownerId;
-    private UUID inviteCode;
-    private UUID rulesetId;
     private String name;
-    private String description;
+    private Set<String> ruleNames;
 
 }

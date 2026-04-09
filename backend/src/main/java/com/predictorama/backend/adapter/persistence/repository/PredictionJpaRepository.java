@@ -18,4 +18,6 @@ public interface PredictionJpaRepository extends JpaRepository<PredictionEntity,
     List<PredictionEntity> findByUserId(UUID userId);
 
     List<PredictionEntity> findByGroupId(UUID groupId);
+
+    List<PredictionEntity> findByMatchId(UUID matchId);
 }
