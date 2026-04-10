@@ -2,8 +2,8 @@ import { useState } from 'react';
 
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import type { WinningTeam } from '../TournamentConstants';
-import TeamDisplay from './TeamDisplay';
-import TimeBadge from './TimeBadge';
+import TeamDisplay from '../../../components/ui/TeamDisplay';
+import TimeBadge from '../../../components/ui/TimeBadge';
 import WinnerButton from './WinnerButton';
 import { buildPrediction, deriveTimeStyle, formatKickoffTime, } from '../utils/matchCardUtils';
 
