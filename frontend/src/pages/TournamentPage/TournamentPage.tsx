@@ -1,40 +1,62 @@
 import { useState } from 'react';
 
-import HeroBanner from './Components/HeroBanner';
-import MatchCard from './Components/MatchCard';
-import StandingsTable from './Components/StandingsTable';
-import Tabs from './Components/Tabs';
-import { matches } from './TournamentConstants';
-import type { Prediction, WinningTeam } from './TournamentConstants';
+import HeroBanner from './components/HeroBanner';
+import MatchCard from './components/MatchCard';
+import StandingsTable from './components/StandingsTable';
+import Tabs from './components/Tabs';
+import { useTournamentMatches } from './hooks/useTournamentMatches';
+import type { WinningTeam } from './TournamentConstants';
+import type { TournamentMatchPrediction } from '../../services/predictionsApi';
+import { savePrediction, winningTeamToApiWinner } from '../../services/predictionsApi';
 
-const groups = Array.from(new Set(matches.map((m) => m.group)));
-const matchesByGroup = groups.map((group) => ({
-    group,
-    matches: matches
-        .filter((m) => m.group === group)
-        .sort((a, b) => a.datetime.localeCompare(b.datetime)),
-}));
-
-
+const COMPETITION = 'CL';
+const GROUP_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 function TournamentPage() {
-    const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
-    const [predictions, setPredictions] = useState<Record<number, Prediction>>({
-        1: { home: 0, away: 0, winningTeam: 'Draw', saved: false },
-        2: { home: 1, away: 2, winningTeam: 'Away', saved: false },
-    });
+    const { matches, tournamentName, isLoading, error, refetch } = useTournamentMatches(
+        COMPETITION,
+        GROUP_ID
+    );
 
-    function handlePredict(id: number, home: number, away: number, winningTeam: WinningTeam) {
-        setPredictions((prev) => ({ ...prev, [id]: { home, away, saved: true, winningTeam } }));
+    const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
+    const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
+
+    const liveMatchCount = matches.filter((match) => match.matchStatus === 'LIVE').length;
+
+    async function handlePredict(
+        matchId: string,
+        homeScore: number,
+        awayScore: number,
+        winningTeam: WinningTeam
+    ) {
+        try {
+            setSavingMatchId(matchId);
+            setSaveError(null);
+
+            await savePrediction({
+                groupId: GROUP_ID,
+                matchId,
+                homeScore,
+                awayScore,
+                predictedWinner: winningTeamToApiWinner[winningTeam],
+            });
+
+            await refetch();
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Failed to save prediction');
+        } finally {
+            setSavingMatchId(null);
+        }
     }
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <HeroBanner
                 season="Summer 2024 Series"
-                name="EURO CHAMPIONS CUP"
+                name={tournamentName}
                 phase="Group Stage Phase"
-                liveMatchCount={128}
+                liveMatchCount={liveMatchCount}
             />
 
             <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -53,23 +75,21 @@ function TournamentPage() {
                             </span>
                         </div>
 
-                        {matchesByGroup.map(({ group, matches: groupMatches }) => (
-                            <div key={group}>
-                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">
-                                    Group {group}
-                                </h3>
-                                <div className="space-y-4">
-                                    {groupMatches.map((match) => (
-                                        <MatchCard
-                                            key={match.id}
-                                            match={match}
-                                            prediction={predictions[match.id]}
-                                            onPredict={handlePredict}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
+                        {isLoading && <p>Loading matches...</p>}
+                        {error && <p className="text-red-500">{error}</p>}
+                        {saveError && <p className="text-red-500">{saveError}</p>}
+                        {!isLoading && !error && matches.length === 0 && <p>No matches available.</p>}
+
+                        {!isLoading &&
+                            !error &&
+                            matches.map((match: TournamentMatchPrediction) => (
+                                <MatchCard
+                                    key={`${match.matchId}-${match.predictedHomeScore}-${match.predictedAwayScore}-${match.predictedWinner}`}
+                                    match={match}
+                                    onPredict={handlePredict}
+                                    isSaving={savingMatchId === match.matchId}
+                                />
+                            ))}
                     </div>
 
                     {/* Sidebar */}

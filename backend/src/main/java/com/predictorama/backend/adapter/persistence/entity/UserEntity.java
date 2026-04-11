@@ -29,4 +29,7 @@ public class UserEntity extends BaseEntity{
     @Column(name = "system_role", nullable = false)
     private Role systemRole;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
 }

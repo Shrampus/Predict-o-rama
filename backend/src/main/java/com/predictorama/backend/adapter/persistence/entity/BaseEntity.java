@@ -1,11 +1,13 @@
 package com.predictorama.backend.adapter.persistence.entity;
 
+import com.predictorama.backend.domain.entity.Score;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
 import java.time.Instant;
+import java.util.List;
 
 @MappedSuperclass
 public class BaseEntity {
@@ -25,4 +27,6 @@ public class BaseEntity {
     void onUpdate() {
         updatedAt = Instant.now();
     }
+
+
 }

@@ -11,6 +11,7 @@ public class UserMapper {
                 .username(entity.getUsername())
                 .email(entity.getEmail())
                 .systemRole(entity.getSystemRole())
+                .passwordHash(entity.getPasswordHash())
                 .build();
     }
 
@@ -20,6 +21,7 @@ public class UserMapper {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .systemRole(user.getSystemRole())
+                .passwordHash(user.getPasswordHash())
                 .build();
     }
 }

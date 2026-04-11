@@ -1,3 +1,4 @@
+
 package com.predictorama.backend.adapter.persistence.entity;
 
 import com.predictorama.backend.domain.entity.Winner;
