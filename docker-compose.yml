@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    container_name: predictorama-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    image: ghcr.io/shrampus/predictorama-frontend:latest
+    ports:
+      - "80:80"
+    container_name: predictorama-frontend
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/shrampus/predictorama-backend:latest
+    ports:
+      - "8080:8080"
+    container_name: predictorama-backend
+    environment:
+      - ALLOWED_ORIGIN=http://193.40.157.126
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:postgresql://db:5432/${POSTGRES_DB}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - FOOTBALL_DATA_API_KEY=${FOOTBALL_DATA_API_KEY}
+      - FIXTURE_SYNC_ENABLED=true
+      - FIXTURE_SYNC_INITIAL_DELAY=15s
+      - FIXTURE_SYNC_FIXED_DELAY=1m
+      - FIXTURE_SYNC_COMPETITIONS=WC,EC,CL,PL,BL1,DED,BSA,PD,FL1,ELC,PPL,SA
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

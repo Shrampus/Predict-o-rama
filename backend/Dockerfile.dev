@@ -1,0 +1,12 @@
+FROM eclipse-temurin:21-jdk
+
+WORKDIR /app
+
+COPY mvnw mvnw.cmd pom.xml ./
+COPY .mvn .mvn
+
+RUN ./mvnw dependency:go-offline --no-transfer-progress
+
+EXPOSE 8080
+
+CMD ["./mvnw", "spring-boot:run"]
