@@ -20,8 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Repository
 @RequiredArgsConstructor
@@ -60,33 +64,22 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
 
     @Override
     public List<Match> findByTournamentId(UUID tournamentId) {
-        return jpaRepository.findByTournamentId(tournamentId).stream()
-                .map(this::toMatch)
-                .toList();
+        return toMatches(jpaRepository.findByTournamentId(tournamentId));
     }
 
     @Override
     public List<Match> findByTournamentIdAndMatchStatus(UUID tournamentId, Match.MatchStatus matchStatus) {
-        return jpaRepository.findByTournamentIdAndMatchStatus(tournamentId, matchStatus).stream()
-                .map(this::toMatch)
-                .toList();
+        return toMatches(jpaRepository.findByTournamentIdAndMatchStatus(tournamentId, matchStatus));
     }
 
     @Override
     public List<Match> findByTournamentIdAndKickoffTimeBetween(UUID tournamentId, Instant from, Instant to) {
-        return jpaRepository.findByTournamentId(tournamentId).stream()
-                .filter(entity -> entity.getKickoffTime() != null)
-                .filter(entity -> !entity.getKickoffTime().isBefore(from))
-                .filter(entity -> !entity.getKickoffTime().isAfter(to))
-                .map(this::toMatch)
-                .toList();
+        return toMatches(jpaRepository.findByTournamentIdAndKickoffTimeBetween(tournamentId, from, to));
     }
 
     @Override
     public List<Match> findByKickoffTimeBetween(Instant from, Instant to) {
-        return jpaRepository.findByKickoffTimeBetween(from, to).stream()
-                .map(this::toMatch)
-                .toList();
+        return toMatches(jpaRepository.findByKickoffTimeBetween(from, to));
     }
 
     @Override
@@ -95,21 +88,55 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
     }
 
     private Match toMatch(MatchEntity entity) {
-        List<Score> scores = loadScores(entity.getId());
-        Team homeTeam = loadTeam(entity.getHomeTeamId());
-        Team awayTeam = loadTeam(entity.getAwayTeamId());
-        return MatchMapper.toDomain(entity, scores, homeTeam, awayTeam);
+        return toMatches(List.of(entity)).get(0);
     }
 
-    private List<Score> loadScores(UUID matchId) {
-        return matchScoreRepository.findByMatchId(matchId).stream()
-                .map(MatchScoreMapper::toDomain)
+    private List<Match> toMatches(List<MatchEntity> entities) {
+        if (entities.isEmpty()) {
+            return List.of();
+        }
+
+        Map<UUID, Team> teamsById = loadTeamsById(entities);
+        Map<UUID, List<Score>> scoresByMatchId = loadScoresByMatchId(entities);
+
+        return entities.stream()
+                .map(entity -> MatchMapper.toDomain(
+                        entity,
+                        scoresByMatchId.getOrDefault(entity.getId(), List.of()),
+                        requireTeam(teamsById, entity.getHomeTeamId()),
+                        requireTeam(teamsById, entity.getAwayTeamId())
+                ))
                 .toList();
     }
 
-    private Team loadTeam(UUID teamId) {
-        return teamJpaRepository.findById(teamId)
+    private Map<UUID, Team> loadTeamsById(List<MatchEntity> entities) {
+        List<UUID> teamIds = entities.stream()
+                .flatMap(entity -> Stream.of(entity.getHomeTeamId(), entity.getAwayTeamId()))
+                .distinct()
+                .toList();
+
+        return teamJpaRepository.findAllById(teamIds).stream()
                 .map(TeamMapper::toDomain)
-                .orElseThrow(() -> new IllegalStateException("Team not found: " + teamId));
+                .collect(Collectors.toMap(Team::getId, Function.identity()));
+    }
+
+    private Map<UUID, List<Score>> loadScoresByMatchId(List<MatchEntity> entities) {
+        List<UUID> matchIds = entities.stream()
+                .map(MatchEntity::getId)
+                .toList();
+
+        return matchScoreRepository.findByMatchIdIn(matchIds).stream()
+                .collect(Collectors.groupingBy(
+                        MatchScoreEntity::getMatchId,
+                        Collectors.mapping(MatchScoreMapper::toDomain, Collectors.toList())
+                ));
+    }
+
+    private Team requireTeam(Map<UUID, Team> teamsById, UUID teamId) {
+        Team team = teamsById.get(teamId);
+        if (team == null) {
+            throw new IllegalStateException("Team not found: " + teamId);
+        }
+        return team;
     }
 }
