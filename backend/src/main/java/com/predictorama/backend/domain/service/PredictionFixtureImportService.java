@@ -49,22 +49,20 @@ public class PredictionFixtureImportService {
 
         String tournamentName = competitionCatalog.toTournamentName(competition);
 
-        return tournamentRepositoryPort.findAll().stream()
-                .filter(tournament -> tournament.getName().equalsIgnoreCase(tournamentName))
-                .findFirst()
-                .orElseGet(() -> {
-                    Tournament savedTournament = tournamentRepositoryPort.save(
-                            Tournament.builder()
-                                    .id(UUID.randomUUID())
-                                    .name(tournamentName)
-                                    .description("Imported from football-data API")
-                                    .sport(Tournament.Sport.FOOTBALL)
-                                    .build()
-                    );
+        return tournamentRepositoryPort.findByNameIgnoreCase(tournamentName)
+        .orElseGet(() -> {
+            Tournament savedTournament = tournamentRepositoryPort.save(
+                    Tournament.builder()
+                            .id(UUID.randomUUID())
+                            .name(tournamentName)
+                            .description("Imported from football-data API")
+                            .sport(Tournament.Sport.FOOTBALL)
+                            .build()
+            );
 
-                    log.info("Created tournament in DB name={} id={}", savedTournament.getName(), savedTournament.getId());
-                    return savedTournament;
-                });
+            log.info("Created tournament in DB name={} id={}", savedTournament.getName(), savedTournament.getId());
+            return savedTournament;
+        });
     }
 
     private boolean isValidExternalMatch(Match match) {

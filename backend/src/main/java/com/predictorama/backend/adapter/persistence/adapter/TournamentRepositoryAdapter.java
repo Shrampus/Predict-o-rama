@@ -35,6 +35,12 @@ public class TournamentRepositoryAdapter implements TournamentRepositoryPort {
     }
 
     @Override
+    public Optional<Tournament> findByNameIgnoreCase(String name) {
+        return jpaRepository.findByNameIgnoreCase(name)
+                .map(TournamentMapper::toDomain);
+    }
+
+    @Override
     public List<Tournament> findAll() {
         return jpaRepository.findAll().stream().map(TournamentMapper::toDomain).toList();
     }
