@@ -41,30 +41,31 @@ public class PredictionScoringService {
 
         var predictions = predictionRepositoryPort.findByMatchId(matchId);
 
+        var actualScore = match.getScores().stream()
+                .filter(s -> s.getScoreType() == Score.ScoreType.FULL_TIME)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No full-time score found for matchId: " + match.getId()));
+        var actualWinner = match.getWinner();
+
         for (var prediction : predictions) {
-            var groupRepoPort = groupRepositoryPort.findById(prediction.getGroupId())
+            var group = groupRepositoryPort.findById(prediction.getGroupId())
                     .orElse(null);
 
             List<ScoringRule> activeRules;
 
-            if (groupRepoPort == null || groupRepoPort.getRulesetId() == null) {
+            if (group == null || group.getRulesetId() == null) {
                 log.warn("No group or ruleset found for groupId={}, using default ruleset", prediction.getGroupId());
                 activeRules = scoringRules;
             } else {
-                var rulesetRepoPort = rulesetRepositoryPort.findById(groupRepoPort.getRulesetId())
+                var ruleset = rulesetRepositoryPort.findById(group.getRulesetId())
                         .orElseThrow(() -> new IllegalStateException(
-                                "Ruleset not found for rulesetId:" + groupRepoPort.getRulesetId()));
+                                "Ruleset not found for rulesetId:" + group.getRulesetId()));
 
                 activeRules = scoringRules.stream()
-                        .filter(r -> rulesetRepoPort.getRuleNames().contains(r.name()))
+                        .filter(r -> ruleset.getRuleNames().contains(r.name()))
                         .toList();
             }
 
-            var actualScore = match.getScores().stream()
-            .filter( s -> s.getScoreType() == Score.ScoreType.FULL_TIME)
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No full-time score found for matchId: " + match.getId()));
-            var actualWinner = match.getWinner();
             int totalScore = 0;
 
             for (var rule : activeRules) {
