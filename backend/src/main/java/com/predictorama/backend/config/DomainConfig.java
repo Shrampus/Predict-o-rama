@@ -7,6 +7,8 @@ import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.AuthService;
 import com.predictorama.backend.domain.service.GroupService;
 import com.predictorama.backend.domain.service.UserService;
+import com.predictorama.backend.domain.service.scoring.CorrectWinnerRule;
+import com.predictorama.backend.domain.service.scoring.ExactScoreRule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,5 +33,15 @@ public class DomainConfig {
     @Bean
     public AuthService authService(UserRepositoryPort userRepository, PasswordVerifier passwordVerifier) {
         return new AuthService(userRepository, passwordVerifier);
+    }
+
+    @Bean
+    public CorrectWinnerRule correctWinnerRule() {
+        return new CorrectWinnerRule();
+    }
+
+    @Bean
+    public ExactScoreRule exactScoreRule() {
+        return new ExactScoreRule();
     }
 }

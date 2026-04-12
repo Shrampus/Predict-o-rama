@@ -3,7 +3,6 @@ package com.predictorama.backend.adapter.persistence.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -29,5 +28,8 @@ public class GroupEntity extends BaseEntity {
 
     @Column(length = 500)
     private String description;
+
+    @Column(name = "ruleset_id")
+    private UUID rulesetId;
 
 }
