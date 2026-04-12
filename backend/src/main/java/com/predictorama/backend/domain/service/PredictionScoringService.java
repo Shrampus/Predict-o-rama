@@ -32,43 +32,41 @@ public class PredictionScoringService {
 
     private final RulesetRepositoryPort rulesetRepositoryPort;
 
-    public void distributePredictionScores(UUID matchId, UUID groupId) {
-        var matchOpt = matchRepositoryPort.findById(matchId);
-        if (matchOpt.isEmpty()) {
+    public void distributePredictionScores(UUID matchId) {
+        var matchRepoPort = matchRepositoryPort.findById(matchId);
+        if (matchRepoPort.isEmpty()) {
             throw new IllegalStateException("Match not found for matchId: " + matchId);
         }
-        var match = matchOpt.get();
+        var match = matchRepoPort.get();
 
-        var predictions = predictionRepositoryPort.findByMatchIdAndGroupId(matchId, groupId);
-
-        var groupOpt = groupRepositoryPort.findById(groupId);
-        if (groupOpt.isEmpty()) {
-            throw new IllegalStateException("Group not found for groupId: " + groupId);
-        }
-        var group = groupOpt.get();
-
-        List<ScoringRule> activeRules;
-        if (group.getRulesetId() == null) {
-            log.warn("No ruleset for groupId={}, applying all rules", groupId);
-            activeRules = scoringRules;
-        } else {
-            var ruleset = rulesetRepositoryPort.findById(group.getRulesetId())
-                    .orElseThrow(() -> new IllegalStateException(
-                            "Ruleset not found for rulesetId: " + group.getRulesetId()));
-            activeRules = scoringRules.stream()
-                    .filter(r -> ruleset.getRuleNames().contains(r.name()))
-                    .toList();
-        }
-
-        Score actualScore = match.getScores().stream()
-                .filter(s -> s.getScoreType() == Score.ScoreType.FULL_TIME)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No score found for matchId: " + matchId));
-
-        Winner actualWinner = match.getWinner();
+        var predictions = predictionRepositoryPort.findByMatchId(matchId);
 
         for (var prediction : predictions) {
+            var groupRepoPort = groupRepositoryPort.findById(prediction.getGroupId())
+                    .orElse(null);
+
+            List<ScoringRule> activeRules;
+
+            if (groupRepoPort == null || groupRepoPort.getRulesetId() == null) {
+                log.warn("No group or ruleset found for groupId={}, using default ruleset", prediction.getGroupId());
+                activeRules = scoringRules;
+            } else {
+                var rulesetRepoPort = rulesetRepositoryPort.findById(groupRepoPort.getRulesetId())
+                        .orElseThrow(() -> new IllegalStateException(
+                                "Ruleset not found for rulesetId:" + groupRepoPort.getRulesetId()));
+
+                activeRules = scoringRules.stream()
+                        .filter(r -> rulesetRepoPort.getRuleNames().contains(r.name()))
+                        .toList();
+            }
+
+            var actualScore = match.getScores().stream()
+            .filter( s -> s.getScoreType() == Score.ScoreType.FULL_TIME)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No full-time score found for matchId: " + match.getId()));
+            var actualWinner = match.getWinner();
             int totalScore = 0;
+
             for (var rule : activeRules) {
                 log.debug("Evaluating rule {} for predictionId={}", rule.name(), prediction.getId());
                 totalScore += rule.evaluate(prediction, actualScore, actualWinner);

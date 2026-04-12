@@ -6,7 +6,6 @@ import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TeamRepositoryPort;
-import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +18,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MatchResultSyncService {
 
+    private final PredictionFixtureImportService predictionFixtureImportService;
     private final FootballDataPort footballDataPort;
     private final MatchRepositoryPort matchRepositoryPort;
     private final TeamRepositoryPort teamRepositoryPort;
-    private final TournamentRepositoryPort tournamentRepositoryPort;
     private final CompetitionCatalog competitionCatalog;
     private final PredictionScoringService predictionScoringService;
 
     private static final Logger log = LoggerFactory.getLogger(MatchResultSyncService.class);
-
 
     private Team saveOrGetTeam(Team incomingTeam) {
         return teamRepositoryPort.findByName(incomingTeam.getName())
@@ -117,5 +115,27 @@ public class MatchResultSyncService {
         return homeTeam.getName() + " vs " + awayTeam.getName();
     }
 
-    private void syncAllCompetitions() {}
+    public void syncAllCompetitions() {
+        for (String competition : competitionCatalog.getSupportedCompetitions()) {
+            syncCompetition(competition);
+        }
+    }
+
+    private void syncCompetition(String competition) {
+        var finishedMatches = footballDataPort.getFinishedMatches(competition);
+
+        if (finishedMatches.isEmpty()) {
+            log.info("No finished matches to sync for competition={}", competition);
+            return;
+        }
+
+        Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
+
+        for (Match match : finishedMatches) {
+            Match savedMatch = saveOrUpdateMatch(match, tournament);
+            log.info("Synced match result for matchId={} externalId={} competition={}",
+                    savedMatch.getId(), savedMatch.getExternalId(), competition);
+            predictionScoringService.distributePredictionScores(savedMatch.getId());
+        }
+    }
 }
