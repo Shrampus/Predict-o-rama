@@ -17,10 +17,7 @@ public class GroupTournamentRepositoryAdapter implements GroupTournamentReposito
 
     @Override
     public List<UUID> findTournamentIdsByGroupId(UUID groupId) {
-        return groupTournamentJpaRepository.findByGroupId(groupId)
-                .stream()
-                .map(GroupTournamentEntity::getTournamentId)
-                .toList();
+        return groupTournamentJpaRepository.findTournamentIdsByGroupId(groupId);
     }
 
     @Override
