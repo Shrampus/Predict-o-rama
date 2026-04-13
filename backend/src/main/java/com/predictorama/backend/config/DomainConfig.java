@@ -1,8 +1,10 @@
 package com.predictorama.backend.config;
 
 import com.predictorama.backend.domain.port.PasswordVerifier;
+import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.AuthService;
 import com.predictorama.backend.domain.service.GroupService;
@@ -24,8 +26,20 @@ public class DomainConfig {
     }
 
     @Bean
-    public GroupService groupService(GroupRepositoryPort groupRepository, GroupMemberRepositoryPort groupMemberRepository) {
-        return new GroupService(groupRepository, groupMemberRepository);
+    public GroupService groupService(
+            GroupRepositoryPort groupRepository,
+            GroupMemberRepositoryPort groupMemberRepository,
+            UserRepositoryPort userRepository,
+            TournamentRepositoryPort tournamentRepository,
+            GroupTournamentRepositoryPort groupTournamentRepository
+    ) {
+        return new GroupService(
+                groupRepository,
+                groupMemberRepository,
+                userRepository,
+                tournamentRepository,
+                groupTournamentRepository
+        );
     }
 
     @Bean

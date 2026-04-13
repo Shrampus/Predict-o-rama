@@ -3,10 +3,20 @@ package com.predictorama.backend.domain.service;
 import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.entity.GroupMember;
 import com.predictorama.backend.domain.entity.Role;
+import com.predictorama.backend.domain.entity.Tournament;
+import com.predictorama.backend.domain.entity.aggregate.GroupDetailsView;
 import com.predictorama.backend.domain.entity.aggregate.UserGroups;
 import com.predictorama.backend.domain.exception.AlreadyMemberException;
+import com.predictorama.backend.domain.exception.GroupAccessDeniedException;
+import com.predictorama.backend.domain.exception.GroupNotFoundException;
+import com.predictorama.backend.domain.exception.TournamentAlreadyLinkedException;
+import com.predictorama.backend.domain.exception.TournamentNotFoundException;
+import com.predictorama.backend.domain.exception.UserNotFoundException;
+import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -18,6 +28,9 @@ public class GroupService {
 
     private final GroupRepositoryPort groupRepository;
     private final GroupMemberRepositoryPort groupMemberRepository;
+    private final UserRepositoryPort userRepository;
+    private final TournamentRepositoryPort tournamentRepository;
+    private final GroupTournamentRepositoryPort groupTournamentRepository;
 
     public Group createGroup(UUID ownerId, String name, String description) {
         Group group = Group.builder()
@@ -62,8 +75,55 @@ public class GroupService {
         groupMemberRepository.deleteByGroupIdAndUserId(groupId, userId);
     }
 
-    public List<GroupMember> getGroupMembers(UUID groupId) {
+    public GroupDetailsView getGroupDetails(UUID userId, UUID groupId) {
+        Group group = requireExistingGroup(groupId);
+        GroupMember membership = requireActiveMembership(userId, groupId);
+        return new GroupDetailsView(group, membership.getMemberRole());
+    }
+
+    public List<GroupMember> getGroupMembers(UUID userId, UUID groupId) {
+        requireActiveMembership(userId, groupId);
         return groupMemberRepository.findByGroupId(groupId);
+    }
+
+    public GroupMember addMemberByEmail(UUID adminUserId, UUID groupId, String email) {
+        requireAdminMembership(adminUserId, groupId);
+        UUID userIdToAdd = userRepository.findByEmail(email)
+                .map(user -> user.getId())
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (groupMemberRepository.findByGroupIdAndUserId(groupId, userIdToAdd).isPresent()) {
+            throw new AlreadyMemberException(userIdToAdd, groupId);
+        }
+
+        GroupMember newMembership = GroupMember.builder()
+                .id(UUID.randomUUID())
+                .groupId(groupId)
+                .userId(userIdToAdd)
+                .status(GroupMember.MemberStatus.ACTIVE)
+                .memberRole(Role.USER)
+                .build();
+        return groupMemberRepository.save(newMembership);
+    }
+
+    public List<Tournament> getGroupTournaments(UUID userId, UUID groupId) {
+        requireActiveMembership(userId, groupId);
+        return groupTournamentRepository.findTournamentIdsByGroupId(groupId).stream()
+                .map(tournamentId -> tournamentRepository.findById(tournamentId)
+                        .orElseThrow(() -> new TournamentNotFoundException(tournamentId)))
+                .toList();
+    }
+
+    public void addTournamentToGroup(UUID adminUserId, UUID groupId, UUID tournamentId) {
+        requireAdminMembership(adminUserId, groupId);
+        tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
+
+        if (groupTournamentRepository.existsByGroupIdAndTournamentId(groupId, tournamentId)) {
+            throw new TournamentAlreadyLinkedException(groupId, tournamentId);
+        }
+
+        groupTournamentRepository.save(groupId, tournamentId);
     }
 
     public List<UserGroups> getUserGroups(UUID userId) {
@@ -72,5 +132,24 @@ public class GroupService {
                         .map(group -> new UserGroups(group, membership))
                         .orElseThrow(() -> new IllegalStateException("Group not found for membership: " + membership.getId())))
                 .toList();
+    }
+
+    private GroupMember requireActiveMembership(UUID userId, UUID groupId) {
+        requireExistingGroup(groupId);
+        return groupMemberRepository.findByGroupIdAndUserId(groupId, userId)
+                .filter(membership -> membership.getStatus() == GroupMember.MemberStatus.ACTIVE)
+                .orElseThrow(() -> new GroupAccessDeniedException(userId, groupId));
+    }
+
+    private void requireAdminMembership(UUID userId, UUID groupId) {
+        GroupMember membership = requireActiveMembership(userId, groupId);
+        if (membership.getMemberRole() != Role.ADMIN) {
+            throw new GroupAccessDeniedException(userId, groupId);
+        }
+    }
+
+    private Group requireExistingGroup(UUID groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupNotFoundException(groupId));
     }
 }
