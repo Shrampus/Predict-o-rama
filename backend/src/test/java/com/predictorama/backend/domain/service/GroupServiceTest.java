@@ -3,26 +3,45 @@ package com.predictorama.backend.domain.service;
 import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.entity.GroupMember;
 import com.predictorama.backend.domain.entity.Role;
+import com.predictorama.backend.domain.entity.Tournament;
+import com.predictorama.backend.domain.entity.User;
+import com.predictorama.backend.domain.exception.GroupNotFoundException;
+import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GroupServiceTest {
 
     private GroupService groupService;
     private InMemoryGroupRepository groupRepository;
     private InMemoryGroupMemberRepository groupMemberRepository;
+    private InMemoryUserRepository userRepository;
+    private InMemoryTournamentRepository tournamentRepository;
+    private InMemoryGroupTournamentRepository groupTournamentRepository;
 
     @BeforeEach
     void setUp() {
         groupRepository = new InMemoryGroupRepository();
         groupMemberRepository = new InMemoryGroupMemberRepository();
-        groupService = new GroupService(groupRepository, groupMemberRepository);
+        userRepository = new InMemoryUserRepository();
+        tournamentRepository = new InMemoryTournamentRepository();
+        groupTournamentRepository = new InMemoryGroupTournamentRepository();
+        groupService = new GroupService(
+                groupRepository,
+                groupMemberRepository,
+                userRepository,
+                tournamentRepository,
+                groupTournamentRepository
+        );
     }
 
     @Test
@@ -104,16 +123,15 @@ class GroupServiceTest {
         Group group = groupService.createGroup(ownerId, "Legends", null);
         groupService.joinGroup(UUID.randomUUID(), group.getInviteCode());
 
-        List<GroupMember> members = groupService.getGroupMembers(group.getId());
+        List<GroupMember> members = groupService.getGroupMembers(ownerId, group.getId());
 
         assertThat(members).hasSize(2);
     }
 
     @Test
-    void getGroupMembers_returnsEmptyForUnknownGroup() {
-        List<GroupMember> members = groupService.getGroupMembers(UUID.randomUUID());
-
-        assertThat(members).isEmpty();
+    void getGroupMembers_unknownGroup_throwsNotFound() {
+        assertThatThrownBy(() -> groupService.getGroupMembers(UUID.randomUUID(), UUID.randomUUID()))
+                .isInstanceOf(GroupNotFoundException.class);
     }
 
     // --- In-memory stubs ---
@@ -177,6 +195,77 @@ class GroupServiceTest {
         @Override
         public void deleteByGroupIdAndUserId(UUID groupId, UUID userId) {
             store.values().removeIf(m -> m.getGroupId().equals(groupId) && m.getUserId().equals(userId));
+        }
+    }
+
+    static class InMemoryUserRepository implements UserRepositoryPort {
+        @Override
+        public User save(User user) {
+            return user;
+        }
+
+        @Override
+        public Optional<User> findById(UUID id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<User> findByUsername(String username) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<User> findByEmail(String email) {
+            return Optional.empty();
+        }
+
+        @Override
+        public boolean existsByUsername(String username) {
+            return false;
+        }
+
+        @Override
+        public boolean existsByEmail(String email) {
+            return false;
+        }
+    }
+
+    static class InMemoryTournamentRepository implements TournamentRepositoryPort {
+        @Override
+        public Tournament save(Tournament tournament) {
+            return tournament;
+        }
+
+        @Override
+        public Optional<Tournament> findById(UUID id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Tournament> findByNameIgnoreCase(String name) {
+            return Optional.empty();
+        }
+
+        @Override
+        public List<Tournament> findAll() {
+            return List.of();
+        }
+    }
+
+    static class InMemoryGroupTournamentRepository implements GroupTournamentRepositoryPort {
+        @Override
+        public List<UUID> findTournamentIdsByGroupId(UUID groupId) {
+            return List.of();
+        }
+
+        @Override
+        public boolean existsByGroupIdAndTournamentId(UUID groupId, UUID tournamentId) {
+            return false;
+        }
+
+        @Override
+        public void save(UUID groupId, UUID tournamentId) {
+            // no-op for tests in this class
         }
     }
 }
