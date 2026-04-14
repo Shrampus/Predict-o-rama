@@ -135,13 +135,6 @@ public class MatchResultSyncService {
             Match savedMatch = saveOrUpdateMatch(match, tournament);
             log.info("Synced match result for matchId={} externalId={} competition={}",
                     savedMatch.getId(), savedMatch.getExternalId(), competition);
-            log.info(
-                    "About to score synced match matchId={} externalId={} status={} scores={}",
-                    savedMatch.getId(),
-                    savedMatch.getExternalId(),
-                    savedMatch.getMatchStatus(),
-                    savedMatch.getScores()
-            );
             predictionScoringService.distributePredictionScores(savedMatch.getId());
         }
     }
