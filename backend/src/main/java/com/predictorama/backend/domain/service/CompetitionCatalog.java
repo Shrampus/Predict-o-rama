@@ -44,4 +44,8 @@ public class CompetitionCatalog {
                 .findFirst()
                 .orElse(null);
     }
+
+    public Set<String> getSupportedCompetitions() {
+        return SUPPORTED_COMPETITIONS;
+    }
 }
