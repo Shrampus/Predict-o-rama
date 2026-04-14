@@ -5,12 +5,16 @@ import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
 import com.predictorama.backend.domain.entity.Winner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public final class FootballDataMatchMapper {
+
+    private static final Logger log = LoggerFactory.getLogger(FootballDataMatchMapper.class);
 
     private FootballDataMatchMapper() {
     }
@@ -28,6 +32,14 @@ public final class FootballDataMatchMapper {
                     .build());
             winner = mapWinner(scoreResponse.getWinner());
         }
+
+        log.info(
+                "Mapped football-data match externalId={} status={} fullTimePresent={} mappedScores={}",
+                matchResponse.getId(),
+                matchResponse.getStatus(),
+                scoreResponse != null && scoreResponse.getFullTime() != null,
+                scores
+        );
 
         return Match.builder()
                 .id(UUID.randomUUID()) // temporary until persisted

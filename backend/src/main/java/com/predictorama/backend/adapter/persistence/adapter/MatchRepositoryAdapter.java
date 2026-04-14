@@ -44,6 +44,7 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
         MatchEntity saved = jpaRepository.save(MatchMapper.toEntity(match));
 
         matchScoreRepository.deleteByMatchId(saved.getId());
+        matchScoreRepository.flush();
         List<MatchScoreEntity> scoreEntities = match.getScores().stream()
                 .map(score -> MatchScoreMapper.toEntity(saved.getId(), score))
                 .toList();

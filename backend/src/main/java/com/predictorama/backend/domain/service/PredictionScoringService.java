@@ -38,6 +38,13 @@ public class PredictionScoringService {
             throw new IllegalStateException("Match not found for matchId: " + matchId);
         }
         var match = matchRepoPort.get();
+        log.info(
+                "Loaded match for scoring matchId={} externalId={} status={} scores={}",
+                match.getId(),
+                match.getExternalId(),
+                match.getMatchStatus(),
+                match.getScores()
+        );
 
         var predictions = predictionRepositoryPort.findByMatchId(matchId);
 

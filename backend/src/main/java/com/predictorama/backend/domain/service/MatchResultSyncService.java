@@ -98,8 +98,8 @@ public class MatchResultSyncService {
                             .awayTeam(savedAwayTeam)
                             .matchStatus(externalMatch.getMatchStatus())
                             .kickoffTime(externalMatch.getKickoffTime())
-                            .scores(List.of())
-                            .winner(null)
+                            .scores(externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
                             .externalId(externalMatch.getExternalId())
                             .build();
 
@@ -135,6 +135,13 @@ public class MatchResultSyncService {
             Match savedMatch = saveOrUpdateMatch(match, tournament);
             log.info("Synced match result for matchId={} externalId={} competition={}",
                     savedMatch.getId(), savedMatch.getExternalId(), competition);
+            log.info(
+                    "About to score synced match matchId={} externalId={} status={} scores={}",
+                    savedMatch.getId(),
+                    savedMatch.getExternalId(),
+                    savedMatch.getMatchStatus(),
+                    savedMatch.getScores()
+            );
             predictionScoringService.distributePredictionScores(savedMatch.getId());
         }
     }
