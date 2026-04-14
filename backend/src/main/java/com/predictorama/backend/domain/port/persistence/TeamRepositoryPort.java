@@ -14,5 +14,7 @@ public interface TeamRepositoryPort {
 
     List<Team> findAll();
 
+    Optional<Team> findByExternalId(String externalId);
+
     Optional<Team> findByName(String name);
 }

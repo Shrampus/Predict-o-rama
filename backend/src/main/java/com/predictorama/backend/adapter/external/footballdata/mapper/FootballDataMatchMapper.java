@@ -36,11 +36,17 @@ public final class FootballDataMatchMapper {
                 .description(null)
                 .homeTeam(Team.builder()
                         .id(UUID.randomUUID())
+                        .externalId(matchResponse.getHomeTeam().getId() != null
+                                ? String.valueOf(matchResponse.getHomeTeam().getId())
+                                : null)
                         .name(matchResponse.getHomeTeam().getName())
                         .imageUrl(matchResponse.getHomeTeam().getCrest())
                         .build())
                 .awayTeam(Team.builder()
                         .id(UUID.randomUUID())
+                        .externalId(matchResponse.getAwayTeam().getId() != null
+                                ? String.valueOf(matchResponse.getAwayTeam().getId())
+                                : null)
                         .name(matchResponse.getAwayTeam().getName())
                         .imageUrl(matchResponse.getAwayTeam().getCrest())
                         .build())

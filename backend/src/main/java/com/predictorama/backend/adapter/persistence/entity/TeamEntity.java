@@ -17,6 +17,9 @@ public class TeamEntity extends BaseEntity {
     @Id
     private UUID id;
 
+    @Column(name = "external_id", unique = true)
+    private String externalId;
+
     @Column(nullable = false, unique = true)
     private String name;
 

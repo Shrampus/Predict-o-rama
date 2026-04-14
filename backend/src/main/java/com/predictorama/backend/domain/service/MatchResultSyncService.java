@@ -28,37 +28,56 @@ public class MatchResultSyncService {
     private static final Logger log = LoggerFactory.getLogger(MatchResultSyncService.class);
 
     private Team saveOrGetTeam(Team incomingTeam) {
-        return teamRepositoryPort.findByName(incomingTeam.getName())
+        if (incomingTeam == null || isBlank(incomingTeam.getExternalId())) {
+            throw new IllegalArgumentException("Cannot save team with missing externalId");
+        }
+
+        if (isBlank(incomingTeam.getName())) {
+            throw new IllegalArgumentException("Cannot save team with missing name");
+        }
+
+        return teamRepositoryPort.findByExternalId(incomingTeam.getExternalId())
                 .map(existingTeam -> {
-                    String existingImage = existingTeam.getImageUrl();
-                    String incomingImage = incomingTeam.getImageUrl();
+                    boolean teamChanged =
+                            !incomingTeam.getName().equals(existingTeam.getName()) ||
+                            (incomingTeam.getImageUrl() != null &&
+                                    !incomingTeam.getImageUrl().equals(existingTeam.getImageUrl()));
 
-                    boolean imageChanged = incomingImage != null &&
-                            (existingImage == null || !existingImage.equals(incomingImage));
-
-                    if (!imageChanged) {
+                    if (!teamChanged) {
                         return existingTeam;
                     }
 
                     Team updatedTeam = Team.builder()
                             .id(existingTeam.getId())
-                            .name(existingTeam.getName())
-                            .imageUrl(incomingImage)
+                            .externalId(existingTeam.getExternalId())
+                            .name(incomingTeam.getName())
+                            .imageUrl(incomingTeam.getImageUrl())
                             .build();
 
                     Team savedTeam = teamRepositoryPort.save(updatedTeam);
-                    log.info("Updated team image in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
+                    log.info(
+                            "Updated team in DB externalId={} name={} id={}",
+                            savedTeam.getExternalId(),
+                            savedTeam.getName(),
+                            savedTeam.getId()
+                    );
                     return savedTeam;
                 })
                 .orElseGet(() -> {
                     Team savedTeam = teamRepositoryPort.save(
                             Team.builder()
                                     .id(UUID.randomUUID())
+                                    .externalId(incomingTeam.getExternalId())
                                     .name(incomingTeam.getName())
                                     .imageUrl(incomingTeam.getImageUrl())
                                     .build());
 
-                    log.info("Created team in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
+                    log.info(
+                            "Created team in DB externalId={} name={} id={}",
+                            savedTeam.getExternalId(),
+                            savedTeam.getName(),
+                            savedTeam.getId()
+                    );
                     return savedTeam;
                 });
     }
@@ -113,6 +132,10 @@ public class MatchResultSyncService {
 
     private String buildMatchName(Team homeTeam, Team awayTeam) {
         return homeTeam.getName() + " vs " + awayTeam.getName();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     public void syncAllCompetitions() {

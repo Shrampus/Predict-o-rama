@@ -96,8 +96,18 @@ public class PredictionFixtureImportService {
             return false;
         }
 
+        if (isBlank(match.getHomeTeam().getExternalId())) {
+            log.warn("Skipping imported match externalId={} because homeTeam.externalId is missing", match.getExternalId());
+            return false;
+        }
+
         if (isBlank(match.getAwayTeam().getName())) {
             log.warn("Skipping imported match externalId={} because awayTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getExternalId())) {
+            log.warn("Skipping imported match externalId={} because awayTeam.externalId is missing", match.getExternalId());
             return false;
         }
 
@@ -105,43 +115,57 @@ public class PredictionFixtureImportService {
     }
 
     private Team saveOrGetTeam(Team incomingTeam) {
-        if (incomingTeam == null || isBlank(incomingTeam.getName())) {
+        if (incomingTeam == null || isBlank(incomingTeam.getExternalId())) {
+            throw new IllegalArgumentException("Cannot save team with missing externalId");
+        }
+
+        if (isBlank(incomingTeam.getName())) {
             throw new IllegalArgumentException("Cannot save team with missing name");
         }
 
-        return teamRepositoryPort.findByName(incomingTeam.getName())
+        return teamRepositoryPort.findByExternalId(incomingTeam.getExternalId())
                 .map(existingTeam -> {
-                    String existingImage = existingTeam.getImageUrl();
-                    String incomingImage = incomingTeam.getImageUrl();
+                    boolean teamChanged =
+                            !Objects.equals(existingTeam.getName(), incomingTeam.getName()) ||
+                            (incomingTeam.getImageUrl() != null &&
+                                    !Objects.equals(existingTeam.getImageUrl(), incomingTeam.getImageUrl()));
 
-                    boolean imageChanged =
-                            incomingImage != null &&
-                            !Objects.equals(existingImage, incomingImage);
-
-                    if (!imageChanged) {
+                    if (!teamChanged) {
                         return existingTeam;
                     }
 
                     Team updatedTeam = Team.builder()
                             .id(existingTeam.getId())
-                            .name(existingTeam.getName())
-                            .imageUrl(incomingImage)
+                            .externalId(existingTeam.getExternalId())
+                            .name(incomingTeam.getName())
+                            .imageUrl(incomingTeam.getImageUrl())
                             .build();
 
                     Team savedTeam = teamRepositoryPort.save(updatedTeam);
-                    log.info("Updated team image in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
+                    log.info(
+                            "Updated team in DB externalId={} name={} id={}",
+                            savedTeam.getExternalId(),
+                            savedTeam.getName(),
+                            savedTeam.getId()
+                    );
                     return savedTeam;
                 })
                 .orElseGet(() -> {
                     Team savedTeam = teamRepositoryPort.save(
                             Team.builder()
                                     .id(UUID.randomUUID())
+                                    .externalId(incomingTeam.getExternalId())
                                     .name(incomingTeam.getName())
                                     .imageUrl(incomingTeam.getImageUrl())
                                     .build()
                     );
 
-                    log.info("Created team in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
+                    log.info(
+                            "Created team in DB externalId={} name={} id={}",
+                            savedTeam.getExternalId(),
+                            savedTeam.getName(),
+                            savedTeam.getId()
+                    );
                     return savedTeam;
                 });
     }

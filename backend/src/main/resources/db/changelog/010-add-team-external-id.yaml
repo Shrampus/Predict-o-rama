@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-add-team-external-id
+      author: codex
+      changes:
+        - addColumn:
+            tableName: teams
+            columns:
+              - column:
+                  name: external_id
+                  type: varchar(255)
+        - addUniqueConstraint:
+            tableName: teams
+            columnNames: external_id
+            constraintName: uq_teams_external_id
