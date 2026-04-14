@@ -8,8 +8,6 @@ import com.predictorama.backend.domain.entity.Winner;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
-
 public final class FootballDataMatchMapper {
 
     private FootballDataMatchMapper() {
@@ -30,17 +28,17 @@ public final class FootballDataMatchMapper {
         }
 
         return Match.builder()
-                .id(UUID.randomUUID()) // temporary until persisted
+                .id(null)
                 .tournamentId(null)
                 .name(matchResponse.getHomeTeam().getName() + " vs " + matchResponse.getAwayTeam().getName())
                 .description(null)
                 .homeTeam(Team.builder()
-                        .id(UUID.randomUUID())
+                        .id(null)
                         .name(matchResponse.getHomeTeam().getName())
                         .imageUrl(matchResponse.getHomeTeam().getCrest())
                         .build())
                 .awayTeam(Team.builder()
-                        .id(UUID.randomUUID())
+                        .id(null)
                         .name(matchResponse.getAwayTeam().getName())
                         .imageUrl(matchResponse.getAwayTeam().getCrest())
                         .build())

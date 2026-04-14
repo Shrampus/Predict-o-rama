@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/008-seed-test-groups.yaml
   - include:
       file: db/changelog/009-add-prediction-rulesets.yaml
+  - include:
+      file: db/changelog/010-add-unique-match-external-id.yaml
