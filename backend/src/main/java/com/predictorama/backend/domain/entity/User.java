@@ -15,4 +15,5 @@ public class User {
     private String email;
     private Role systemRole;
     private String passwordHash;
+    private String googleId;
 }

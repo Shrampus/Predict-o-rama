@@ -12,6 +12,7 @@ public class UserMapper {
                 .email(entity.getEmail())
                 .systemRole(entity.getSystemRole())
                 .passwordHash(entity.getPasswordHash())
+                .googleId(entity.getGoogleId())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .systemRole(user.getSystemRole())
                 .passwordHash(user.getPasswordHash())
+                .googleId(user.getGoogleId())
                 .build();
     }
 }

@@ -19,7 +19,7 @@ public class UserEntity extends BaseEntity{
     @Id
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(unique = true, length = 50)
     private String username;
 
     @Column(nullable = false, unique = true)
@@ -32,4 +32,6 @@ public class UserEntity extends BaseEntity{
     @Column(name = "password_hash")
     private String passwordHash;
 
+    @Column(name = "google_id")
+    private String googleId;
 }

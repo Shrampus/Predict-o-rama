@@ -1,6 +1,7 @@
 package com.predictorama.backend.config;
 
 import com.predictorama.backend.domain.port.PasswordVerifier;
+import com.predictorama.backend.domain.port.external.GoogleTokenValidatorPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
@@ -29,7 +30,7 @@ public class DomainConfig {
     }
 
     @Bean
-    public AuthService authService(UserRepositoryPort userRepository, PasswordVerifier passwordVerifier) {
-        return new AuthService(userRepository, passwordVerifier);
+    public AuthService authService(UserRepositoryPort userRepository, PasswordVerifier passwordVerifier, GoogleTokenValidatorPort googleTokenValidatorPort) {
+        return new AuthService(userRepository, passwordVerifier, googleTokenValidatorPort);
     }
 }
