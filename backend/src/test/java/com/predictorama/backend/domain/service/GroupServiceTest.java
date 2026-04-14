@@ -134,6 +134,18 @@ class GroupServiceTest {
                 .isInstanceOf(GroupNotFoundException.class);
     }
 
+    @Test
+    void removeTournamentFromGroup_existingLink_removesLink() {
+        UUID adminId = UUID.randomUUID();
+        Group group = groupService.createGroup(adminId, "Legends", "Best group");
+        UUID tournamentId = UUID.randomUUID();
+        groupTournamentRepository.save(group.getId(), tournamentId);
+
+        groupService.removeTournamentFromGroup(adminId, group.getId(), tournamentId);
+
+        assertThat(groupTournamentRepository.existsByGroupIdAndTournamentId(group.getId(), tournamentId)).isFalse();
+    }
+
     // --- In-memory stubs ---
 
     static class InMemoryGroupRepository implements GroupRepositoryPort {
@@ -253,19 +265,33 @@ class GroupServiceTest {
     }
 
     static class InMemoryGroupTournamentRepository implements GroupTournamentRepositoryPort {
+        private final Set<String> links = new HashSet<>();
+
+        private String key(UUID groupId, UUID tournamentId) {
+            return groupId + ":" + tournamentId;
+        }
+
         @Override
         public List<UUID> findTournamentIdsByGroupId(UUID groupId) {
-            return List.of();
+            return links.stream()
+                    .filter(link -> link.startsWith(groupId + ":"))
+                    .map(link -> UUID.fromString(link.substring(link.indexOf(':') + 1)))
+                    .toList();
         }
 
         @Override
         public boolean existsByGroupIdAndTournamentId(UUID groupId, UUID tournamentId) {
-            return false;
+            return links.contains(key(groupId, tournamentId));
         }
 
         @Override
         public void save(UUID groupId, UUID tournamentId) {
-            // no-op for tests in this class
+            links.add(key(groupId, tournamentId));
+        }
+
+        @Override
+        public void delete(UUID groupId, UUID tournamentId) {
+            links.remove(key(groupId, tournamentId));
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class GroupTournamentResponse {
     private UUID id;
+    private String competitionCode;
     private String name;
     private String description;
     private Tournament.Sport sport;

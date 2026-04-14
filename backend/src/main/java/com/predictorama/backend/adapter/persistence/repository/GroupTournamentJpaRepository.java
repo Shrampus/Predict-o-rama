@@ -14,4 +14,6 @@ public interface GroupTournamentJpaRepository extends JpaRepository<GroupTournam
     List<UUID> findTournamentIdsByGroupId(@Param("groupId") UUID groupId);
 
     boolean existsByGroupIdAndTournamentId(UUID groupId, UUID tournamentId);
+
+    void deleteByGroupIdAndTournamentId(UUID groupId, UUID tournamentId);
 }

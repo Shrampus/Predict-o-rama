@@ -13,6 +13,7 @@ public class GroupMemberResponseDto {
     private UUID id;
     private UUID groupId;
     private UUID userId;
+    private String name;
     private Role memberRole;
     private GroupMember.MemberStatus status;
 }

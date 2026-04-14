@@ -9,4 +9,6 @@ public interface GroupTournamentRepositoryPort {
     boolean existsByGroupIdAndTournamentId(UUID groupId, UUID tournamentId);
 
     void save(UUID groupId, UUID tournamentId);
+
+    void delete(UUID groupId, UUID tournamentId);
 }

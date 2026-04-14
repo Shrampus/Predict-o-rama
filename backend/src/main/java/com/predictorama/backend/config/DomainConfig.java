@@ -8,6 +8,7 @@ import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.AuthService;
 import com.predictorama.backend.domain.service.GroupService;
+import com.predictorama.backend.domain.service.TournamentService;
 import com.predictorama.backend.domain.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,5 +46,10 @@ public class DomainConfig {
     @Bean
     public AuthService authService(UserRepositoryPort userRepository, PasswordVerifier passwordVerifier) {
         return new AuthService(userRepository, passwordVerifier);
+    }
+
+    @Bean
+    public TournamentService tournamentService(TournamentRepositoryPort tournamentRepository) {
+        return new TournamentService(tournamentRepository);
     }
 }

@@ -8,8 +8,10 @@ import com.predictorama.backend.domain.entity.aggregate.GroupDetailsView;
 import com.predictorama.backend.domain.entity.aggregate.UserGroups;
 import com.predictorama.backend.domain.exception.AlreadyMemberException;
 import com.predictorama.backend.domain.exception.GroupAccessDeniedException;
+import com.predictorama.backend.domain.exception.GroupMemberNotFoundException;
 import com.predictorama.backend.domain.exception.GroupNotFoundException;
 import com.predictorama.backend.domain.exception.TournamentAlreadyLinkedException;
+import com.predictorama.backend.domain.exception.TournamentNotLinkedException;
 import com.predictorama.backend.domain.exception.TournamentNotFoundException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
@@ -18,6 +20,7 @@ import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,7 @@ public class GroupService {
     private final TournamentRepositoryPort tournamentRepository;
     private final GroupTournamentRepositoryPort groupTournamentRepository;
 
+    @Transactional
     public Group createGroup(UUID ownerId, String name, String description) {
         Group group = Group.builder()
                 .id(UUID.randomUUID())
@@ -54,6 +58,7 @@ public class GroupService {
         return saved;
     }
 
+    @Transactional
     public Optional<GroupMember> joinGroup(UUID userId, UUID inviteCode) {
         return groupRepository.findByInviteCode(inviteCode)
                 .map(group -> {
@@ -71,6 +76,7 @@ public class GroupService {
                 });
     }
 
+    @Transactional
     public void leaveGroup(UUID userId, UUID groupId) {
         groupMemberRepository.deleteByGroupIdAndUserId(groupId, userId);
     }
@@ -86,6 +92,7 @@ public class GroupService {
         return groupMemberRepository.findByGroupId(groupId);
     }
 
+    @Transactional
     public GroupMember addMemberByEmail(UUID adminUserId, UUID groupId, String email) {
         requireAdminMembership(adminUserId, groupId);
         UUID userIdToAdd = userRepository.findByEmail(email)
@@ -106,6 +113,28 @@ public class GroupService {
         return groupMemberRepository.save(newMembership);
     }
 
+    @Transactional
+    public void removeMember(UUID adminUserId, UUID groupId, UUID memberUserId) {
+        requireAdminMembership(adminUserId, groupId);
+
+        if (adminUserId.equals(memberUserId)) {
+            throw new IllegalArgumentException("Admins cannot remove themselves. Use leave group instead.");
+        }
+
+        GroupMember membershipToRemove = groupMemberRepository.findByGroupIdAndUserId(groupId, memberUserId)
+                .orElseThrow(() -> new GroupMemberNotFoundException(groupId, memberUserId));
+
+        if (membershipToRemove.getStatus() != GroupMember.MemberStatus.ACTIVE) {
+            throw new IllegalArgumentException("Only active group members can be removed.");
+        }
+
+        if (membershipToRemove.getMemberRole() == Role.ADMIN) {
+            throw new IllegalArgumentException("Admins cannot remove other admins.");
+        }
+
+        groupMemberRepository.deleteByGroupIdAndUserId(groupId, memberUserId);
+    }
+
     public List<Tournament> getGroupTournaments(UUID userId, UUID groupId) {
         requireActiveMembership(userId, groupId);
         return groupTournamentRepository.findTournamentIdsByGroupId(groupId).stream()
@@ -114,6 +143,7 @@ public class GroupService {
                 .toList();
     }
 
+    @Transactional
     public void addTournamentToGroup(UUID adminUserId, UUID groupId, UUID tournamentId) {
         requireAdminMembership(adminUserId, groupId);
         tournamentRepository.findById(tournamentId)
@@ -124,6 +154,16 @@ public class GroupService {
         }
 
         groupTournamentRepository.save(groupId, tournamentId);
+    }
+
+    @Transactional
+    public void removeTournamentFromGroup(UUID adminUserId, UUID groupId, UUID tournamentId) {
+        requireAdminMembership(adminUserId, groupId);
+        if (!groupTournamentRepository.existsByGroupIdAndTournamentId(groupId, tournamentId)) {
+            throw new TournamentNotLinkedException(groupId, tournamentId);
+        }
+
+        groupTournamentRepository.delete(groupId, tournamentId);
     }
 
     public List<UserGroups> getUserGroups(UUID userId) {

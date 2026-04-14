@@ -4,6 +4,8 @@ import com.predictorama.backend.adapter.rest.SessionService;
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.GroupMemberMapper;
 import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
+import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -26,7 +28,15 @@ public class GroupController {
     private static final Logger log = LoggerFactory.getLogger(GroupController.class);
 
     private final GroupService groupService;
+    private final UserRepositoryPort userRepository;
     private final SessionService sessionService;
+    private final CompetitionCatalog competitionCatalog;
+
+    private String resolveMemberName(UUID userId) {
+        return userRepository.findById(userId)
+                .map(user -> user.getUsername())
+                .orElse(userId.toString());
+    }
 
     private <T> ResponseEntity<T> withUser(HttpSession session, Function<UUID, ResponseEntity<T>> action) {
         return sessionService.getUserId(session)
@@ -51,7 +61,7 @@ public class GroupController {
             return groupService.joinGroup(userId, request.getInviteCode())
                     .map(member -> {
                         log.info("User joined group - memberId={}", member.getId());
-                        return ResponseEntity.ok(GroupMemberMapper.toResponse(member));
+                        return ResponseEntity.ok(GroupMemberMapper.toResponse(member, resolveMemberName(member.getUserId())));
                     })
                     .orElseGet(() -> {
                         log.warn("Join failed - invite code not found: {}", request.getInviteCode());
@@ -96,7 +106,7 @@ public class GroupController {
     @GetMapping("/{groupId}/members")
     public ResponseEntity<List<GroupMemberResponseDto>> getGroupMembers(@PathVariable UUID groupId, HttpSession session) {
         return withUser(session, userId -> ResponseEntity.ok(groupService.getGroupMembers(userId, groupId).stream()
-                .map(GroupMemberMapper::toResponse)
+                .map(member -> GroupMemberMapper.toResponse(member, resolveMemberName(member.getUserId())))
                 .toList()));
     }
 
@@ -107,10 +117,21 @@ public class GroupController {
             HttpSession session
     ) {
         return withUser(session, userId -> {
-            GroupMemberResponseDto response = GroupMemberMapper.toResponse(
-                    groupService.addMemberByEmail(userId, groupId, request.getEmail().trim())
-            );
+            var member = groupService.addMemberByEmail(userId, groupId, request.getEmail().trim());
+            GroupMemberResponseDto response = GroupMemberMapper.toResponse(member, resolveMemberName(member.getUserId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        });
+    }
+
+    @DeleteMapping("/{groupId}/members/{memberUserId}")
+    public ResponseEntity<Void> removeGroupMember(
+            @PathVariable UUID groupId,
+            @PathVariable UUID memberUserId,
+            HttpSession session
+    ) {
+        return withUser(session, userId -> {
+            groupService.removeMember(userId, groupId, memberUserId);
+            return ResponseEntity.noContent().build();
         });
     }
 
@@ -120,6 +141,7 @@ public class GroupController {
                 groupService.getGroupTournaments(userId, groupId).stream()
                         .map(tournament -> new GroupTournamentResponse(
                                 tournament.getId(),
+                                competitionCatalog.toCompetitionCode(tournament.getName()),
                                 tournament.getName(),
                                 tournament.getDescription(),
                                 tournament.getSport()
@@ -137,6 +159,18 @@ public class GroupController {
         return withUser(session, userId -> {
             groupService.addTournamentToGroup(userId, groupId, request.getTournamentId());
             return ResponseEntity.status(HttpStatus.CREATED).<Void>build();
+        });
+    }
+
+    @DeleteMapping("/{groupId}/tournaments/{tournamentId}")
+    public ResponseEntity<Void> removeGroupTournament(
+            @PathVariable UUID groupId,
+            @PathVariable UUID tournamentId,
+            HttpSession session
+    ) {
+        return withUser(session, userId -> {
+            groupService.removeTournamentFromGroup(userId, groupId, tournamentId);
+            return ResponseEntity.noContent().build();
         });
     }
 }

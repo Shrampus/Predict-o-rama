@@ -3,9 +3,11 @@ package com.predictorama.backend.adapter.rest;
 import com.predictorama.backend.adapter.rest.dto.ApiErrorResponse;
 import com.predictorama.backend.domain.exception.AlreadyMemberException;
 import com.predictorama.backend.domain.exception.GroupAccessDeniedException;
+import com.predictorama.backend.domain.exception.GroupMemberNotFoundException;
 import com.predictorama.backend.domain.exception.GroupNotFoundException;
 import com.predictorama.backend.domain.exception.InvalidCredentialsException;
 import com.predictorama.backend.domain.exception.TournamentAlreadyLinkedException;
+import com.predictorama.backend.domain.exception.TournamentNotLinkedException;
 import com.predictorama.backend.domain.exception.TournamentNotFoundException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -45,6 +47,11 @@ public class AuthExceptionHandler {
         return error(HttpStatus.NOT_FOUND, "GROUP_NOT_FOUND", ex.getMessage());
     }
 
+    @ExceptionHandler(GroupMemberNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupMemberNotFound(GroupMemberNotFoundException ex) {
+        return error(HttpStatus.NOT_FOUND, "GROUP_MEMBER_NOT_FOUND", ex.getMessage());
+    }
+
     @ExceptionHandler(TournamentNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleTournamentNotFound(TournamentNotFoundException ex) {
         return error(HttpStatus.NOT_FOUND, "TOURNAMENT_NOT_FOUND", ex.getMessage());
@@ -53,6 +60,11 @@ public class AuthExceptionHandler {
     @ExceptionHandler(TournamentAlreadyLinkedException.class)
     public ResponseEntity<ApiErrorResponse> handleTournamentAlreadyLinked(TournamentAlreadyLinkedException ex) {
         return error(HttpStatus.CONFLICT, "TOURNAMENT_ALREADY_LINKED", ex.getMessage());
+    }
+
+    @ExceptionHandler(TournamentNotLinkedException.class)
+    public ResponseEntity<ApiErrorResponse> handleTournamentNotLinked(TournamentNotLinkedException ex) {
+        return error(HttpStatus.NOT_FOUND, "TOURNAMENT_NOT_LINKED", ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

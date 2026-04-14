@@ -32,4 +32,9 @@ public class GroupTournamentRepositoryAdapter implements GroupTournamentReposito
                 .tournamentId(tournamentId)
                 .build());
     }
+
+    @Override
+    public void delete(UUID groupId, UUID tournamentId) {
+        groupTournamentJpaRepository.deleteByGroupIdAndTournamentId(groupId, tournamentId);
+    }
 }
