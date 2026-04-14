@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../../app/routePaths';
 import type { GroupTournamentResponse, TournamentOption } from '../../../services/groupApi';
@@ -43,6 +43,29 @@ export function GroupTournamentsSection({
   onResetTournamentFeedback,
   onRemoveTournament,
 }: GroupTournamentsSectionProps) {
+  const navigate = useNavigate();
+
+  function getTournamentDetailsPath(competitionCode: string) {
+    return ROUTE_PATHS.groupTournamentDetails
+      .replace(':groupId', groupId)
+      .replace(':tournament', competitionCode);
+  }
+
+  function openTournamentDetails(competitionCode: string | null) {
+    if (!competitionCode) {
+      return;
+    }
+    navigate(getTournamentDetailsPath(competitionCode));
+  }
+
+  function shouldIgnoreRowNavigation(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    return target.closest('button, a') !== null;
+  }
+
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
       <h2 className="text-xl font-bold text-slate-900">Tournaments</h2>
@@ -56,7 +79,29 @@ export function GroupTournamentsSection({
           {tournaments.map((tournament) => (
             <li
               key={tournament.id}
-              className="text-sm text-slate-700 flex items-center justify-between bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 gap-3"
+              onClick={(event) => {
+                if (shouldIgnoreRowNavigation(event.target)) {
+                  return;
+                }
+                openTournamentDetails(tournament.competitionCode);
+              }}
+              onKeyDown={(event) => {
+                if (shouldIgnoreRowNavigation(event.target)) {
+                  return;
+                }
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openTournamentDetails(tournament.competitionCode);
+                }
+              }}
+              role="button"
+              tabIndex={tournament.competitionCode ? 0 : -1}
+              aria-disabled={!tournament.competitionCode}
+              className={`text-sm text-slate-700 flex items-center justify-between bg-slate-50/70 border border-slate-200 rounded-xl px-3.5 py-2.5 gap-3 ${
+                tournament.competitionCode
+                  ? 'cursor-pointer hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600/40'
+                  : 'cursor-default'
+              }`}
             >
               <div className="min-w-0">
                 <p className="font-bold text-slate-800">{tournament.name}</p>
@@ -64,14 +109,13 @@ export function GroupTournamentsSection({
               </div>
               <div className="flex items-center gap-2">
                 {tournament.competitionCode ? (
-                  <Link
-                    to={ROUTE_PATHS.groupTournamentDetails
-                      .replace(':groupId', groupId)
-                      .replace(':tournament', tournament.competitionCode)}
+                  <button
+                    type="button"
+                    onClick={() => openTournamentDetails(tournament.competitionCode)}
                     className="rounded-lg border border-green-200 bg-green-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-700 hover:bg-green-100"
                   >
                     Open
-                  </Link>
+                  </button>
                 ) : (
                   <span className="rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                     Unavailable
