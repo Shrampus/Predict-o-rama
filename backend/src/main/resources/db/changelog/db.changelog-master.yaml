@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/007-seed-test-users.yaml
   - include:
       file: db/changelog/008-seed-test-groups.yaml
+  - include:
+      file: db/changelog/009-add-prediction-rulesets.yaml

@@ -43,4 +43,8 @@ public class CompetitionCatalog {
             default -> competition;
         };
     }
+
+    public Set<String> getSupportedCompetitions() {
+        return SUPPORTED_COMPETITIONS;
+    }
 }
