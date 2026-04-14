@@ -1,10 +1,10 @@
 import { useLocation, useParams } from 'react-router-dom';
 
-import { useGroupDetails } from './hooks/useGroupDetails';
+import type { MyGroupsResponse } from '../../services/groupApi';
 import { GroupDetailsHeader } from './components/GroupDetailsHeader';
 import { GroupMembersSection } from './components/GroupMembersSection';
 import { GroupTournamentsSection } from './components/GroupTournamentsSection';
-import type { MyGroupsResponse } from '../../services/groupApi';
+import { useGroupDetails } from './hooks/useGroupDetails';
 
 type GroupDetailsLocationState = {
   group?: MyGroupsResponse;
@@ -77,22 +77,6 @@ function GroupDetailsPage() {
         groupError={groupError}
       />
 
-      <GroupMembersSection
-        members={members}
-        isLoadingMembers={isLoadingMembers}
-        membersError={membersError}
-        isAdmin={isAdmin}
-        removingMemberUserId={removingMemberUserId}
-        memberEmail={memberEmail}
-        isAddingMember={isAddingMember}
-        memberActionMessage={memberActionMessage}
-        memberActionError={memberActionError}
-        onAddMember={(event) => void handleAddMember(event)}
-        onMemberEmailChange={handleMemberEmailChange}
-        onResetMemberFeedback={resetMemberFeedback}
-        onRemoveMember={(member) => void handleRemoveMember(member)}
-      />
-
       <GroupTournamentsSection
         groupId={groupId}
         tournaments={tournaments}
@@ -111,6 +95,22 @@ function GroupDetailsPage() {
         onSelectTournament={handleTournamentSelectionChange}
         onResetTournamentFeedback={resetTournamentFeedback}
         onRemoveTournament={(tournament) => void handleRemoveTournament(tournament)}
+      />
+
+      <GroupMembersSection
+        members={members}
+        isLoadingMembers={isLoadingMembers}
+        membersError={membersError}
+        isAdmin={isAdmin}
+        removingMemberUserId={removingMemberUserId}
+        memberEmail={memberEmail}
+        isAddingMember={isAddingMember}
+        memberActionMessage={memberActionMessage}
+        memberActionError={memberActionError}
+        onAddMember={(event) => void handleAddMember(event)}
+        onMemberEmailChange={handleMemberEmailChange}
+        onResetMemberFeedback={resetMemberFeedback}
+        onRemoveMember={(member) => void handleRemoveMember(member)}
       />
     </div>
   );

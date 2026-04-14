@@ -70,8 +70,13 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
   }
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-3">My Groups</h2>
+    <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900">My Groups</h2>
+        <span className="text-sm text-slate-500">
+          {groups.length} {groups.length === 1 ? 'group' : 'groups'}
+        </span>
+      </div>
 
       {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
 
@@ -81,7 +86,7 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
         <p className="text-sm text-slate-400">You are not a member of any groups yet.</p>
       )}
 
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {groups.map((group) => (
           <li
             key={group.groupId}
@@ -104,12 +109,12 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
             }}
             role="button"
             tabIndex={0}
-            className="flex items-center justify-between bg-white border border-slate-200
-                       rounded-xl px-5 py-4 shadow-sm cursor-pointer transition-colors hover:bg-slate-50
+            className="flex items-center justify-between bg-slate-50 border border-slate-200
+                       rounded-xl px-5 py-4 cursor-pointer transition-colors hover:bg-slate-100
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <div>
-              <p className="font-semibold">{group.name}</p>
+              <p className="font-semibold text-slate-900">{group.name}</p>
               <p className="text-sm text-slate-500">{group.description}</p>
               {group.groupMemberRole === 'ADMIN' && (
                 <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
@@ -142,7 +147,7 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
 

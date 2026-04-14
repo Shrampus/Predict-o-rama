@@ -11,34 +11,40 @@ function GroupsPage() {
   const joinBanner = useJoinGroupBanner(myGroups.refetch);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <JoinGroupBanner
-        inviteCode={joinBanner.formData.inviteCode}
-        isLoading={joinBanner.isLoading}
-        errorMessage={joinBanner.errorMessage}
-        joinedMember={joinBanner.joinedMember}
-        handleChange={joinBanner.handleChange}
-        handleSubmit={joinBanner.handleSubmit}
-      />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <div className="grid grid-cols-1 laptop:grid-cols-12 gap-8 items-start">
+        <div className="laptop:col-span-4 space-y-6">
+          <JoinGroupBanner
+            inviteCode={joinBanner.formData.inviteCode}
+            isLoading={joinBanner.isLoading}
+            errorMessage={joinBanner.errorMessage}
+            joinedMember={joinBanner.joinedMember}
+            handleChange={joinBanner.handleChange}
+            handleSubmit={joinBanner.handleSubmit}
+          />
 
-      <CreateGroupForm
-        name={createForm.formData.name}
-        description={createForm.formData.description}
-        isLoading={createForm.isLoading}
-        errorMessage={createForm.errorMessage}
-        isFormOpen={createForm.isFormOpen}
-        createdGroup={createForm.createdGroup}
-        toggleForm={createForm.toggleForm}
-        handleChange={createForm.handleChange}
-        handleSubmit={createForm.handleSubmit}
-      />
+          <CreateGroupForm
+            name={createForm.formData.name}
+            description={createForm.formData.description}
+            isLoading={createForm.isLoading}
+            errorMessage={createForm.errorMessage}
+            isFormOpen={createForm.isFormOpen}
+            createdGroup={createForm.createdGroup}
+            toggleForm={createForm.toggleForm}
+            handleChange={createForm.handleChange}
+            handleSubmit={createForm.handleSubmit}
+          />
+        </div>
 
-      <MyGroupsList
-        groups={myGroups.groups}
-        isLoading={myGroups.isLoading}
-        errorMessage={myGroups.errorMessage}
-        onLeave={myGroups.leaveCurrentGroup}
-      />
+        <div className="laptop:col-span-8">
+          <MyGroupsList
+            groups={myGroups.groups}
+            isLoading={myGroups.isLoading}
+            errorMessage={myGroups.errorMessage}
+            onLeave={myGroups.leaveCurrentGroup}
+          />
+        </div>
+      </div>
     </div>
   );
 }

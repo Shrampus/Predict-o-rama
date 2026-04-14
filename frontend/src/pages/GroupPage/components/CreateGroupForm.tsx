@@ -27,13 +27,13 @@ function CreateGroupForm({
   handleSubmit,
 }: CreateGroupFormProps) {
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-5 shadow-sm">
+    <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 sm:px-6 py-5 shadow-sm">
       <button
         onClick={toggleForm}
         className="flex items-center gap-1 text-gray-800 font-semibold hover:text-gray-600 transition-colors"
       >
         {isFormOpen ? <Minus size={16} /> : <Plus size={16} />}
-        {isFormOpen ? 'Add new group' : 'Add new group'}
+        Add new group
       </button>
 
       {isFormOpen && (
@@ -46,7 +46,7 @@ function CreateGroupForm({
             value={name}
             onChange={handleChange}
             placeholder="Group name"
-            className="flex-1 min-w-0 border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm
+            className="w-full border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm
                        focus:outline-none focus:ring-2 focus:ring-gray-400"
             required
           />
@@ -56,14 +56,14 @@ function CreateGroupForm({
             value={description}
             onChange={handleChange}
             placeholder="Description"
-            className="flex-1 min-w-0 border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm
+            className="w-full border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm
                        focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <button
             type="submit"
             disabled={isLoading}
             className="bg-gray-600 text-white px-5 py-2 rounded-lg text-sm font-semibold
-                       hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap"
+                       hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap sm:w-auto w-full"
           >
             {isLoading ? 'Creating...' : 'Create Group'}
           </button>
