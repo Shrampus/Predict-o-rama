@@ -37,7 +37,7 @@ function GroupsPage() {
         groups={myGroups.groups}
         isLoading={myGroups.isLoading}
         errorMessage={myGroups.errorMessage}
-        onLeave={myGroups.refetch}
+        onLeave={myGroups.leaveCurrentGroup}
       />
     </div>
   );
