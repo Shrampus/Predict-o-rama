@@ -119,7 +119,7 @@ public class GroupService {
         requireAdminMembership(adminUserId, groupId);
 
         if (adminUserId.equals(memberUserId)) {
-            throw new IllegalArgumentException("Admins cannot remove themselves. Use leave group instead.");
+            throw new IllegalArgumentException("Admins cannot remove themselves.");
         }
 
         GroupMember membershipToRemove = groupMemberRepository.findByGroupIdAndUserId(groupId, memberUserId)
