@@ -20,7 +20,11 @@ public class GoogleTokenValidatorAdapter implements GoogleTokenValidatorPort {
     @Override
     GoogleUserInfo validate(String idToken){
 
-        var result = verifier.verify(idToken);
+        try{
+            return verifier.verify(idToken);
+        } catch {
+            log.error("TODO");
+        }
 
 
     };

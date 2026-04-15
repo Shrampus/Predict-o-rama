@@ -45,9 +45,17 @@ public class AuthService {
         return new AuthResult(newUser, true);
     }
 
+    public User completeProfile(UUID userId, String username) {
+        Optional<User> user = userRepository.findById(userId);
+
+        user.setUsername = username;
+        return user;
+    }
     public User getById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
+
 
 }
