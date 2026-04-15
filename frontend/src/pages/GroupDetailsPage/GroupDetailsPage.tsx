@@ -14,8 +14,7 @@ function isGroupDetailsLocationState(value: unknown): value is GroupDetailsLocat
   return typeof value === 'object' && value !== null && 'group' in value;
 }
 
-function GroupDetailsPage() {
-  const { groupId } = useParams<{ groupId: string }>();
+function GroupDetailsPageContent({ groupId }: { groupId: string }) {
   const location = useLocation();
   const groupState = isGroupDetailsLocationState(location.state) ? location.state : null;
   const initialGroup = groupState?.group ?? null;
@@ -52,14 +51,6 @@ function GroupDetailsPage() {
     handleRemoveMember,
     handleRemoveTournament,
   } = useGroupDetails(groupId);
-
-  if (!groupId) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <p className="text-red-600">Invalid group URL</p>
-      </div>
-    );
-  }
 
   const linkedTournamentIds = new Set(tournaments.map((tournament) => tournament.id));
   const selectableTournaments = availableTournaments.filter(
@@ -116,4 +107,18 @@ function GroupDetailsPage() {
   );
 }
 
-export default GroupDetailsPage;
+function GroupDetailsPageRoute() {
+  const { groupId } = useParams<{ groupId: string }>();
+
+  if (!groupId) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <p className="text-red-600">Invalid group URL</p>
+      </div>
+    );
+  }
+
+  return <GroupDetailsPageContent key={groupId} groupId={groupId} />;
+}
+
+export default GroupDetailsPageRoute;

@@ -101,7 +101,27 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
   }
 
   useEffect(() => {
+    setGroup(null);
+    setGroupError('');
+    setMembers([]);
+    setMembersError('');
+    setTournaments([]);
+    setTournamentsError('');
+    setAvailableTournaments([]);
+    setAvailableTournamentsError('');
+    setSelectedTournamentId('');
+    setMemberActionMessage('');
+    setMemberActionError('');
+    setTournamentActionMessage('');
+    setTournamentActionError('');
+    setRemovingMemberUserId(null);
+    setRemovingTournamentId(null);
+
     if (!groupId) {
+      setIsLoadingGroup(false);
+      setIsLoadingMembers(false);
+      setIsLoadingTournaments(false);
+      setIsLoadingAvailableTournaments(false);
       return;
     }
 
@@ -178,6 +198,10 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
 
   useEffect(() => {
     if (!groupId || !isAdmin) {
+      setAvailableTournaments([]);
+      setAvailableTournamentsError('');
+      setSelectedTournamentId('');
+      setIsLoadingAvailableTournaments(false);
       return;
     }
 
@@ -213,7 +237,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
 
   async function handleAddMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!groupId || memberEmail.trim().length === 0) {
+    if (!groupId || group?.id !== groupId || memberEmail.trim().length === 0) {
       return;
     }
 
@@ -239,7 +263,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
 
   async function handleAddTournament(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!groupId || selectedTournamentId.length === 0) {
+    if (!groupId || group?.id !== groupId || selectedTournamentId.length === 0) {
       return;
     }
 
@@ -261,7 +285,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
   }
 
   async function handleRemoveMember(member: GroupMemberResponse) {
-    if (!groupId) {
+    if (!groupId || group?.id !== groupId) {
       return;
     }
 
@@ -288,7 +312,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
   }
 
   async function handleRemoveTournament(tournament: GroupTournamentResponse) {
-    if (!groupId) {
+    if (!groupId || group?.id !== groupId) {
       return;
     }
 
