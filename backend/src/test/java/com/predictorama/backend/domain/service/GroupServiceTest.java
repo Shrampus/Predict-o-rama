@@ -5,6 +5,7 @@ import com.predictorama.backend.domain.entity.GroupMember;
 import com.predictorama.backend.domain.entity.Role;
 import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.entity.User;
+import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
 import com.predictorama.backend.domain.exception.GroupNotFoundException;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
@@ -123,7 +124,7 @@ class GroupServiceTest {
         Group group = groupService.createGroup(ownerId, "Legends", null);
         groupService.joinGroup(UUID.randomUUID(), group.getInviteCode());
 
-        List<GroupMember> members = groupService.getGroupMembers(ownerId, group.getId());
+        List<GroupMemberView> members = groupService.getGroupMembers(ownerId, group.getId());
 
         assertThat(members).hasSize(2);
     }
@@ -190,6 +191,13 @@ class GroupServiceTest {
         @Override
         public List<GroupMember> findByGroupId(UUID groupId) {
             return store.values().stream().filter(m -> m.getGroupId().equals(groupId)).toList();
+        }
+
+        @Override
+        public List<GroupMemberView> findByGroupIdWithUsernames(UUID groupId) {
+            return findByGroupId(groupId).stream()
+                    .map(member -> new GroupMemberView(member, member.getUserId().toString()))
+                    .toList();
         }
 
         @Override

@@ -5,6 +5,7 @@ import com.predictorama.backend.domain.entity.GroupMember;
 import com.predictorama.backend.domain.entity.Role;
 import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.entity.aggregate.GroupDetailsView;
+import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
 import com.predictorama.backend.domain.entity.aggregate.UserGroups;
 import com.predictorama.backend.domain.exception.AlreadyMemberException;
 import com.predictorama.backend.domain.exception.GroupAccessDeniedException;
@@ -87,9 +88,9 @@ public class GroupService {
         return new GroupDetailsView(group, membership.getMemberRole());
     }
 
-    public List<GroupMember> getGroupMembers(UUID userId, UUID groupId) {
+    public List<GroupMemberView> getGroupMembers(UUID userId, UUID groupId) {
         requireActiveMembership(userId, groupId);
-        return groupMemberRepository.findByGroupId(groupId);
+        return groupMemberRepository.findByGroupIdWithUsernames(groupId);
     }
 
     @Transactional

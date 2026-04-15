@@ -106,7 +106,7 @@ public class GroupController {
     @GetMapping("/{groupId}/members")
     public ResponseEntity<List<GroupMemberResponseDto>> getGroupMembers(@PathVariable UUID groupId, HttpSession session) {
         return withUser(session, userId -> ResponseEntity.ok(groupService.getGroupMembers(userId, groupId).stream()
-                .map(member -> GroupMemberMapper.toResponse(member, resolveMemberName(member.getUserId())))
+                .map(memberView -> GroupMemberMapper.toResponse(memberView.member(), memberView.username()))
                 .toList()));
     }
 
