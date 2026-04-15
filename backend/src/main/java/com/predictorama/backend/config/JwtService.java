@@ -18,7 +18,7 @@ public class JwtService {
     private final Integer expiryDays;
 
 
-    public JwtService(@Value("${jwt.secret}") String jwtSecret, @Value("${jwt.jwt.expiry-days}") Integer expiryDays) {
+    public JwtService(@Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiry-days}") Integer expiryDays) {
         this.jwtSecret = jwtSecret;
         this.expiryDays = expiryDays;
     }

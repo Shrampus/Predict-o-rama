@@ -39,11 +39,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (Exception e) {
-            filterChain.doFilter(request, response);
+            // do nothing
         }
 
-
-
+        filterChain.doFilter(request, response);
     }
 
 }

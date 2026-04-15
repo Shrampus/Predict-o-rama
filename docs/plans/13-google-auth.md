@@ -379,16 +379,17 @@ config/
 This plan adds "Sign in with Google" to Predict-o-rama. Currently there is no authentication — all endpoints are open and the app has no concept of identity. After this change, users log in via Google OAuth2, the backend issues its own JWT for sessions, and protected endpoints require a valid token.
 
 **Design decisions:**
-- Google only (no email+password for now)
-- Username: user picks one after first Google login (onboarding screen)
+- Two login methods: email+password (existing) and Google OAuth2 (new)
+- Both login flows return a JWT — the backend is fully stateless (no server-side sessions)
+- Username: Google users pick one after first login (onboarding screen); email+password users already have one
 - Most `/api/*` endpoints require authentication; `GET /api/tournaments/**` and `GET /api/matches/**` are public
-- Sessions are stateless JWTs — no server-side session storage
+- Logout is frontend-only (clear JWT from localStorage) — JWTs cannot be server-side invalidated
 
 ---
 
 ## How It Works
 
-### The authentication flow
+### Google login flow
 
 ```
 1. User clicks "Sign in with Google"
@@ -401,6 +402,23 @@ This plan adds "Sign in with Google" to Predict-o-rama. Currently there is no au
 7b. Returning user           → { status: "OK", token }
 8. All subsequent requests carry: Authorization: Bearer <jwt>
 ```
+
+### Email+password login flow
+
+```
+1. User submits email + password on login form
+2. Frontend sends: POST /api/auth/login  { email, password }
+3. Backend verifies credentials (bcrypt hash comparison)
+4. Backend issues a JWT (same JwtService as Google login)
+5. Response: { token, status: "OK" | "NEEDS_ONBOARDING", user }
+6. All subsequent requests carry: Authorization: Bearer <jwt>
+```
+
+Both flows produce the same artifact (a JWT) and are handled identically after login. The `JwtAuthFilter` doesn't know or care which login method was used.
+
+### Logout
+
+Logout is a frontend-only operation. The frontend clears the JWT from `localStorage` and resets `AuthContext` state. There is no backend `/api/auth/logout` endpoint — JWTs are stateless and cannot be server-side invalidated. The `ProtectedRoute` component redirects unauthenticated users to `/login`.
 
 ### Why issue our own JWT instead of reusing Google's token?
 
@@ -507,12 +525,15 @@ public record GoogleUserInfo(String googleId, String email, String name) {}
 - Add `Optional<User> findByGoogleId(String googleId)`
 
 **`domain/service/AuthService.java`** — new service
+- `login(String email, String password)` → `AuthResult`
+    - Find user by email, verify password via `PasswordVerifier`
+    - Return `AuthResult(user, needsOnboarding: username == null)`
 - `loginWithGoogle(String idToken)` → `AuthResult`
     - Validate via `GoogleTokenValidatorPort`
     - `findByGoogleId` → create user if not found (username null)
     - Return `AuthResult(user, needsOnboarding: username == null)`
 - `completeProfile(UUID userId, String username)` → `User`
-    - Check username not taken
+    - Check username not taken (`existsByUsername`)
     - Save and return updated user
 
 **`domain/service/AuthResult.java`** — new record
@@ -542,9 +563,13 @@ public record AuthResult(User user, boolean needsOnboarding) {}
 **`adapter/persistence/mapper/UserMapper.java`**
 - Handle nullable username in both directions
 
-**`adapter/rest/controller/AuthController.java`** — new
+**`adapter/rest/controller/AuthController.java`** — updated
+- `POST /api/auth/login` → validate email+password, return JWT (migrated from session-based to JWT)
 - `POST /api/auth/google` → validate Google token, return JWT
+- `GET /api/auth/me` → read userId from `SecurityContextHolder`, return user (no longer uses HttpSession)
 - `POST /api/auth/complete-profile` → set username, return new JWT
+- No `/api/auth/logout` endpoint — logout is frontend-only (clear localStorage)
+- `SessionService` is no longer used — remove dependency
 
 **New DTOs:**
 - `GoogleLoginRequest` — `{ String idToken }`
@@ -565,7 +590,7 @@ public record AuthResult(User user, boolean needsOnboarding) {}
 
 **`config/SecurityConfig.java`** — new
 ```
-Public:  GET /health, GET /, POST /api/auth/google,
+Public:  GET /health, GET /, POST /api/auth/google, POST /api/auth/login,
          GET /api/tournaments/**, GET /api/matches/**
 Protected: all other /api/**
 Session policy: STATELESS
@@ -613,8 +638,9 @@ Add `VITE_GOOGLE_CLIENT_ID` to `.env.local` (not a secret — public value).
 - Handles 401 → logout + redirect to `/login`
 
 **`frontend/src/pages/LoginPage/LoginPage.tsx`**
-- Renders `<GoogleLogin>` button
-- On success: `POST /api/auth/google` → store token → redirect to `/onboarding` or `/`
+- Renders email+password form AND `<GoogleLogin>` button
+- Email+password: `POST /api/auth/login` → store token → redirect based on status
+- Google: `POST /api/auth/google` → store token → redirect to `/onboarding` or `/`
 
 **`frontend/src/pages/OnboardingPage/OnboardingPage.tsx`**
 - Username input form
@@ -641,17 +667,23 @@ Add `VITE_GOOGLE_CLIENT_ID` to `.env.local` (not a secret — public value).
 Following the existing pattern (mock all ports, test service logic only).
 
 **`AuthServiceTest.java`**
-- New user → `needsOnboarding: true`, user created in repository
-- Returning user with username → `needsOnboarding: false`
-- Returning user without username → `needsOnboarding: true`
+- Email+password login with valid credentials → `AuthResult` with user
+- Email+password login with wrong password → `InvalidCredentialsException`
+- Email+password login with unknown email → `InvalidCredentialsException`
+- Google login: new user → `needsOnboarding: true`, user created in repository
+- Google login: returning user with username → `needsOnboarding: false`
+- Google login: returning user without username → `needsOnboarding: true`
 - Invalid Google token → exception thrown
-- `completeProfile` with taken username → exception thrown
+- `completeProfile` with taken username → `UsernameTakenException`
 - `completeProfile` with available username → user saved with username
 
 **`AuthControllerTest.java`**
-- `POST /api/auth/google` valid body → 200 with token
+- `POST /api/auth/login` valid credentials → 200 with JWT
+- `POST /api/auth/login` invalid credentials → 401
+- `POST /api/auth/google` valid body → 200 with JWT
 - `POST /api/auth/google` missing idToken → 400
 - `POST /api/auth/complete-profile` without JWT → 401
+- `GET /api/auth/me` with valid JWT → 200 with user
 
 ---
 
@@ -682,5 +714,6 @@ Following the existing pattern (mock all ports, test service logic only).
 - [ ] `GET /api/tournaments` without token → 200
 - [ ] `GET /api/groups` without token → 401
 - [ ] `GET /api/groups` with valid token → 200
-- [ ] Logout → token cleared, redirected to `/login`
+- [ ] Email+password login → 200 with JWT, subsequent requests work with Bearer token
+- [ ] Logout (frontend) → token cleared from localStorage, redirected to `/login`
 - [ ] Second login with same Google account → home directly (no onboarding)
