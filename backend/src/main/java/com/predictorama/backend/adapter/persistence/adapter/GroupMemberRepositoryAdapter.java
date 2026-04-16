@@ -2,7 +2,9 @@ package com.predictorama.backend.adapter.persistence.adapter;
 
 import com.predictorama.backend.adapter.persistence.mapper.GroupMemberMapper;
 import com.predictorama.backend.adapter.persistence.repository.GroupMemberJpaRepository;
+import com.predictorama.backend.adapter.persistence.repository.GroupMemberJpaRepository.MemberWithUsername;
 import com.predictorama.backend.domain.entity.GroupMember;
+import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -37,6 +39,24 @@ public class GroupMemberRepositoryAdapter implements GroupMemberRepositoryPort {
     @Override
     public List<GroupMember> findByGroupId(UUID groupId) {
         return jpaRepository.findByGroupId(groupId).stream().map(GroupMemberMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<GroupMemberView> findByGroupIdWithUsernames(UUID groupId) {
+        return jpaRepository.findByGroupIdWithUsernames(groupId).stream()
+                .map(GroupMemberRepositoryAdapter::toView)
+                .toList();
+    }
+
+    private static GroupMemberView toView(MemberWithUsername row) {
+        GroupMember member = GroupMember.builder()
+                .id(row.getId())
+                .userId(row.getUserId())
+                .groupId(row.getGroupId())
+                .status(row.getStatus())
+                .memberRole(row.getMemberRole())
+                .build();
+        return new GroupMemberView(member, row.getUsername());
     }
 
     @Override

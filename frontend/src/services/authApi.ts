@@ -11,6 +11,7 @@ export const authApi = {
   login: (email: string, password: string): Promise<CurrentUser> =>
     fetch(`${BASE}/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     }).then(res => {
@@ -19,8 +20,8 @@ export const authApi = {
     }),
 
   me: (): Promise<CurrentUser | null> =>
-    fetch(`${BASE}/me`).then(res => (res.ok ? res.json() : null)),
+    fetch(`${BASE}/me`, { credentials: 'include' }).then(res => (res.ok ? res.json() : null)),
 
   logout: (): Promise<void> =>
-    fetch(`${BASE}/logout`, { method: 'POST' }).then(() => {}),
+    fetch(`${BASE}/logout`, { method: 'POST', credentials: 'include' }).then(() => {}),
 };
