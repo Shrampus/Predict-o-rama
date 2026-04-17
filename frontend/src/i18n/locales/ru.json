@@ -62,6 +62,8 @@
     "groupCount_one": "{{count}} группа",
     "groupCount_few": "{{count}} группы",
     "groupCount_many": "{{count}} групп",
-    "groupCount_other": "{{count}} группы"
+    "groupCount_other": "{{count}} группы",
+    "leaveGroup": "Покинуть группу",
+    "leaveGroupError": "Не удалось покинуть группу"
   }
 }

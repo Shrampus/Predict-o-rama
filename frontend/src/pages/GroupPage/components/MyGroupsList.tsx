@@ -21,6 +21,7 @@ function LeaveGroupButton({
   groupId: string;
   onLeave: (groupId: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [isLeaving, setIsLeaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -30,7 +31,7 @@ function LeaveGroupButton({
     try {
       await onLeave(groupId);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to leave group');
+      setErrorMessage(err instanceof Error ? err.message : t('groups.leaveGroupError'));
     } finally {
       setIsLeaving(false);
     }
@@ -41,7 +42,7 @@ function LeaveGroupButton({
       <button
         onClick={handleLeave}
         disabled={isLeaving}
-        title="Leave group"
+        title={t('groups.leaveGroup')}
         className="flex items-center gap-1 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
       >
         <LogOut size={16} />

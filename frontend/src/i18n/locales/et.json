@@ -60,6 +60,8 @@
     "copied": "Kopeeritud!",
     "viewDetails": "Vaata detaile",
     "groupCount_one": "{{count}} grupp",
-    "groupCount_other": "{{count}} gruppi"
+    "groupCount_other": "{{count}} gruppi",
+    "leaveGroup": "Lahku grupist",
+    "leaveGroupError": "Grupist lahkumine ebaõnnestus"
   }
 }

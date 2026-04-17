@@ -60,6 +60,8 @@
     "copied": "Copied!",
     "viewDetails": "View details",
     "groupCount_one": "{{count}} group",
-    "groupCount_other": "{{count}} groups"
+    "groupCount_other": "{{count}} groups",
+    "leaveGroup": "Leave group",
+    "leaveGroupError": "Failed to leave group"
   }
 }
