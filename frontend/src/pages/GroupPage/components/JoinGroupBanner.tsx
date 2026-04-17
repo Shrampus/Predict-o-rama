@@ -18,7 +18,7 @@ function JoinGroupBanner({
   handleSubmit,
 }: JoinGroupBannerProps) {
   return (
-    <div className="bg-green-50 border border-green-200 rounded-2xl px-6 py-5 shadow-sm">
+    <div className="w-full bg-green-50 border border-green-200 rounded-2xl px-5 sm:px-6 py-5 shadow-sm">
       <p className="text-green-800 font-semibold mb-3">Have an invite code? Join here:</p>
 
       {errorMessage && <p className="text-red-600 text-sm mb-3">{errorMessage}</p>}
@@ -27,14 +27,14 @@ function JoinGroupBanner({
         <p className="text-green-700 text-sm mb-3 font-medium">Successfully joined the group!</p>
       )}
 
-      <form onSubmit={handleSubmit} className="flex gap-3 flex-wrap">
+      <form onSubmit={handleSubmit} className="flex gap-3 flex-wrap sm:flex-nowrap">
         <input
           type="text"
           name="inviteCode"
           value={inviteCode}
           onChange={handleChange}
           placeholder="Paste invite code"
-          className="flex-1 min-w-0 border border-green-300 bg-white rounded-lg px-4 py-2 text-sm
+          className="flex-1 min-w-[220px] border border-green-300 bg-white rounded-lg px-4 py-2 text-sm
                      focus:outline-none focus:ring-2 focus:border-green-300"
           required
         />

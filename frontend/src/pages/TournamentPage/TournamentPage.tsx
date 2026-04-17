@@ -1,26 +1,31 @@
 import { useState } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 
 import HeroBanner from './components/HeroBanner';
 import MatchCard from './components/MatchCard';
 import StandingsTable from './components/StandingsTable';
 import Tabs from './components/Tabs';
+import { usePredictionSaver } from './hooks/usePredictionSaver';
 import { useTournamentMatches } from './hooks/useTournamentMatches';
 import type { WinningTeam } from './TournamentConstants';
+import { ROUTE_PATHS } from '../../app/routePaths';
 import type { TournamentMatchPrediction } from '../../services/predictionsApi';
-import { savePrediction, winningTeamToApiWinner } from '../../services/predictionsApi';
-
-const COMPETITION = 'CL';
-const GROUP_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 function TournamentPage() {
-    const { matches, tournamentName, isLoading, error, refetch } = useTournamentMatches(
-        COMPETITION,
-        GROUP_ID
-    );
+    const { groupId, tournament } = useParams<{ groupId: string; tournament: string }>();
+    const resolvedGroupId = groupId ?? '';
+    const resolvedTournament = tournament ?? '';
 
+    const { matches, tournamentName, isLoading, error, refetch } = useTournamentMatches(
+        resolvedTournament,
+        resolvedGroupId
+    );
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
-    const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
-    const [saveError, setSaveError] = useState<string | null>(null);
+    const { savingMatchId, saveError, saveMatchPrediction } = usePredictionSaver();
+
+    if (!groupId || !tournament) {
+        return <Navigate to={ROUTE_PATHS.groups} replace />;
+    }
 
     const liveMatchCount = matches.filter((match) => match.matchStatus === 'LIVE').length;
 
@@ -30,23 +35,15 @@ function TournamentPage() {
         awayScore: number,
         winningTeam: WinningTeam
     ) {
-        try {
-            setSavingMatchId(matchId);
-            setSaveError(null);
-
-            await savePrediction({
-                groupId: GROUP_ID,
-                matchId,
-                homeScore,
-                awayScore,
-                predictedWinner: winningTeamToApiWinner[winningTeam],
-            });
-
+        const hasSaved = await saveMatchPrediction(
+            resolvedGroupId,
+            matchId,
+            homeScore,
+            awayScore,
+            winningTeam
+        );
+        if (hasSaved) {
             await refetch();
-        } catch (error) {
-            setSaveError(error instanceof Error ? error.message : 'Failed to save prediction');
-        } finally {
-            setSavingMatchId(null);
         }
     }
 
