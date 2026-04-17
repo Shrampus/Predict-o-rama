@@ -78,6 +78,54 @@ public class MatchResultSyncService {
         return homeTeam.getName() + " vs " + awayTeam.getName();
     }
 
+    private boolean isValidFinishedMatch(Match match) {
+        if (match == null) {
+            log.warn("Skipping finished match because it is null");
+            return false;
+        }
+
+        if (isBlank(match.getExternalId())) {
+            log.warn("Skipping finished match because externalId is missing");
+            return false;
+        }
+
+        if (match.getHomeTeam() == null) {
+            log.warn("Skipping finished match externalId={} because homeTeam is missing", match.getExternalId());
+            return false;
+        }
+
+        if (match.getAwayTeam() == null) {
+            log.warn("Skipping finished match externalId={} because awayTeam is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getHomeTeam().getName())) {
+            log.warn("Skipping finished match externalId={} because homeTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getHomeTeam().getExternalId())) {
+            log.warn("Skipping finished match externalId={} because homeTeam.externalId is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getName())) {
+            log.warn("Skipping finished match externalId={} because awayTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getExternalId())) {
+            log.warn("Skipping finished match externalId={} because awayTeam.externalId is missing", match.getExternalId());
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
     public void syncAllCompetitions() {
         for (String competition : competitionCatalog.getSupportedCompetitions()) {
             syncCompetition(competition);
@@ -95,6 +143,10 @@ public class MatchResultSyncService {
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
 
         for (Match match : finishedMatches) {
+            if (!isValidFinishedMatch(match)) {
+                continue;
+            }
+
             try {
                 Match savedMatch = saveOrUpdateMatch(match, tournament);
                 log.info("Synced match result for matchId={} externalId={} competition={}",
