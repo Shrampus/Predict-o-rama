@@ -95,10 +95,19 @@ public class MatchResultSyncService {
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
 
         for (Match match : finishedMatches) {
-            Match savedMatch = saveOrUpdateMatch(match, tournament);
-            log.info("Synced match result for matchId={} externalId={} competition={}",
-                    savedMatch.getId(), savedMatch.getExternalId(), competition);
-            predictionScoringService.distributePredictionScores(savedMatch.getId());
+            try {
+                Match savedMatch = saveOrUpdateMatch(match, tournament);
+                log.info("Synced match result for matchId={} externalId={} competition={}",
+                        savedMatch.getId(), savedMatch.getExternalId(), competition);
+                predictionScoringService.distributePredictionScores(savedMatch.getId());
+            } catch (Exception e) {
+                log.error(
+                        "Failed to sync finished match externalId={} competition={}",
+                        match.getExternalId(),
+                        competition,
+                        e
+                );
+            }
         }
     }
 }
