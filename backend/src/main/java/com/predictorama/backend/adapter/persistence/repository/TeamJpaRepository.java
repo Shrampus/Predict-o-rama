@@ -9,6 +9,4 @@ import java.util.UUID;
 public interface TeamJpaRepository extends JpaRepository<TeamEntity, UUID> {
 
     Optional<TeamEntity> findByExternalId(String externalId);
-
-    Optional<TeamEntity> findByName(String name);
 }
