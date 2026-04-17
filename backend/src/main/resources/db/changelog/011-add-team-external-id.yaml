@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 010-add-team-external-id
+      id: 011-add-team-external-id
       author: codex
       changes:
         - addColumn:

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-add-unique-match-external-id
+      author: codex
+      changes:
+        - addUniqueConstraint:
+            tableName: matches
+            columnNames: external_id
+            constraintName: uq_matches_external_id

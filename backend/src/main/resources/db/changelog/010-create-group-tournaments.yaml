@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-group-tournaments
+      author: codex
+      changes:
+        - createTable:
+            tableName: group_tournaments
+            columns:
+              - column:
+                  name: group_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_group_tournaments_group
+                    references: groups(id)
+              - column:
+                  name: tournament_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_group_tournaments_tournament
+                    references: tournaments(id)
+
+        - addPrimaryKey:
+            tableName: group_tournaments
+            columnNames: group_id, tournament_id
+            constraintName: pk_group_tournaments

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { getMyGroups } from '../../../services/groupApi';
+import { getMyGroups, leaveGroup } from '../../../services/groupApi';
 import type { MyGroupsResponse } from '../../../services/groupApi';
 
 interface UseGroupsReturn {
   groups: MyGroupsResponse[];
   isLoading: boolean;
   errorMessage: string;
-  refetch: () => void;
+  refetch: () => Promise<void>;
+  leaveCurrentGroup: (groupId: string) => Promise<void>;
 }
 
 export function useGroups(): UseGroupsReturn {
@@ -37,5 +38,13 @@ export function useGroups(): UseGroupsReturn {
     fetchGroups();
   }, [fetchGroups]);
 
-  return { groups, isLoading, errorMessage, refetch: fetchGroups };
+  const leaveCurrentGroup = useCallback(
+    async (groupId: string) => {
+      await leaveGroup(groupId);
+      await fetchGroups();
+    },
+    [fetchGroups],
+  );
+
+  return { groups, isLoading, errorMessage, refetch: fetchGroups, leaveCurrentGroup };
 }

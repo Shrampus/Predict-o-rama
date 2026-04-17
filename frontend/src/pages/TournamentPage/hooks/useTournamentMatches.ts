@@ -10,6 +10,14 @@ export function useTournamentMatches(competition: string, groupId: string) {
     const [error, setError] = useState<string | null>(null);
 
     async function fetchMatches() {
+        if (!competition || !groupId) {
+            setMatches([]);
+            setTournamentName(competition);
+            setError(null);
+            setIsLoading(false);
+            return;
+        }
+
         try {
             setIsLoading(true);
             setError(null);
