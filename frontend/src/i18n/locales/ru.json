@@ -57,6 +57,11 @@
     "groupCreated": "Группа создана!",
     "shareCode": "Поделитесь этим кодом, чтобы другие могли присоединиться к вашей группе.",
     "copyInviteCode": "Копировать код приглашения",
-    "copied": "Скопировано!"
+    "copied": "Скопировано!",
+    "viewDetails": "Подробнее",
+    "groupCount_one": "{{count}} группа",
+    "groupCount_few": "{{count}} группы",
+    "groupCount_many": "{{count}} групп",
+    "groupCount_other": "{{count}} группы"
   }
 }

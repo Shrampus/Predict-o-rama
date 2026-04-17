@@ -57,6 +57,9 @@
     "groupCreated": "Grupp loodud!",
     "shareCode": "Jaga seda koodi, et teised saaksid su grupiga liituda.",
     "copyInviteCode": "Kopeeri kutsekood",
-    "copied": "Kopeeritud!"
+    "copied": "Kopeeritud!",
+    "viewDetails": "Vaata detaile",
+    "groupCount_one": "{{count}} grupp",
+    "groupCount_other": "{{count}} gruppi"
   }
 }

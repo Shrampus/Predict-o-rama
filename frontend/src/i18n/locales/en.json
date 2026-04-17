@@ -57,6 +57,9 @@
     "groupCreated": "Group created!",
     "shareCode": "Share this code so others can join your group.",
     "copyInviteCode": "Copy invite code",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "viewDetails": "View details",
+    "groupCount_one": "{{count}} group",
+    "groupCount_other": "{{count}} groups"
   }
 }
