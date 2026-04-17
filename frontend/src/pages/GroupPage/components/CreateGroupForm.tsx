@@ -30,7 +30,7 @@ function CreateGroupForm({
   const { t } = useTranslation();
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-5 shadow-sm">
+    <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 sm:px-6 py-5 shadow-sm">
       <button
         onClick={toggleForm}
         className="flex items-center gap-1 text-gray-800 font-semibold hover:text-gray-600 transition-colors"
@@ -66,7 +66,7 @@ function CreateGroupForm({
             type="submit"
             disabled={isLoading}
             className="bg-gray-600 text-white px-5 py-2 rounded-lg text-sm font-semibold
-                       hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap"
+                       hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap sm:w-auto w-full"
           >
             {isLoading ? t('groups.creating') : t('groups.createGroup')}
           </button>
