@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import type { WinningTeam } from '../TournamentConstants';
@@ -15,6 +16,7 @@ type MatchCardProps = {
 
 function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
     const prediction = buildPrediction(match);
+    const { t } = useTranslation();
 
     const [homeScore, setHomeScore] = useState(prediction.home);
     const [awayScore, setAwayScore] = useState(prediction.away);
@@ -46,7 +48,7 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
                         onChange={(e) => setHomeScore(Number(e.target.value))}
                         disabled={isSaving}
                     />
-                    <span className="text-slate-400 font-bold">VS</span>
+                    <span className="text-slate-400 font-bold">{t('matchCard.vs')}</span>
                     <input
                         className="w-14 h-14 bg-white rounded-xl text-center text-2xl font-black border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                         type="number"
@@ -69,7 +71,7 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
                         isActive={winningTeam === 'Draw'}
                         onClick={() => setWinningTeam('Draw')}
                     >
-                        Draw
+                        {t('matchCard.draw')}
                     </WinnerButton>
                     <WinnerButton
                         isActive={winningTeam === 'Away'}
@@ -88,7 +90,7 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
                         : 'bg-orange-600 text-white hover:bg-orange-700'
                         } ${isSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
-                    {isSaving ? 'Saving...' : prediction.saved ? '✓ Saved' : 'Predict Now'}
+                    {isSaving ? t('matchCard.saving') : prediction.saved ? t('matchCard.saved') : t('matchCard.predictNow')}
                 </button>
             </div>
 

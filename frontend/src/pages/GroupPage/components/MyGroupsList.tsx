@@ -1,5 +1,6 @@
 import { LogOut } from 'lucide-react'
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import CopyInviteButton from '../../../components/ui/CopyInviteButton';
 import { leaveGroup } from '../../../services/groupApi';
@@ -45,16 +46,18 @@ function LeaveGroupButton({ groupId, onLeave }: { groupId: string; onLeave: () =
 }
 
 function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsListProps) {
+  const { t } = useTranslation();
+
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-3">My Groups</h2>
+      <h2 className="text-lg font-semibold mb-3">{t('groups.myGroups')}</h2>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-slate-500">{t('groups.loading')}</p>}
 
       {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
       {!isLoading && groups.length === 0 && (
-        <p className="text-sm text-slate-400">You are not a member of any groups yet.</p>
+        <p className="text-sm text-slate-400">{t('groups.empty')}</p>
       )}
 
       <ul className="space-y-2">
@@ -69,7 +72,7 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
               <p className="text-sm text-slate-500">{group.description}</p>
               {group.groupMemberRole === 'ADMIN' && (
                 <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                  Invite code: <span className="font-mono">{group.inviteCode}</span>
+                  {t('groups.inviteCode')} <span className="font-mono">{group.inviteCode}</span>
                   <CopyInviteButton inviteCode={group.inviteCode} />
                 </p>
               )}

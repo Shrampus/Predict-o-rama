@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "home": "Home",
+    "predictions": "Predictions",
+    "tournaments": "Tournaments",
+    "groups": "Groups",
+    "signOut": "Sign out"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "error": "Invalid email or password.",
+    "signingIn": "Signing in…",
+    "signIn": "Sign in",
+    "devAccounts": "Dev accounts — click to fill"
+  },
+  "tournament": {
+    "roundOf16": "ROUND OF 16",
+    "upcoming": "Upcoming",
+    "viewCalendar": "View Calendar",
+    "loadingMatches": "Loading matches...",
+    "noMatches": "No matches available."
+  },
+  "heroBanner": {
+    "matchesLive": "{{count}} Matches Live"
+  },
+  "tabs": {
+    "matches": "Matches",
+    "standings": "Standings"
+  },
+  "matchCard": {
+    "vs": "VS",
+    "draw": "Draw",
+    "saving": "Saving...",
+    "saved": "✓ Saved",
+    "predictNow": "Predict Now"
+  },
+  "standings": {
+    "group": "Group {{letter}}",
+    "pts": "pts"
+  },
+  "groups": {
+    "myGroups": "My Groups",
+    "loading": "Loading...",
+    "empty": "You are not a member of any groups yet.",
+    "inviteCode": "Invite code:",
+    "joinTitle": "Have an invite code? Join here:",
+    "joinSuccess": "Successfully joined the group!",
+    "joinPlaceholder": "Paste invite code",
+    "joining": "Joining...",
+    "joinGroup": "Join Group",
+    "addNewGroup": "Add new group",
+    "groupName": "Group name",
+    "description": "Description",
+    "creating": "Creating...",
+    "createGroup": "Create Group",
+    "groupCreated": "Group created!",
+    "shareCode": "Share this code so others can join your group.",
+    "copyInviteCode": "Copy invite code",
+    "copied": "Copied!"
+  }
+}
