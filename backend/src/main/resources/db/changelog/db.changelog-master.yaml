@@ -18,4 +18,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/009-add-prediction-rulesets.yaml
   - include:
-      file: db/changelog/010-add-team-external-id.yaml
+      file: db/changelog/011-add-team-external-id.yaml
+  - include:
+      file: db/changelog/012-drop-unique-team-name.yaml
