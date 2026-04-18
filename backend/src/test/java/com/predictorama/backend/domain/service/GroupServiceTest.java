@@ -240,6 +240,11 @@ class GroupServiceTest {
         }
 
         @Override
+        public Optional<User> findByGoogleId(String googleId) {
+            return Optional.empty();
+        }
+
+        @Override
         public boolean existsByUsername(String username) {
             return false;
         }
