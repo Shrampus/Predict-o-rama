@@ -1,10 +1,12 @@
 package com.predictorama.backend.domain.service;
 
+import com.predictorama.backend.domain.entity.GoogleUserInfo;
 import com.predictorama.backend.domain.entity.Role;
 import com.predictorama.backend.domain.entity.User;
 import com.predictorama.backend.domain.exception.InvalidCredentialsException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
 import com.predictorama.backend.domain.port.PasswordVerifier;
+import com.predictorama.backend.domain.port.external.GoogleTokenValidatorPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,7 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = new InMemoryUserRepository();
-        authService = new AuthService(userRepository, new FakePasswordVerifier());
+        authService = new AuthService(userRepository, new FakeGoogleTokenValidator(), new FakePasswordVerifier());
     }
 
     @Test
@@ -32,7 +34,7 @@ class AuthServiceTest {
 
         var result = authService.login("alice@test.com", "password123");
 
-        assertThat(result.getEmail()).isEqualTo("alice@test.com");
+        assertThat(result.user().getEmail()).isEqualTo("alice@test.com");
     }
 
     @Test
@@ -87,6 +89,13 @@ class AuthServiceTest {
                 .build();
     }
 
+    static class FakeGoogleTokenValidator implements GoogleTokenValidatorPort {
+        @Override
+        public GoogleUserInfo validate(String idToken) {
+            throw new UnsupportedOperationException("not used in these tests");
+        }
+    }
+
     // Fake: interprets encoded as "hashed:<raw>" so tests can control matching
     static class FakePasswordVerifier implements PasswordVerifier {
         @Override
@@ -127,6 +136,11 @@ class AuthServiceTest {
         @Override
         public boolean existsByEmail(String email) {
             return store.values().stream().anyMatch(u -> u.getEmail().equals(email));
+        }
+
+        @Override
+        public Optional<User> findByGoogleId(String googleId) {
+            return store.values().stream().filter(u -> googleId.equals(u.getGoogleId())).findFirst();
         }
     }
 }

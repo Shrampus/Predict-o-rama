@@ -1,13 +1,11 @@
 package com.predictorama.backend.adapter.rest.controller;
 
-import com.predictorama.backend.adapter.rest.SessionService;
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.UserRestMapper;
 import com.predictorama.backend.config.JwtService;
 import com.predictorama.backend.domain.entity.User;
 import com.predictorama.backend.domain.service.AuthResult;
 import com.predictorama.backend.domain.service.AuthService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +26,7 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("/login")
-    public AuthResponseDto login(@RequestBody LoginRequestDto request, HttpSession session) {
+    public AuthResponseDto login(@RequestBody LoginRequestDto request) {
         log.info("POST /api/auth/login - email={}", request.email());
         AuthResult result = authService.login(request.email(), request.password());
         String authToken = jwtService.generateToken(result.user().getId(), result.needsOnboarding());

@@ -1,3 +1,5 @@
+import { apiFetch } from '../lib/apiClient';
+
 /** Request/response types matching the backend DTOs. */
 
 export interface CreateGroupRequest {
@@ -35,7 +37,7 @@ export interface MyGroupsResponse {
 
 /** Create a new prediction group. */
 export async function createGroup(request: CreateGroupRequest): Promise<GroupResponse> {
-  const response = await fetch('/api/groups', {
+  const response = await apiFetch('/api/groups', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
@@ -54,7 +56,7 @@ export async function createGroup(request: CreateGroupRequest): Promise<GroupRes
 
 /** Join an existing group via invite code. */
 export async function joinGroup(request: JoinGroupRequest): Promise<GroupMemberResponse> {
-  const response = await fetch('/api/groups/join', {
+  const response = await apiFetch('/api/groups/join', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
@@ -81,7 +83,7 @@ export async function joinGroup(request: JoinGroupRequest): Promise<GroupMemberR
 
 /** Leave a group. */
 export async function leaveGroup(groupId: string): Promise<void> {
-  const response = await fetch(`/api/groups/${groupId}/leave`, {
+  const response = await apiFetch(`/api/groups/${groupId}/leave`, {
     method: 'DELETE',
   });
 
@@ -96,7 +98,7 @@ export async function leaveGroup(groupId: string): Promise<void> {
 
 /** Fetch all groups the current user is a member of. */
 export async function getMyGroups(): Promise<MyGroupsResponse[]> {
-  const response = await fetch('/api/groups/my');
+  const response = await apiFetch('/api/groups/my');
 
   if (response.status === 401) {
     throw new Error('You must be logged in to view your groups.');

@@ -4,4 +4,5 @@ export const ROUTE_PATHS = {
   tournaments: '/tournaments',
   login: '/login',
   groups: '/groups',
+  onboarding: '/onboarding',
 } as const;

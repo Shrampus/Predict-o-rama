@@ -87,5 +87,10 @@ class UserServiceTest {
         public boolean existsByEmail(String email) {
             return store.values().stream().anyMatch(u -> u.getEmail().equals(email));
         }
+
+        @Override
+        public Optional<User> findByGoogleId(String googleId) {
+            return store.values().stream().filter(u -> googleId.equals(u.getGoogleId())).findFirst();
+        }
     }
 }

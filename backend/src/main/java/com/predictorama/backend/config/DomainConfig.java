@@ -30,7 +30,7 @@ public class DomainConfig {
     }
 
     @Bean
-    public AuthService authService(UserRepositoryPort userRepository, PasswordVerifier passwordVerifier, GoogleTokenValidatorPort googleTokenValidatorPort) {
-        return new AuthService(userRepository, passwordVerifier, googleTokenValidatorPort);
+    public AuthService authService(UserRepositoryPort userRepository, GoogleTokenValidatorPort googleTokenValidatorPort, PasswordVerifier passwordVerifier) {
+        return new AuthService(userRepository, googleTokenValidatorPort, passwordVerifier);
     }
 }
