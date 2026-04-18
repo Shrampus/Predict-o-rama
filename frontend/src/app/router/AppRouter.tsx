@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { RequireAuth } from '../../components/auth/RequireAuth';
 import { MainLayout } from '../../components/layout/MainLayout';
+import GroupDetailsPage from '../../pages/GroupDetailsPage/GroupDetailsPage';
 import GroupsPage from '../../pages/GroupPage/GroupsPage';
 import HomePage from '../../pages/HomePage/HomePage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
@@ -31,8 +32,9 @@ export function AppRouter() {
       >
         <Route path={ROUTE_PATHS.home} element={<HomePage />} />
         <Route path={ROUTE_PATHS.predictions} element={<PredictionsPage />} />
-        <Route path={ROUTE_PATHS.tournaments} element={<TournamentPage />} />
         <Route path={ROUTE_PATHS.groups} element={<GroupsPage />} />
+        <Route path={ROUTE_PATHS.groupDetails} element={<GroupDetailsPage />} />
+        <Route path={ROUTE_PATHS.groupTournamentDetails} element={<TournamentPage />} />
       </Route>
     </Routes>
   );

@@ -3,7 +3,10 @@ package com.predictorama.backend.adapter.rest.controller;
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.GroupMemberMapper;
 import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
+import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
+import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +26,17 @@ public class GroupController {
     private static final Logger log = LoggerFactory.getLogger(GroupController.class);
 
     private final GroupService groupService;
+    private final UserRepositoryPort userRepository;
+    private final CompetitionCatalog competitionCatalog;
 
     private UUID currentUserId() {
         return UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    }
+
+    private String resolveMemberName(UUID userId) {
+        return userRepository.findById(userId)
+                .map(user -> user.getUsername())
+                .orElse(userId.toString());
     }
 
     @PostMapping
@@ -68,5 +79,82 @@ public class GroupController {
                 .map(GroupMapper::toUserGroupsResponse)
                 .toList();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<GroupDetailsResponse> getGroupDetails(@PathVariable UUID groupId) {
+        UUID userId = currentUserId();
+        var details = groupService.getGroupDetails(userId, groupId);
+        return ResponseEntity.ok(new GroupDetailsResponse(
+                details.getGroup().getId(),
+                details.getGroup().getName(),
+                details.getGroup().getDescription(),
+                details.getCurrentUserRole()
+        ));
+    }
+
+    @GetMapping("/{groupId}/members")
+    public ResponseEntity<List<GroupMemberResponseDto>> getGroupMembers(@PathVariable UUID groupId) {
+        UUID userId = currentUserId();
+        return ResponseEntity.ok(groupService.getGroupMembers(userId, groupId).stream()
+                .map(memberView -> GroupMemberMapper.toResponse(memberView.member(), memberView.username()))
+                .toList());
+    }
+
+    @PostMapping("/{groupId}/members")
+    public ResponseEntity<GroupMemberResponseDto> addGroupMember(
+            @PathVariable UUID groupId,
+            @Valid @RequestBody AddGroupMemberRequest request
+    ) {
+        UUID userId = currentUserId();
+        var member = groupService.addMemberByEmail(userId, groupId, request.getEmail().trim());
+        GroupMemberResponseDto response = GroupMemberMapper.toResponse(member, resolveMemberName(member.getUserId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{groupId}/members/{memberUserId}")
+    public ResponseEntity<Void> removeGroupMember(
+            @PathVariable UUID groupId,
+            @PathVariable UUID memberUserId
+    ) {
+        UUID userId = currentUserId();
+        groupService.removeMember(userId, groupId, memberUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{groupId}/tournaments")
+    public ResponseEntity<List<GroupTournamentResponse>> getGroupTournaments(@PathVariable UUID groupId) {
+        UUID userId = currentUserId();
+        return ResponseEntity.ok(
+                groupService.getGroupTournaments(userId, groupId).stream()
+                        .map(tournament -> new GroupTournamentResponse(
+                                tournament.getId(),
+                                competitionCatalog.toCompetitionCode(tournament.getName()),
+                                tournament.getName(),
+                                tournament.getDescription(),
+                                tournament.getSport()
+                        ))
+                        .toList()
+        );
+    }
+
+    @PostMapping("/{groupId}/tournaments")
+    public ResponseEntity<Void> addGroupTournament(
+            @PathVariable UUID groupId,
+            @Valid @RequestBody AddGroupTournamentRequest request
+    ) {
+        UUID userId = currentUserId();
+        groupService.addTournamentToGroup(userId, groupId, request.getTournamentId());
+        return ResponseEntity.status(HttpStatus.CREATED).<Void>build();
+    }
+
+    @DeleteMapping("/{groupId}/tournaments/{tournamentId}")
+    public ResponseEntity<Void> removeGroupTournament(
+            @PathVariable UUID groupId,
+            @PathVariable UUID tournamentId
+    ) {
+        UUID userId = currentUserId();
+        groupService.removeTournamentFromGroup(userId, groupId, tournamentId);
+        return ResponseEntity.noContent().build();
     }
 }
