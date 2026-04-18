@@ -152,3 +152,4 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
 }
 
 export default MyGroupsList;
+
