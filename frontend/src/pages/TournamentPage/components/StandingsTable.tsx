@@ -1,14 +1,18 @@
+import { useTranslation } from 'react-i18next';
+
 import { standings } from '../TournamentConstants';
 
 const groups = Array.from(new Set(standings.map((t) => t.group)));
 
 function StandingsTable() {
+    const { t } = useTranslation();
+
     return (
         <div className="space-y-6">
             {groups.map((group) => (
                 <div key={group} className="bg-slate-50 rounded-2xl p-6">
                     <h3 className="text-xl font-black mb-4 uppercase tracking-tight">
-                        Group {group}
+                        {t('standings.group', { letter: group })}
                     </h3>
                     <div className="space-y-3">
                         {standings
@@ -32,7 +36,7 @@ function StandingsTable() {
                                         <span className="font-bold">{team.name}</span>
                                     </div>
                                     <div className="flex gap-4 items-center">
-                                        <span className="text-slate-400 text-sm">{team.pts}pts</span>
+                                        <span className="text-slate-400 text-sm">{team.pts} {t('standings.pts')}</span>
                                         <span className={`font-black text-sm ${team.danger ? 'text-red-600' : ''}`}>
                                             {team.gd}
                                         </span>

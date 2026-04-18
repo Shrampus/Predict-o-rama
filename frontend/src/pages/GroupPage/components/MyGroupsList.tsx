@@ -1,5 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../../app/routePaths';
@@ -20,6 +21,7 @@ function LeaveGroupButton({
   groupId: string;
   onLeave: (groupId: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [isLeaving, setIsLeaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -29,7 +31,7 @@ function LeaveGroupButton({
     try {
       await onLeave(groupId);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Failed to leave group');
+      setErrorMessage(err instanceof Error ? err.message : t('groups.leaveGroupError'));
     } finally {
       setIsLeaving(false);
     }
@@ -40,7 +42,7 @@ function LeaveGroupButton({
       <button
         onClick={handleLeave}
         disabled={isLeaving}
-        title="Leave group"
+        title={t('groups.leaveGroup')}
         className="flex items-center gap-1 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
       >
         <LogOut size={16} />
@@ -51,6 +53,7 @@ function LeaveGroupButton({
 }
 
 function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsListProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   function getGroupDetailsPath(groupId: string) {
@@ -65,25 +68,24 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
     if (!(target instanceof HTMLElement)) {
       return false;
     }
-
     return target.closest('button, a') !== null;
   }
 
   return (
     <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg sm:text-xl font-semibold text-slate-900">My Groups</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900">{t('groups.myGroups')}</h2>
         <span className="text-sm text-slate-500">
-          {groups.length} {groups.length === 1 ? 'group' : 'groups'}
+          {t('groups.groupCount', { count: groups.length })}
         </span>
       </div>
 
-      {isLoading && <p className="text-sm text-slate-500">Loading...</p>}
+      {isLoading && <p className="text-sm text-slate-500">{t('groups.loading')}</p>}
 
       {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
       {!isLoading && groups.length === 0 && (
-        <p className="text-sm text-slate-400">You are not a member of any groups yet.</p>
+        <p className="text-sm text-slate-400">{t('groups.empty')}</p>
       )}
 
       <ul className="space-y-3">
@@ -94,14 +96,12 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
               if (shouldIgnoreRowNavigation(event.target)) {
                 return;
               }
-
               openGroupDetails(group);
             }}
             onKeyDown={(event) => {
               if (shouldIgnoreRowNavigation(event.target)) {
                 return;
               }
-
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 openGroupDetails(group);
@@ -118,7 +118,7 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
               <p className="text-sm text-slate-500">{group.description}</p>
               {group.groupMemberRole === 'ADMIN' && (
                 <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                  Invite code: <span className="font-mono">{group.inviteCode}</span>
+                  {t('groups.inviteCode')} <span className="font-mono">{group.inviteCode}</span>
                   <CopyInviteButton inviteCode={group.inviteCode} />
                 </p>
               )}
@@ -129,7 +129,7 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
                 onClick={() => openGroupDetails(group)}
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700"
               >
-                View details
+                {t('groups.viewDetails')}
               </button>
               <span
                 className={`text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full ${
@@ -152,3 +152,4 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
 }
 
 export default MyGroupsList;
+

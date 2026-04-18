@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "home": "Avaleht",
+    "predictions": "Ennustused",
+    "tournaments": "Turniirid",
+    "groups": "Grupid",
+    "signOut": "Logi välja"
+  },
+  "login": {
+    "email": "E-post",
+    "password": "Parool",
+    "error": "Vale e-post või parool.",
+    "signingIn": "Sisselogimine…",
+    "signIn": "Logi sisse",
+    "devAccounts": "Testkontod — klõpsa täitmiseks"
+  },
+  "tournament": {
+    "roundOf16": "16 PARIMAT",
+    "upcoming": "Eelseisvad",
+    "viewCalendar": "Vaata kalendrit",
+    "loadingMatches": "Laadin mänge...",
+    "noMatches": "Mänge pole saadaval."
+  },
+  "heroBanner": {
+    "matchesLive": "{{count}} mängu ülekanne"
+  },
+  "tabs": {
+    "matches": "Mängud",
+    "standings": "Tabeliseis"
+  },
+  "matchCard": {
+    "vs": "VS",
+    "draw": "Viik",
+    "saving": "Salvestamine...",
+    "saved": "✓ Salvestatud",
+    "predictNow": "Ennusta nüüd"
+  },
+  "standings": {
+    "group": "Grupp {{letter}}",
+    "pts": "pts"
+  },
+  "groups": {
+    "myGroups": "Minu grupid",
+    "loading": "Laadimine...",
+    "empty": "Sa ei ole veel ühegi grupi liige.",
+    "inviteCode": "Kutsekood:",
+    "joinTitle": "Kas sul on kutsekood? Liitu siin:",
+    "joinSuccess": "Grupiga liitumine õnnestus!",
+    "joinPlaceholder": "Sisesta kutsekood",
+    "joining": "Liitumine...",
+    "joinGroup": "Liitu grupiga",
+    "addNewGroup": "Lisa uus grupp",
+    "groupName": "Grupi nimi",
+    "description": "Kirjeldus",
+    "creating": "Loomine...",
+    "createGroup": "Loo grupp",
+    "groupCreated": "Grupp loodud!",
+    "shareCode": "Jaga seda koodi, et teised saaksid su grupiga liituda.",
+    "copyInviteCode": "Kopeeri kutsekood",
+    "copied": "Kopeeritud!",
+    "viewDetails": "Vaata detaile",
+    "groupCount_one": "{{count}} grupp",
+    "groupCount_other": "{{count}} gruppi",
+    "leaveGroup": "Lahku grupist",
+    "leaveGroupError": "Grupist lahkumine ebaõnnestus"
+  }
+}
