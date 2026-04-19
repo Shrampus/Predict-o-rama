@@ -38,15 +38,6 @@ export function MainLayout() {
             </NavLink>
 
             <NavLink
-              to={ROUTE_PATHS.predictions}
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
-              }
-            >
-              {t('nav.predictions')}
-            </NavLink>
-
-            <NavLink
               to={ROUTE_PATHS.tournaments}
               className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`

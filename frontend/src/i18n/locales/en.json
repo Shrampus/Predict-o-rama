@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Home",
-    "predictions": "Predictions",
     "tournaments": "Tournaments",
     "groups": "Groups",
     "signOut": "Sign out"
