@@ -27,6 +27,18 @@ public class UpcomingMatchQueryService {
     private final TournamentRepositoryPort tournamentRepositoryPort;
     private final CompetitionCatalog competitionCatalog;
 
+    public List<UpcomingMatchResult> getGenericUpcomingMatches() {
+        Instant now = Instant.now();
+        Instant end = now.plus(28, ChronoUnit.DAYS);
+
+        return matchRepositoryPort.findByKickoffTimeBetween(now, end).stream()
+                .map(match -> UpcomingMatchResult.builder()
+                        .match(match)
+                        .userGroups(List.of())
+                        .build())
+                .toList();
+    }
+
     public List<UpcomingMatchResult> getUpcomingMatches(UUID userId) {
         List<Group> userGroups = groupMemberRepositoryPort.findByUserId(userId).stream()
                 .map(member -> groupRepositoryPort.findById(member.getGroupId()).orElse(null))
@@ -37,17 +49,10 @@ public class UpcomingMatchQueryService {
         Instant end = now.plus(28, ChronoUnit.DAYS);
 
         return matchRepositoryPort.findByKickoffTimeBetween(now, end).stream()
-                .map(match -> {
-                    String competitionCode = tournamentRepositoryPort.findById(match.getTournamentId())
-                            .map(t -> competitionCatalog.toCompetitionCode(t.getName()))
-                            .orElse(null);
-
-                    return UpcomingMatchResult.builder()
-                            .match(match)
-                            .competitionCode(competitionCode)
-                            .userGroups(userGroups)
-                            .build();
-                })
+                .map(match -> UpcomingMatchResult.builder()
+                        .match(match)
+                        .userGroups(userGroups)
+                        .build())
                 .toList();
     }
     
