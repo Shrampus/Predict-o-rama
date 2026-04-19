@@ -197,4 +197,45 @@ Rules:
 
 ---
 
-**Summary:** One page = one folder under `src/pages/` with a thin `PageName.tsx`, local `components/` and `hooks/` when needed, all HTTP in `src/services/`, Tailwind for UI, strict naming, predictable data flow — and AI/human changes stay minimal, typed, and on-structure.
+---
+
+### 11. Translations (i18n)
+
+The project uses **i18next** with three locale files:
+
+- `src/i18n/locales/en.json` — English (source of truth)
+- `src/i18n/locales/et.json` — Estonian
+- `src/i18n/locales/ru.json` — Russian
+
+**Rules:**
+
+- **MUST** use the `useTranslation` hook and `t('key')` for **every user-visible string**. Hard-coded English text in JSX is not allowed.
+- **MUST** add the translation key to **all three locale files** (`en.json`, `et.json`, `ru.json`) in the same change that introduces the new UI text. Never leave a key missing in any locale.
+- **MUST** keep the key structure **nested and semantic**: group related keys under a shared namespace (e.g. `"groups"`, `"matchCard"`, `"nav"`). Do not dump all keys at the top level.
+- **MUST** keep all three locale files **in sync**: same keys, same nesting, same structure. If you add, rename, or remove a key in one file, apply the identical change to the other two immediately.
+- **MUST NOT** add a key in `en.json` without a corresponding entry in `et.json` and `ru.json` (use a placeholder translation if the real one is not yet known, but never omit the key).
+- **MUST NOT** use inline string literals for user-visible text anywhere in components or hooks.
+- **MUST** use **dot-notation keys** that mirror the JSON structure: `t('groups.createGroup')`, `t('matchCard.saving')`.
+- **MAY** use interpolation for dynamic values: `t('heroBanner.matchesLive', { count })` — define the `{{count}}` placeholder in all three locale files.
+
+**When adding a new page or feature:**
+
+1. Identify every user-visible string in the new code.
+2. Choose (or create) the appropriate namespace key group in the JSON files.
+3. Add the key + value to `en.json`, `et.json`, and `ru.json` before opening a PR.
+4. Replace every hard-coded string in the component with the corresponding `t(...)` call.
+
+**Examples**
+
+- ❗ Wrong — `<button>Create Group</button>`
+- ✅ Correct — `<button>{t('groups.createGroup')}</button>` with `"createGroup": "Create Group"` in all three locale files.
+
+- ❗ Wrong — adding `"submitButton": "Submit"` only to `en.json`.
+- ✅ Correct — `"submitButton"` present in `en.json`, `et.json`, and `ru.json` in the same commit.
+
+- ❗ Wrong — `"page": { "title": "Home" }` in `en.json` but `"page.title"` flat key in `et.json`.
+- ✅ Correct — identical nested structure in all three files.
+
+---
+
+**Summary:** One page = one folder under `src/pages/` with a thin `PageName.tsx`, local `components/` and `hooks/` when needed, all HTTP in `src/services/`, Tailwind for UI, strict naming, predictable data flow — and AI/human changes stay minimal, typed, and on-structure. Every user-visible string goes through i18next and must be present in all three locale files (`en`, `et`, `ru`) in the same change.

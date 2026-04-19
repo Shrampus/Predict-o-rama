@@ -11,6 +11,7 @@ public interface TournamentRepositoryPort {
     Tournament save(Tournament tournament);
 
     Optional<Tournament> findById(UUID id);
+    Optional<Tournament> findByNameIgnoreCase(String name);
 
     List<Tournament> findAll();
 }

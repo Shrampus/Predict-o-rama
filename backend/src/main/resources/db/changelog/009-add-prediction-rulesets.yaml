@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-prediction-rulesets
+      author: ses
+      changes:
+        - createTable:
+            tableName: rulesets
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+              - column:
+                  name: updated_at
+                  type: timestamptz
+        - addColumn:
+            tableName: groups
+            columns:
+              - column:
+                  name: ruleset_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_groups_ruleset
+                    references: rulesets(id) 
+                    
+        - createTable:
+            tableName: ruleset_rules
+            columns:
+              - column:
+                  name: ruleset_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_ruleset_rules_ruleset
+                    references: rulesets(id)
+              - column:
+                  name: rule_name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false

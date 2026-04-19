@@ -1,6 +1,7 @@
 package com.predictorama.backend.domain.port.persistence;
 
 import com.predictorama.backend.domain.entity.GroupMember;
+import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,8 @@ public interface GroupMemberRepositoryPort {
     Optional<GroupMember> findById(UUID id);
 
     List<GroupMember> findByGroupId(UUID groupId);
+
+    List<GroupMemberView> findByGroupIdWithUsernames(UUID groupId);
 
     List<GroupMember> findByUserId(UUID userId);
 

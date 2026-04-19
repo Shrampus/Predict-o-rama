@@ -1,4 +1,8 @@
+import { useTranslation } from 'react-i18next';
+
 function Tabs({ activeTab, setActiveTab }: { activeTab: 'matches' | 'standings'; setActiveTab: (tab: 'matches' | 'standings') => void }) {
+    const { t } = useTranslation();
+
     return (
         <div className="flex gap-2 mb-8 bg-slate-100 p-1.5 rounded-full w-fit mx-auto sm:mx-0">
             <button
@@ -8,7 +12,7 @@ function Tabs({ activeTab, setActiveTab }: { activeTab: 'matches' | 'standings';
                     : 'text-slate-500 hover:bg-slate-200'
                     }`}
             >
-                Matches
+                {t('tabs.matches')}
             </button>
             <button
                 onClick={() => setActiveTab('standings')}
@@ -17,7 +21,7 @@ function Tabs({ activeTab, setActiveTab }: { activeTab: 'matches' | 'standings';
                     : 'text-slate-500 hover:bg-slate-200'
                     }`}
             >
-                Standings
+                {t('tabs.standings')}
             </button>
         </div>
     );
