@@ -1,4 +1,4 @@
-const BASE = '/api/auth';
+import { getApiUrl } from './apiConfig';
 
 export interface CurrentUser {
   id: string;
@@ -9,7 +9,7 @@ export interface CurrentUser {
 
 export const authApi = {
   login: (email: string, password: string): Promise<CurrentUser> =>
-    fetch(`${BASE}/login`, {
+    fetch(getApiUrl('/api/auth/login'), {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -20,8 +20,12 @@ export const authApi = {
     }),
 
   me: (): Promise<CurrentUser | null> =>
-    fetch(`${BASE}/me`, { credentials: 'include' }).then(res => (res.ok ? res.json() : null)),
+    fetch(getApiUrl('/api/auth/me'), { credentials: 'include' }).then(res =>
+      res.ok ? res.json() : null,
+    ),
 
   logout: (): Promise<void> =>
-    fetch(`${BASE}/logout`, { method: 'POST', credentials: 'include' }).then(() => {}),
+    fetch(getApiUrl('/api/auth/logout'), { method: 'POST', credentials: 'include' }).then(
+      () => {},
+    ),
 };

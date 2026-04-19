@@ -1,3 +1,5 @@
+import { getApiUrl } from './apiConfig';
+
 export type TournamentMatchPrediction = {
     matchId: string;
     externalMatchId: string;
@@ -48,7 +50,9 @@ export async function getPredictions(
     groupId: string
 ): Promise<TournamentPredictionsResponse> {
     const response = await fetch(
-        `/api/predictions?competition=${encodeURIComponent(competition)}&groupId=${groupId}`,
+        getApiUrl(
+            `/api/predictions?competition=${encodeURIComponent(competition)}&groupId=${groupId}`,
+        ),
         {
             credentials: 'include',
         }
@@ -64,7 +68,7 @@ export async function getPredictions(
 export async function savePrediction(
     payload: SavePredictionRequest
 ): Promise<PredictionResponse> {
-    const response = await fetch('/api/predictions', {
+    const response = await fetch(getApiUrl('/api/predictions'), {
         method: 'POST',
         credentials: 'include',
         headers: {
