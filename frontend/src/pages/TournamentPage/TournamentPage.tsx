@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 
 import HeroBanner from './components/HeroBanner';
 import MatchCard from './components/MatchCard';
@@ -14,13 +14,19 @@ import type { TournamentMatchPrediction } from '../../services/predictionsApi';
 
 function TournamentPage() {
     const { groupId, tournament } = useParams<{ groupId: string; tournament: string }>();
+    const location = useLocation();
     const resolvedGroupId = groupId ?? '';
     const resolvedTournament = tournament ?? '';
+    const routeState = location.state as
+        | {
+              tournamentName?: string;
+              tournamentDescription?: string;
+              tournamentPhase?: string;
+          }
+        | null;
 
-    const { matches, tournamentName, isLoading, error, refetch } = useTournamentMatches(
-        resolvedTournament,
-        resolvedGroupId
-    );
+    const { matches, tournamentName, seasonLabel: responseSeasonLabel, phaseLabel: responsePhaseLabel, isLoading, error, refetch } =
+        useTournamentMatches(resolvedTournament, resolvedGroupId);
     const { t } = useTranslation();
 
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
@@ -31,6 +37,15 @@ function TournamentPage() {
     }
 
     const liveMatchCount = matches.filter((match) => match.matchStatus === 'LIVE').length;
+    const seasonLabel =
+        responseSeasonLabel.trim() ||
+        routeState?.tournamentDescription?.trim() ||
+        routeState?.tournamentName?.trim() ||
+        tournamentName;
+    const phaseLabel =
+        routeState?.tournamentPhase?.trim() ||
+        responsePhaseLabel.trim() ||
+        t('tournament.phaseFallback');
 
     async function handlePredict(
         matchId: string,
@@ -53,9 +68,9 @@ function TournamentPage() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <HeroBanner
-                season="Summer 2024 Series"
+                season={seasonLabel}
                 name={tournamentName}
-                phase="Group Stage Phase"
+                phase={phaseLabel}
                 liveMatchCount={liveMatchCount}
             />
 

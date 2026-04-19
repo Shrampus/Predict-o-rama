@@ -18,7 +18,9 @@
     "upcoming": "Eelseisvad",
     "viewCalendar": "Vaata kalendrit",
     "loadingMatches": "Laadin mänge...",
-    "noMatches": "Mänge pole saadaval."
+    "noMatches": "Mänge pole saadaval.",
+    "phaseFallback": "Turniiri faas",
+    "fetchError": "Mängude laadimine ebaõnnestus"
   },
   "heroBanner": {
     "matchesLive": "{{count}} mängu ülekanne"
@@ -61,6 +63,22 @@
     "groupCount_one": "{{count}} grupp",
     "groupCount_other": "{{count}} gruppi",
     "leaveGroup": "Lahku grupist",
-    "leaveGroupError": "Grupist lahkumine ebaõnnestus"
+    "leaveGroupError": "Grupist lahkumine ebaõnnestus",
+    "tournamentsSection": {
+      "title": "Turniirid",
+      "loadingTournaments": "Turniiride laadimine...",
+      "emptyTournaments": "Ühtegi turniiri pole veel seotud.",
+      "open": "Ava",
+      "unavailable": "Pole saadaval",
+      "removing": "Eemaldamine...",
+      "remove": "Eemalda",
+      "addTournament": "Lisa turniir",
+      "selectTournament": "Vali turniir",
+      "adding": "Lisamine...",
+      "add": "Lisa",
+      "loadingOptions": "Turniiri valikute laadimine...",
+      "emptyOptions": "Seostamiseks pole rohkem turniire saadaval.",
+      "adminOnlyAction": "Ainult adminitele: turniiride lisamine on saadaval ainult grupi adminitele."
+    }
   }
 }

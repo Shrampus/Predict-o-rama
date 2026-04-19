@@ -15,6 +15,8 @@ export type TournamentMatchPrediction = {
 
 export type TournamentPredictionsResponse = {
     tournamentName: string;
+    seasonLabel?: string;
+    phaseLabel?: string;
     matches: TournamentMatchPrediction[];
 };
 

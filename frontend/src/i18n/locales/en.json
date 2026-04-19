@@ -18,7 +18,9 @@
     "upcoming": "Upcoming",
     "viewCalendar": "View Calendar",
     "loadingMatches": "Loading matches...",
-    "noMatches": "No matches available."
+    "noMatches": "No matches available.",
+    "phaseFallback": "Tournament Phase",
+    "fetchError": "Failed to fetch matches"
   },
   "heroBanner": {
     "matchesLive": "{{count}} Matches Live"
@@ -61,6 +63,22 @@
     "groupCount_one": "{{count}} group",
     "groupCount_other": "{{count}} groups",
     "leaveGroup": "Leave group",
-    "leaveGroupError": "Failed to leave group"
+    "leaveGroupError": "Failed to leave group",
+    "tournamentsSection": {
+      "title": "Tournaments",
+      "loadingTournaments": "Loading tournaments...",
+      "emptyTournaments": "No tournaments linked yet.",
+      "open": "Open",
+      "unavailable": "Unavailable",
+      "removing": "Removing...",
+      "remove": "Remove",
+      "addTournament": "Add tournament",
+      "selectTournament": "Select a tournament",
+      "adding": "Adding...",
+      "add": "Add",
+      "loadingOptions": "Loading tournament options...",
+      "emptyOptions": "No additional tournaments available to link.",
+      "adminOnlyAction": "Admin-only action: adding tournaments is only available to group admins."
+    }
   }
 }

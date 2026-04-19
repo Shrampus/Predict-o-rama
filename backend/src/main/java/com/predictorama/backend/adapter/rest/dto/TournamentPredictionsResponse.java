@@ -9,5 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TournamentPredictionsResponse {
     private String tournamentName;
+    private String seasonLabel;
+    private String phaseLabel;
     private List<TournamentMatchPredictionDto> matches;
 }

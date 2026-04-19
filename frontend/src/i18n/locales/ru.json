@@ -18,7 +18,9 @@
     "upcoming": "Предстоящие",
     "viewCalendar": "Смотреть календарь",
     "loadingMatches": "Загрузка матчей...",
-    "noMatches": "Матчи недоступны."
+    "noMatches": "Матчи недоступны.",
+    "phaseFallback": "Этап турнира",
+    "fetchError": "Не удалось загрузить матчи"
   },
   "heroBanner": {
     "matchesLive": "{{count}} матча в прямом эфире"
@@ -63,6 +65,22 @@
     "groupCount_many": "{{count}} групп",
     "groupCount_other": "{{count}} группы",
     "leaveGroup": "Покинуть группу",
-    "leaveGroupError": "Не удалось покинуть группу"
+    "leaveGroupError": "Не удалось покинуть группу",
+    "tournamentsSection": {
+      "title": "Турниры",
+      "loadingTournaments": "Загрузка турниров...",
+      "emptyTournaments": "Пока нет привязанных турниров.",
+      "open": "Открыть",
+      "unavailable": "Недоступно",
+      "removing": "Удаление...",
+      "remove": "Удалить",
+      "addTournament": "Добавить турнир",
+      "selectTournament": "Выберите турнир",
+      "adding": "Добавление...",
+      "add": "Добавить",
+      "loadingOptions": "Загрузка вариантов турниров...",
+      "emptyOptions": "Больше нет турниров для привязки.",
+      "adminOnlyAction": "Действие только для админов: добавлять турниры могут только администраторы группы."
+    }
   }
 }

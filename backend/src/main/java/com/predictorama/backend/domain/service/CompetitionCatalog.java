@@ -2,6 +2,7 @@ package com.predictorama.backend.domain.service;
 
 import org.springframework.stereotype.Component;
 
+import java.time.Year;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,8 @@ public class CompetitionCatalog {
     );
 
     private static final Set<String> SUPPORTED_COMPETITIONS = COMPETITION_NAME_BY_CODE.keySet();
+    private static final Set<String> INTERNATIONAL_TOURNAMENTS = Set.of("WC", "EC");
+    private static final Set<String> LEAGUE_PHASE_TOURNAMENTS = Set.of("CL");
 
     public boolean isSupportedCompetition(String competition) {
         return competition != null && SUPPORTED_COMPETITIONS.contains(competition);
@@ -31,6 +34,28 @@ public class CompetitionCatalog {
 
     public String toTournamentName(String competition) {
         return COMPETITION_NAME_BY_CODE.getOrDefault(competition, competition);
+    }
+
+    public String toSeasonLabel(String competition) {
+        int currentYear = Year.now().getValue();
+        if (INTERNATIONAL_TOURNAMENTS.contains(competition)) {
+            return currentYear + " Tournament";
+        }
+
+        int nextYearShort = (currentYear + 1) % 100;
+        return currentYear + "/" + String.format("%02d", nextYearShort) + " Season";
+    }
+
+    public String toPhaseLabel(String competition) {
+        if (INTERNATIONAL_TOURNAMENTS.contains(competition)) {
+            return "Group Stage";
+        }
+
+        if (LEAGUE_PHASE_TOURNAMENTS.contains(competition)) {
+            return "League Phase";
+        }
+
+        return "Regular Season";
     }
 
     public String toCompetitionCode(String tournamentName) {

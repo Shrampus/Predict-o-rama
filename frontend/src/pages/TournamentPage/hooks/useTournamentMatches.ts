@@ -1,11 +1,25 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import { getPredictions } from '../../../services/predictionsApi';
 
-export function useTournamentMatches(competition: string, groupId: string) {
+type UseTournamentMatchesResult = {
+    matches: TournamentMatchPrediction[];
+    tournamentName: string;
+    seasonLabel: string;
+    phaseLabel: string;
+    isLoading: boolean;
+    error: string | null;
+    refetch: () => Promise<void>;
+};
+
+export function useTournamentMatches(competition: string, groupId: string): UseTournamentMatchesResult {
+    const { t } = useTranslation();
     const [matches, setMatches] = useState<TournamentMatchPrediction[]>([]);
     const [tournamentName, setTournamentName] = useState<string>(competition);
+    const [seasonLabel, setSeasonLabel] = useState<string>('');
+    const [phaseLabel, setPhaseLabel] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -13,6 +27,8 @@ export function useTournamentMatches(competition: string, groupId: string) {
         if (!competition || !groupId) {
             setMatches([]);
             setTournamentName(competition);
+            setSeasonLabel('');
+            setPhaseLabel('');
             setError(null);
             setIsLoading(false);
             return;
@@ -25,8 +41,10 @@ export function useTournamentMatches(competition: string, groupId: string) {
             const predictions = await getPredictions(competition, groupId);
             setMatches(predictions.matches);
             setTournamentName(predictions.tournamentName ?? competition);
+            setSeasonLabel(predictions.seasonLabel ?? '');
+            setPhaseLabel(predictions.phaseLabel ?? '');
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Failed to fetch matches');
+            setError(error instanceof Error ? error.message : t('tournament.fetchError'));
         } finally {
             setIsLoading(false);
         }
@@ -37,5 +55,5 @@ export function useTournamentMatches(competition: string, groupId: string) {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- run when competition/groupId change; fetchMatches is not stable
     }, [competition, groupId]);
 
-    return { matches, tournamentName, isLoading, error, refetch: fetchMatches };
+    return { matches, tournamentName, seasonLabel, phaseLabel, isLoading, error, refetch: fetchMatches };
 }

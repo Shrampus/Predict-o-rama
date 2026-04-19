@@ -13,6 +13,8 @@ public final class TournamentPredictionsRestMapper {
     public static TournamentPredictionsResponse toResponse(TournamentPredictionsView view) {
         return new TournamentPredictionsResponse(
                 view.getTournamentName(),
+                view.getSeasonLabel(),
+                view.getPhaseLabel(),
                 view.getMatches().stream()
                         .map(TournamentPredictionsRestMapper::toMatchDto)
                         .toList()
