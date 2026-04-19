@@ -1,24 +1,12 @@
-import type { UpcomingMatch, GroupReference } from "../types";
+import type { UpcomingMatch } from "../types";
 import UpcomingMatchCard from './UpcomingMatchCard';
+import { groupMatchesByGroup } from '../utils/upcomingMatchUtils';
 
 type UpcomingMatchListProps = {
     matches: UpcomingMatch[];
     isLoading: boolean;
     hasError: boolean;
 };
-
-function groupMatchesByGroup(matches: UpcomingMatch[]): Map<string, { group: GroupReference; matches: UpcomingMatch[] }> {
-    const grouped = new Map<string, { group: GroupReference; matches: UpcomingMatch[] }>();
-    for (const match of matches) {
-        for (const group of match.groups) {
-            if (!grouped.has(group.groupId)) {
-                grouped.set(group.groupId, { group, matches: [] });
-            }
-            grouped.get(group.groupId)!.matches.push(match);
-        }
-    }
-    return grouped;
-}
 
 function UpcomingMatchList({ matches, isLoading, hasError }: UpcomingMatchListProps) {
     if (isLoading) {

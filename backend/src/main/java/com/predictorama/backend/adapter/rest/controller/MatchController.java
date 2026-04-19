@@ -7,6 +7,8 @@ import com.predictorama.backend.domain.service.UpcomingMatchQueryService;
 import com.predictorama.backend.domain.service.result.UpcomingMatchResult;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +20,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchController {
 
+    private static final Logger log = LoggerFactory.getLogger(MatchController.class);
+
     private final UpcomingMatchQueryService upcomingMatchQueryService;
     private final SessionService sessionService;
 
     @GetMapping("/upcoming")
     public List<UpcomingMatchDto> getUpcomingMatches() {
+        log.info("GET /api/matches/upcoming");
         return upcomingMatchQueryService.getGenericUpcomingMatches().stream()
                 .map(this::toDto)
                 .toList();
@@ -31,6 +36,7 @@ public class MatchController {
     @GetMapping("/upcoming/my")
     public List<UpcomingMatchDto> getMyUpcomingMatches(HttpSession session) {
         var userId = sessionService.getUserIdOrThrow(session);
+        log.info("GET /api/matches/upcoming/my - userId={}", userId);
         return upcomingMatchQueryService.getUpcomingMatches(userId).stream()
                 .map(this::toDto)
                 .toList();
