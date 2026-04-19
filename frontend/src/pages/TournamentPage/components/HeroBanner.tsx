@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 type HeroBannerProps = {
     season: string;
     name: string;
@@ -6,6 +8,8 @@ type HeroBannerProps = {
 };
 
 function HeroBanner({ season, name, phase, liveMatchCount }: HeroBannerProps) {
+    const { t } = useTranslation();
+
     return (
         <section className="relative h-48 sm:h-64 rounded-xl overflow-hidden mb-8 shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-r from-green-900 to-green-600" />
@@ -21,7 +25,7 @@ function HeroBanner({ season, name, phase, liveMatchCount }: HeroBannerProps) {
                         {phase}
                     </span>
                     <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                        {liveMatchCount} Matches Live
+                        {t('heroBanner.matchesLive', { count: liveMatchCount })}
                     </span>
                 </div>
             </div>

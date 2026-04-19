@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navigate, useParams } from 'react-router-dom';
 
 import HeroBanner from './components/HeroBanner';
@@ -20,6 +21,8 @@ function TournamentPage() {
         resolvedTournament,
         resolvedGroupId
     );
+    const { t } = useTranslation();
+
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
     const { savingMatchId, saveError, saveMatchPrediction } = usePredictionSaver();
 
@@ -60,22 +63,21 @@ function TournamentPage() {
 
             {activeTab === 'matches' && (
                 <div className="grid grid-cols-1 laptop:grid-cols-12 gap-8">
-                    {/* Match list */}
                     <div className="laptop:col-span-8 space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-2xl font-black text-slate-900">
-                                ROUND OF 16{' '}
-                                <span className="text-slate-400 font-normal ml-2">Upcoming</span>
+                                {t('tournament.roundOf16')}{' '}
+                                <span className="text-slate-400 font-normal ml-2">{t('tournament.upcoming')}</span>
                             </h2>
                             <span className="text-green-700 font-bold text-sm cursor-pointer hover:underline">
-                                View Calendar
+                                {t('tournament.viewCalendar')}
                             </span>
                         </div>
 
-                        {isLoading && <p>Loading matches...</p>}
+                        {isLoading && <p>{t('tournament.loadingMatches')}</p>}
                         {error && <p className="text-red-500">{error}</p>}
                         {saveError && <p className="text-red-500">{saveError}</p>}
-                        {!isLoading && !error && matches.length === 0 && <p>No matches available.</p>}
+                        {!isLoading && !error && matches.length === 0 && <p>{t('tournament.noMatches')}</p>}
 
                         {!isLoading &&
                             !error &&
@@ -89,7 +91,6 @@ function TournamentPage() {
                             ))}
                     </div>
 
-                    {/* Sidebar */}
                     <div className="laptop:col-span-4 space-y-6">
                         {/* <BentoBoxes /> */}
                     </div>

@@ -1,5 +1,6 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../app/routePaths';
@@ -15,6 +16,7 @@ const TEST_USERS = [
 export default function LoginPage() {
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,7 +30,7 @@ export default function LoginPage() {
       const { needsOnboarding } = await login(email, password);
       navigate(needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home);
     } catch {
-      setError('Invalid email or password.');
+      setError(t('login.error'));
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="mb-4 space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="email">
-              Email
+              {t('login.email')}
             </label>
             <input
               id="email"
@@ -75,7 +77,7 @@ export default function LoginPage() {
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="password">
-              Password
+              {t('login.password')}
             </label>
             <input
               id="password"
@@ -94,7 +96,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? t('login.signingIn') : t('login.signIn')}
           </button>
         </form>
 
@@ -115,13 +117,13 @@ export default function LoginPage() {
 
         <div className="rounded border border-gray-200 bg-white p-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Dev accounts — click to fill
+            {t('login.devAccounts')}
           </p>
           <table className="w-full text-xs">
             <thead>
               <tr className="text-left text-gray-400">
-                <th className="pb-1 pr-2">Email</th>
-                <th className="pb-1 pr-2">Password</th>
+                <th className="pb-1 pr-2">{t('login.email')}</th>
+                <th className="pb-1 pr-2">{t('login.password')}</th>
                 <th className="pb-1">Role</th>
               </tr>
             </thead>
