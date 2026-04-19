@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   addGroupMember,
@@ -51,6 +52,8 @@ type UseGroupDetailsReturn = {
 };
 
 export function useGroupDetails(groupId: string | undefined): UseGroupDetailsReturn {
+  const { t } = useTranslation();
+
   const [group, setGroup] = useState<GroupDetailsResponse | null>(null);
   const [groupError, setGroupError] = useState('');
   const [isLoadingGroup, setIsLoadingGroup] = useState(false);
@@ -138,7 +141,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
         }
       } catch (err) {
         if (isMounted) {
-          setGroupError(err instanceof Error ? err.message : 'Failed to load group details.');
+          setGroupError(
+            err instanceof Error ? err.message : t('groups.groupErrors.failedToLoadGroupDetails'),
+          );
         }
       } finally {
         if (isMounted) {
@@ -158,7 +163,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
         }
       } catch (err) {
         if (isMounted) {
-          setMembersError(err instanceof Error ? err.message : 'Failed to load members.');
+          setMembersError(
+            err instanceof Error ? err.message : t('groups.groupErrors.failedToLoadMembers'),
+          );
         }
       } finally {
         if (isMounted) {
@@ -178,7 +185,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
         }
       } catch (err) {
         if (isMounted) {
-          setTournamentsError(err instanceof Error ? err.message : 'Failed to load tournaments.');
+          setTournamentsError(
+            err instanceof Error ? err.message : t('groups.groupErrors.failedToLoadTournaments'),
+          );
         }
       } finally {
         if (isMounted) {
@@ -194,7 +203,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     return () => {
       isMounted = false;
     };
-  }, [groupId]);
+  }, [groupId, t]);
 
   useEffect(() => {
     if (!groupId || !isAdmin) {
@@ -218,7 +227,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       } catch (err) {
         if (isMounted) {
           setAvailableTournamentsError(
-            err instanceof Error ? err.message : 'Failed to load tournament options.',
+            err instanceof Error
+              ? err.message
+              : t('groups.groupErrors.failedToLoadTournamentOptions'),
           );
         }
       } finally {
@@ -233,7 +244,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     return () => {
       isMounted = false;
     };
-  }, [groupId, isAdmin]);
+  }, [groupId, isAdmin, t]);
 
   async function handleAddMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -253,9 +264,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
           : [...currentMembers, addedMember],
       );
       setMemberEmail('');
-      setMemberActionMessage('Member added successfully.');
+      setMemberActionMessage(t('groups.memberAction.memberAdded'));
     } catch (err) {
-      setMemberActionError(err instanceof Error ? err.message : 'Failed to add member.');
+      setMemberActionError(err instanceof Error ? err.message : t('groups.memberAction.addFailed'));
     } finally {
       setIsAddingMember(false);
     }
@@ -276,9 +287,11 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       const latestTournaments = await getGroupTournaments(groupId);
       setTournaments(latestTournaments);
       setSelectedTournamentId('');
-      setTournamentActionMessage('Tournament linked successfully.');
+      setTournamentActionMessage(t('groups.tournamentAction.tournamentLinked'));
     } catch (err) {
-      setTournamentActionError(err instanceof Error ? err.message : 'Failed to add tournament.');
+      setTournamentActionError(
+        err instanceof Error ? err.message : t('groups.tournamentAction.addFailed'),
+      );
     } finally {
       setIsAddingTournament(false);
     }
@@ -289,7 +302,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       return;
     }
 
-    const hasConfirmed = window.confirm(`Remove ${member.name} from this group?`);
+    const hasConfirmed = window.confirm(
+      t('groups.memberAction.removeConfirmation', { name: member.name }),
+    );
     if (!hasConfirmed) {
       return;
     }
@@ -303,9 +318,11 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       setMembers((currentMembers) =>
         currentMembers.filter((currentMember) => currentMember.userId !== member.userId),
       );
-      setMemberActionMessage('Member removed successfully.');
+      setMemberActionMessage(t('groups.memberAction.memberRemoved'));
     } catch (err) {
-      setMemberActionError(err instanceof Error ? err.message : 'Failed to remove member.');
+      setMemberActionError(
+        err instanceof Error ? err.message : t('groups.memberAction.removeFailed'),
+      );
     } finally {
       setRemovingMemberUserId(null);
     }
@@ -316,7 +333,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       return;
     }
 
-    const hasConfirmed = window.confirm(`Remove ${tournament.name} from this group?`);
+    const hasConfirmed = window.confirm(
+      t('groups.tournamentAction.removeConfirmation', { name: tournament.name }),
+    );
     if (!hasConfirmed) {
       return;
     }
@@ -330,9 +349,11 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       setTournaments((currentTournaments) =>
         currentTournaments.filter((currentTournament) => currentTournament.id !== tournament.id),
       );
-      setTournamentActionMessage('Tournament removed successfully.');
+      setTournamentActionMessage(t('groups.tournamentAction.tournamentRemoved'));
     } catch (err) {
-      setTournamentActionError(err instanceof Error ? err.message : 'Failed to remove tournament.');
+      setTournamentActionError(
+        err instanceof Error ? err.message : t('groups.tournamentAction.removeFailed'),
+      );
     } finally {
       setRemovingTournamentId(null);
     }

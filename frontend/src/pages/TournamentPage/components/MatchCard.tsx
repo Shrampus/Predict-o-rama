@@ -14,16 +14,47 @@ type MatchCardProps = {
     isSaving?: boolean;
 };
 
+function isScoreInput(value: string): boolean {
+    return /^\d*$/.test(value);
+}
+
+function parseScore(value: string): number | null {
+    if (!/^\d+$/.test(value)) {
+        return null;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+}
+
+function normalizeScoreInput(value: string): string {
+    const parsedScore = parseScore(value);
+    return parsedScore === null ? '' : String(parsedScore);
+}
+
 function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
     const prediction = buildPrediction(match);
     const { t } = useTranslation();
 
-    const [homeScore, setHomeScore] = useState(prediction.home);
-    const [awayScore, setAwayScore] = useState(prediction.away);
+    const [homeScore, setHomeScore] = useState(match.predictedHomeScore === null ? '' : String(match.predictedHomeScore));
+    const [awayScore, setAwayScore] = useState(match.predictedAwayScore === null ? '' : String(match.predictedAwayScore));
     const [winningTeam, setWinningTeam] = useState<WinningTeam>(prediction.winningTeam);
+    const [isHomeScoreTouched, setIsHomeScoreTouched] = useState(false);
+    const [isAwayScoreTouched, setIsAwayScoreTouched] = useState(false);
+
+    const parsedHomeScore = parseScore(homeScore);
+    const parsedAwayScore = parseScore(awayScore);
+    const canSubmitPrediction = parsedHomeScore !== null && parsedAwayScore !== null;
+    const shouldShowScoreError = (isHomeScoreTouched || isAwayScoreTouched) && !canSubmitPrediction;
 
     function handlePredictClick() {
-        onPredict?.(match.matchId, homeScore, awayScore, winningTeam);
+        const home = parseScore(homeScore);
+        const away = parseScore(awayScore);
+        if (home === null || away === null) {
+            return;
+        }
+
+        onPredict?.(match.matchId, home, away, winningTeam);
     }
 
     return (
@@ -44,8 +75,20 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
                         className="w-14 h-14 bg-white rounded-xl text-center text-2xl font-black border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                         type="number"
                         min={0}
+                        inputMode="numeric"
                         value={homeScore}
-                        onChange={(e) => setHomeScore(Number(e.target.value))}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (!isScoreInput(value)) {
+                                return;
+                            }
+                            setHomeScore(value);
+                        }}
+                        onBlur={() => {
+                            setIsHomeScoreTouched(true);
+                            setHomeScore((currentValue) => normalizeScoreInput(currentValue));
+                        }}
+                        aria-invalid={shouldShowScoreError}
                         disabled={isSaving}
                     />
                     <span className="text-slate-400 font-bold">{t('matchCard.vs')}</span>
@@ -53,11 +96,26 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
                         className="w-14 h-14 bg-white rounded-xl text-center text-2xl font-black border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-400"
                         type="number"
                         min={0}
+                        inputMode="numeric"
                         value={awayScore}
-                        onChange={(e) => setAwayScore(Number(e.target.value))}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (!isScoreInput(value)) {
+                                return;
+                            }
+                            setAwayScore(value);
+                        }}
+                        onBlur={() => {
+                            setIsAwayScoreTouched(true);
+                            setAwayScore((currentValue) => normalizeScoreInput(currentValue));
+                        }}
+                        aria-invalid={shouldShowScoreError}
                         disabled={isSaving}
                     />
                 </div>
+                {shouldShowScoreError && (
+                    <p className="text-xs text-red-600">{t('matchCard.enterValidScore')}</p>
+                )}
 
                 {/* Winner selector */}
                 <div className="flex w-full gap-10">
@@ -84,11 +142,11 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
                 {/* Submit */}
                 <button
                     onClick={handlePredictClick}
-                    disabled={isSaving}
+                    disabled={isSaving || !canSubmitPrediction}
                     className={`w-full px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-transform active:scale-95 ${prediction.saved
                         ? 'bg-green-700 text-white'
                         : 'bg-orange-600 text-white hover:bg-orange-700'
-                        } ${isSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        } ${isSaving || !canSubmitPrediction ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
                     {isSaving ? t('matchCard.saving') : prediction.saved ? t('matchCard.saved') : t('matchCard.predictNow')}
                 </button>

@@ -34,7 +34,8 @@
     "draw": "Ничья",
     "saving": "Сохранение...",
     "saved": "✓ Сохранено",
-    "predictNow": "Сделать прогноз"
+    "predictNow": "Сделать прогноз",
+    "enterValidScore": "Введите корректный счет (0 или больше)."
   },
   "standings": {
     "group": "Группа {{letter}}",
@@ -66,6 +67,49 @@
     "groupCount_other": "{{count}} группы",
     "leaveGroup": "Покинуть группу",
     "leaveGroupError": "Не удалось покинуть группу",
+    "groupFallbackName": "Группа",
+    "groupFallbackDescription": "Пока нет описания.",
+    "invalidGroupUrl": "Неверный URL группы",
+    "detailsHeader": {
+      "title": "Детали группы",
+      "loading": "Загрузка деталей группы..."
+    },
+    "membersSection": {
+      "title": "Участники",
+      "loadingMembers": "Загрузка участников...",
+      "emptyMembers": "В этой группе пока нет участников.",
+      "removing": "Удаление...",
+      "remove": "Удалить",
+      "addMemberByEmail": "Добавить участника по почте",
+      "memberEmailPlaceholder": "teammate@example.com",
+      "adding": "Добавление...",
+      "add": "Добавить",
+      "adminOnlyAction": "Действие только для админов: добавлять участников могут только администраторы группы."
+    },
+    "groupErrors": {
+      "failedToLoadGroupDetails": "Не удалось загрузить детали группы.",
+      "failedToLoadMembers": "Не удалось загрузить участников.",
+      "failedToLoadTournaments": "Не удалось загрузить турниры.",
+      "failedToLoadTournamentOptions": "Не удалось загрузить варианты турниров."
+    },
+    "roles": {
+      "admin": "Админ",
+      "user": "Участник"
+    },
+    "memberAction": {
+      "memberAdded": "Участник успешно добавлен.",
+      "addFailed": "Не удалось добавить участника.",
+      "removeConfirmation": "Удалить {{name}} из этой группы?",
+      "memberRemoved": "Участник успешно удален.",
+      "removeFailed": "Не удалось удалить участника."
+    },
+    "tournamentAction": {
+      "tournamentLinked": "Турнир успешно привязан.",
+      "addFailed": "Не удалось добавить турнир.",
+      "removeConfirmation": "Удалить {{name}} из этой группы?",
+      "tournamentRemoved": "Турнир успешно удален.",
+      "removeFailed": "Не удалось удалить турнир."
+    },
     "tournamentsSection": {
       "title": "Турниры",
       "loadingTournaments": "Загрузка турниров...",
