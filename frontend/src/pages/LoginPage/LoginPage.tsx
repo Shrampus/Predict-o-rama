@@ -43,7 +43,7 @@ export default function LoginPage() {
       const { needsOnboarding } = await googleLogin(idToken);
       navigate(needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home);
     } catch {
-      setError('Google sign-in failed.');
+      setError(t('login.googleError'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
         <div className="mb-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-xs text-gray-400">or</span>
+          <span className="text-xs text-gray-400">{t('login.or')}</span>
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
             onSuccess={response => {
               if (response.credential) handleGoogleSuccess(response.credential);
             }}
-            onError={() => setError('Google sign-in failed.')}
+            onError={() => setError(t('login.googleError'))}
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function LoginPage() {
               <tr className="text-left text-gray-400">
                 <th className="pb-1 pr-2">{t('login.email')}</th>
                 <th className="pb-1 pr-2">{t('login.password')}</th>
-                <th className="pb-1">Role</th>
+                <th className="pb-1">{t('login.role')}</th>
               </tr>
             </thead>
             <tbody>

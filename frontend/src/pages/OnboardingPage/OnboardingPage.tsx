@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../app/routePaths';
@@ -7,6 +8,7 @@ import { useAuth } from '../../context/useAuth';
 export default function OnboardingPage() {
   const { currentUser, completeProfile, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,7 @@ export default function OnboardingPage() {
       await completeProfile(username);
       navigate(ROUTE_PATHS.home);
     } catch {
-      setError('Username is already taken. Please choose another.');
+      setError(t('onboarding.usernameTaken'));
     } finally {
       setLoading(false);
     }
@@ -28,15 +30,15 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-2 text-center text-2xl font-semibold">Welcome!</h1>
+        <h1 className="mb-2 text-center text-2xl font-semibold">{t('onboarding.title')}</h1>
         <p className="mb-6 text-center text-sm text-gray-500">
-          Signed in as {currentUser?.email}. Choose a username to continue.
+          {t('onboarding.subtitle', { email: currentUser?.email })}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="username">
-              Username
+              {t('onboarding.usernameLabel')}
             </label>
             <input
               id="username"
@@ -47,7 +49,7 @@ export default function OnboardingPage() {
               value={username}
               onChange={e => setUsername(e.target.value)}
               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. footballfan42"
+              placeholder={t('onboarding.usernamePlaceholder')}
             />
           </div>
 
@@ -58,7 +60,7 @@ export default function OnboardingPage() {
             disabled={loading}
             className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? 'Saving…' : 'Continue'}
+            {loading ? t('onboarding.saving') : t('onboarding.continue')}
           </button>
         </form>
 
@@ -66,7 +68,7 @@ export default function OnboardingPage() {
           onClick={logout}
           className="mt-4 w-full text-center text-xs text-gray-400 hover:text-gray-600"
         >
-          Sign out
+          {t('nav.signOut')}
         </button>
       </div>
     </div>

@@ -8,15 +8,12 @@ import { AuthContext } from './authContextDef';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !!localStorage.getItem(TOKEN_KEY));
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
     authApi.me().then(user => {
       if (user) {
         setCurrentUser(user);
