@@ -69,9 +69,9 @@ function TournamentPage() {
                                 {t('tournament.roundOf16')}{' '}
                                 <span className="text-slate-400 font-normal ml-2">{t('tournament.upcoming')}</span>
                             </h2>
-                            <span className="text-green-700 font-bold text-sm cursor-pointer hover:underline">
+                            {/* <span className="text-green-700 font-bold text-sm cursor-pointer hover:underline">
                                 {t('tournament.viewCalendar')}
-                            </span>
+                            </span> */}
                         </div>
 
                         {isLoading && <p>{t('tournament.loadingMatches')}</p>}
