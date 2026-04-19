@@ -9,28 +9,50 @@ import Tabs from './components/Tabs';
 import { usePredictionSaver } from './hooks/usePredictionSaver';
 import { useTournamentMatches } from './hooks/useTournamentMatches';
 import type { WinningTeam } from './TournamentConstants';
+import type { PredictActionResult } from './types/predictionActions';
 import { ROUTE_PATHS } from '../../app/routePaths';
 import type { TournamentMatchPrediction } from '../../services/predictionsApi';
+
+type TournamentRouteState = {
+    tournamentName?: string;
+    tournamentDescription?: string;
+    tournamentPhase?: string;
+};
+
+function isTournamentRouteState(value: unknown): value is TournamentRouteState {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    const routeState = value as Record<string, unknown>;
+    return (
+        (routeState.tournamentName === undefined || typeof routeState.tournamentName === 'string') &&
+        (routeState.tournamentDescription === undefined || typeof routeState.tournamentDescription === 'string') &&
+        (routeState.tournamentPhase === undefined || typeof routeState.tournamentPhase === 'string')
+    );
+}
 
 function TournamentPage() {
     const { groupId, tournament } = useParams<{ groupId: string; tournament: string }>();
     const location = useLocation();
     const resolvedGroupId = groupId ?? '';
     const resolvedTournament = tournament ?? '';
-    const routeState = location.state as
-        | {
-              tournamentName?: string;
-              tournamentDescription?: string;
-              tournamentPhase?: string;
-          }
-        | null;
+    const routeState = isTournamentRouteState(location.state) ? location.state : null;
 
-    const { matches, tournamentName, seasonLabel: responseSeasonLabel, phaseLabel: responsePhaseLabel, isLoading, error, refetch } =
+    const {
+        matches,
+        tournamentName,
+        seasonLabel: responseSeasonLabel,
+        phaseLabel: responsePhaseLabel,
+        isLoading,
+        error,
+        updateMatchPrediction,
+    } =
         useTournamentMatches(resolvedTournament, resolvedGroupId);
     const { t } = useTranslation();
 
     const [activeTab, setActiveTab] = useState<'matches' | 'standings'>('matches');
-    const { savingMatchId, saveError, saveMatchPrediction } = usePredictionSaver();
+    const { savingMatchId, saveMatchPrediction } = usePredictionSaver();
 
     if (!groupId || !tournament) {
         return <Navigate to={ROUTE_PATHS.groups} replace />;
@@ -52,17 +74,20 @@ function TournamentPage() {
         homeScore: number,
         awayScore: number,
         winningTeam: WinningTeam
-    ) {
-        const hasSaved = await saveMatchPrediction(
+    ): Promise<PredictActionResult> {
+        const saveResult = await saveMatchPrediction(
             resolvedGroupId,
             matchId,
             homeScore,
             awayScore,
             winningTeam
         );
-        if (hasSaved) {
-            await refetch();
+        if (saveResult.ok) {
+            updateMatchPrediction(saveResult.prediction);
+            return { ok: true };
         }
+
+        return { ok: false, error: saveResult.error };
     }
 
     return (
@@ -81,7 +106,7 @@ function TournamentPage() {
                     <div className="laptop:col-span-8 space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-2xl font-black text-slate-900">
-                                {t('tournament.roundOf16')}{' '}
+                                {phaseLabel}{' '}
                                 <span className="text-slate-400 font-normal ml-2">{t('tournament.upcoming')}</span>
                             </h2>
                             {/* <span className="text-green-700 font-bold text-sm cursor-pointer hover:underline">
@@ -91,14 +116,13 @@ function TournamentPage() {
 
                         {isLoading && <p>{t('tournament.loadingMatches')}</p>}
                         {error && <p className="text-red-500">{error}</p>}
-                        {saveError && <p className="text-red-500">{saveError}</p>}
                         {!isLoading && !error && matches.length === 0 && <p>{t('tournament.noMatches')}</p>}
 
                         {!isLoading &&
                             !error &&
                             matches.map((match: TournamentMatchPrediction) => (
                                 <MatchCard
-                                    key={`${match.matchId}-${match.predictedHomeScore}-${match.predictedAwayScore}-${match.predictedWinner}`}
+                                    key={match.matchId}
                                     match={match}
                                     onPredict={handlePredict}
                                     isSaving={savingMatchId === match.matchId}

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import { getPredictions } from '../../../services/predictionsApi';
+import type { SavedPredictionPayload } from './usePredictionSaver';
 
 type UseTournamentMatchesResult = {
     matches: TournamentMatchPrediction[];
@@ -12,6 +13,7 @@ type UseTournamentMatchesResult = {
     isLoading: boolean;
     error: string | null;
     refetch: () => Promise<void>;
+    updateMatchPrediction: (prediction: SavedPredictionPayload) => void;
 };
 
 export function useTournamentMatches(competition: string, groupId: string): UseTournamentMatchesResult {
@@ -23,7 +25,7 @@ export function useTournamentMatches(competition: string, groupId: string): UseT
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    async function fetchMatches() {
+    const fetchMatches = useCallback(async () => {
         if (!competition || !groupId) {
             setMatches([]);
             setTournamentName(competition);
@@ -48,12 +50,38 @@ export function useTournamentMatches(competition: string, groupId: string): UseT
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [competition, groupId, t]);
 
     useEffect(() => {
         fetchMatches();
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- run when competition/groupId change; fetchMatches is not stable
-    }, [competition, groupId]);
+    }, [fetchMatches]);
 
-    return { matches, tournamentName, seasonLabel, phaseLabel, isLoading, error, refetch: fetchMatches };
+    const updateMatchPrediction = useCallback((prediction: SavedPredictionPayload) => {
+        setMatches((currentMatches) =>
+            currentMatches.map((match) => {
+                if (match.matchId !== prediction.matchId) {
+                    return match;
+                }
+
+                return {
+                    ...match,
+                    predictionId: prediction.predictionId,
+                    predictedHomeScore: prediction.homeScore,
+                    predictedAwayScore: prediction.awayScore,
+                    predictedWinner: prediction.predictedWinner,
+                };
+            })
+        );
+    }, []);
+
+    return {
+        matches,
+        tournamentName,
+        seasonLabel,
+        phaseLabel,
+        isLoading,
+        error,
+        refetch: fetchMatches,
+        updateMatchPrediction,
+    };
 }
