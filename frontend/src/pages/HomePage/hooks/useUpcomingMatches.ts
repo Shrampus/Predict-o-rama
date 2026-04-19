@@ -18,7 +18,7 @@ export function useUpcomingMatches(): UseUpcomingMatchesResult {
             setIsLoading(true);
             setHasError(false);
             try {
-                const matches = await matchesApi.getUpcomingMatches();
+                const matches = await matchesApi.getMyUpcomingMatches();
                 setUpcomingMatches(matches);
             } catch {
                 setHasError(true);

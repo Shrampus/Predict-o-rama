@@ -26,7 +26,7 @@ function UpcomingMatchCard({ match }: UpcomingMatchCardProps) {
           {match.groups.map((group) => (
             <Link
               key={group.groupId}
-              to={`/predictions?groupId=${group.groupId}&competition=${group.competitionId}`}
+              to={`/groups/${group.groupId}/tournaments/${group.competitionId}`}
               className="w-full text-center px-4 py-1.5 rounded-full bg-orange-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-orange-700 transition-colors"
             >
               Predict · {group.groupName}

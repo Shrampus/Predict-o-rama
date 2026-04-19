@@ -6,7 +6,6 @@ export interface GroupReference {
 
 export interface UpcomingMatch {
     matchId: string;
-    externalMatchId: string;
     homeTeamName: string;
     awayTeamName: string;
     homeTeamImage: string;

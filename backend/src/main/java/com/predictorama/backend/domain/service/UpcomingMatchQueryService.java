@@ -1,16 +1,21 @@
 package com.predictorama.backend.domain.service;
 
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.service.result.UpcomingMatchResult;
@@ -23,6 +28,7 @@ public class UpcomingMatchQueryService {
 
     private final GroupMemberRepositoryPort groupMemberRepositoryPort;
     private final GroupRepositoryPort groupRepositoryPort;
+    private final GroupTournamentRepositoryPort groupTournamentRepositoryPort;
     private final MatchRepositoryPort matchRepositoryPort;
     private final TournamentRepositoryPort tournamentRepositoryPort;
     private final CompetitionCatalog competitionCatalog;
@@ -45,15 +51,33 @@ public class UpcomingMatchQueryService {
                 .filter(Objects::nonNull)
                 .toList();
 
+        Map<UUID, Set<UUID>> tournamentsByGroup = userGroups.stream()
+                .collect(Collectors.toMap(
+                        Group::getId,
+                        group -> new HashSet<>(groupTournamentRepositoryPort.findTournamentIdsByGroupId(group.getId()))
+                ));
+
         Instant now = Instant.now();
         Instant end = now.plus(28, ChronoUnit.DAYS);
 
         return matchRepositoryPort.findByKickoffTimeBetween(now, end).stream()
-                .map(match -> UpcomingMatchResult.builder()
-                        .match(match)
-                        .userGroups(userGroups)
-                        .build())
+                .map(match -> {
+                    List<Group> relevantGroups = userGroups.stream()
+                            .filter(group -> tournamentsByGroup
+                                    .getOrDefault(group.getId(), Set.of())
+                                    .contains(match.getTournamentId()))
+                            .toList();
+
+                    String competitionCode = tournamentRepositoryPort.findById(match.getTournamentId())
+                            .map(t -> competitionCatalog.toCompetitionCode(t.getName()))
+                            .orElse(null);
+
+                    return UpcomingMatchResult.builder()
+                            .match(match)
+                            .competitionCode(competitionCode)
+                            .userGroups(relevantGroups)
+                            .build();
+                })
                 .toList();
     }
-    
 }

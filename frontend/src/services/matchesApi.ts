@@ -10,13 +10,9 @@ interface UpcomingMatchResponse {
     groups: { groupId: string; groupName: string; competitionId: string }[];
 }
 
-async function getUpcomingMatches(): Promise<UpcomingMatch[]> {
-    const res = await fetch('/api/matches/upcoming');
-    if (!res.ok) throw new Error('Failed to fetch upcoming matches');
-    const data: UpcomingMatchResponse[] = await res.json();
+function mapResponse(data: UpcomingMatchResponse[]): UpcomingMatch[] {
     return data.map(m => ({
         matchId: m.matchId,
-        externalMatchId: '',
         homeTeamName: m.homeTeamName,
         homeTeamImage: m.homeTeamImage,
         awayTeamName: m.awayTeamName,
@@ -26,4 +22,16 @@ async function getUpcomingMatches(): Promise<UpcomingMatch[]> {
     }));
 }
 
-export const matchesApi = { getUpcomingMatches };
+async function getUpcomingMatches(): Promise<UpcomingMatch[]> {
+    const res = await fetch('/api/matches/upcoming');
+    if (!res.ok) throw new Error('Failed to fetch upcoming matches');
+    return mapResponse(await res.json());
+}
+
+async function getMyUpcomingMatches(): Promise<UpcomingMatch[]> {
+    const res = await fetch('/api/matches/upcoming/my');
+    if (!res.ok) throw new Error('Failed to fetch upcoming matches');
+    return mapResponse(await res.json());
+}
+
+export const matchesApi = { getUpcomingMatches, getMyUpcomingMatches };
