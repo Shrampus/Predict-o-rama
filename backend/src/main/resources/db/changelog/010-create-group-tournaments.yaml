@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 009-create-group-tournaments
+      id: 010-create-group-tournaments
       author: codex
       changes:
         - createTable:
