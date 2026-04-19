@@ -30,7 +30,6 @@
     "standings": "Tabeliseis"
   },
   "matchCard": {
-    "vs": "VS",
     "draw": "Viik",
     "saving": "Salvestamine...",
     "saved": "✓ Salvestatud",

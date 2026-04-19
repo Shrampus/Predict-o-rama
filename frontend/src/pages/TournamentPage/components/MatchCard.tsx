@@ -91,7 +91,12 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
                         aria-invalid={Boolean(validationMessage)}
                         disabled={isSaving || isLocked}
                     />
-                    <span className="text-slate-400 font-bold">{t('matchCard.vs')}</span>
+                    <span
+                        className="text-slate-400 font-bold text-2xl"
+                        aria-hidden="true"
+                    >
+                        -
+                    </span>
                     <input
                         className="h-14 w-16 rounded-xl border border-slate-200 bg-white text-center text-2xl font-black focus:outline-none focus:ring-2 focus:ring-green-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                         type="number"

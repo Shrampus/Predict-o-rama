@@ -30,7 +30,6 @@
     "standings": "Standings"
   },
   "matchCard": {
-    "vs": "VS",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
