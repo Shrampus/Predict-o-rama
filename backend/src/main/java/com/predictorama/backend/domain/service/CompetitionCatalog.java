@@ -43,4 +43,22 @@ public class CompetitionCatalog {
             default -> competition;
         };
     }
+
+    public String toCompetitionCode(String tournamentName) {
+        return switch (tournamentName) {
+            case "FIFA World Cup" -> "WC";
+            case "UEFA Champions League" -> "CL";
+            case "Bundesliga" -> "BL1";
+            case "Eredivisie" -> "DED";
+            case "Campeonato Brasileiro Série A" -> "BSA";
+            case "Primera Division" -> "PD";
+            case "Ligue 1" -> "FL1";
+            case "Championship" -> "ELC";
+            case "Primeira Liga" -> "PPL";
+            case "UEFA European Championship" -> "EC";
+            case "Serie A" -> "SA";
+            case "Premier League" -> "PL";
+            default -> tournamentName;
+        };
+    }
 }
