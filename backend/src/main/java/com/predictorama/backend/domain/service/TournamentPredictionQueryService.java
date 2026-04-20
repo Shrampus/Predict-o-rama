@@ -35,7 +35,13 @@ public class TournamentPredictionQueryService {
             UUID userId,
             UUID groupId
     ) {
-        List<Match> matches = getTournamentMatches(competition);
+        if (!competitionCatalog.isSupportedCompetition(competition)) {
+            log.warn("Rejected unsupported competition code={} on tournament predictions request", competition);
+            throw new InvalidPredictionException("Unsupported competition code: " + competition);
+        }
+
+        Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
+        List<Match> matches = getTournamentMatches(competition, tournament);
         Map<UUID, Prediction> predictionsByMatchId =
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
@@ -45,6 +51,8 @@ public class TournamentPredictionQueryService {
 
         return new TournamentPredictionsView(
                 competitionCatalog.toTournamentName(competition),
+                resolveSeasonLabel(competition, tournament),
+                competitionCatalog.toPhaseLabel(competition),
                 responseMatches
         );
     }
@@ -68,14 +76,14 @@ public class TournamentPredictionQueryService {
                 .build();
     }
 
-    private List<Match> getTournamentMatches(String competition) {
-        if (!competitionCatalog.isSupportedCompetition(competition)) {
-            log.warn("Rejected unsupported competition code={} on tournament predictions request", competition);
-            throw new InvalidPredictionException("Unsupported competition code: " + competition);
+    private String resolveSeasonLabel(String competition, Tournament tournament) {
+        if (tournament.getDescription() != null && !tournament.getDescription().isBlank()) {
+            return tournament.getDescription();
         }
+        return competitionCatalog.toSeasonLabel(competition);
+    }
 
-        Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
-
+    private List<Match> getTournamentMatches(String competition, Tournament tournament) {
         Instant now = Instant.now();
         Instant in28Days = now.plus(28, ChronoUnit.DAYS);
 

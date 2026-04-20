@@ -1,4 +1,5 @@
 import { apiFetch } from '../lib/apiClient';
+import { getApiUrl } from './apiConfig';
 
 const BASE = '/api/auth';
 
@@ -17,7 +18,7 @@ export interface AuthResponse {
 
 export const authApi = {
   login: (email: string, password: string): Promise<AuthResponse> =>
-    fetch(`${BASE}/login`, {
+    fetch(getApiUrl(`${BASE}/login`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -27,7 +28,7 @@ export const authApi = {
     }),
 
   googleLogin: (idToken: string): Promise<AuthResponse> =>
-    fetch(`${BASE}/google`, {
+    fetch(getApiUrl(`${BASE}/google`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
@@ -37,10 +38,10 @@ export const authApi = {
     }),
 
   me: (): Promise<CurrentUser | null> =>
-    apiFetch(`${BASE}/me`).then(res => (res.ok ? res.json() : null)),
+    apiFetch(getApiUrl(`${BASE}/me`)).then(res => (res.ok ? res.json() : null)),
 
   completeProfile: (username: string): Promise<AuthResponse> =>
-    apiFetch(`${BASE}/complete-profile`, {
+    apiFetch(getApiUrl(`${BASE}/complete-profile`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username }),

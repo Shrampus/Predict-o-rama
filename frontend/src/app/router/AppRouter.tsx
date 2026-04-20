@@ -7,7 +7,6 @@ import GroupsPage from '../../pages/GroupPage/GroupsPage';
 import HomePage from '../../pages/HomePage/HomePage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
 import OnboardingPage from '../../pages/OnboardingPage/OnboardingPage';
-import PredictionsPage from '../../pages/PredictionsPage/PredictionsPage';
 import TournamentPage from '../../pages/TournamentPage/TournamentPage';
 import { ROUTE_PATHS } from '../routePaths';
 
@@ -31,7 +30,6 @@ export function AppRouter() {
         }
       >
         <Route path={ROUTE_PATHS.home} element={<HomePage />} />
-        <Route path={ROUTE_PATHS.predictions} element={<PredictionsPage />} />
         <Route path={ROUTE_PATHS.groups} element={<GroupsPage />} />
         <Route path={ROUTE_PATHS.groupDetails} element={<GroupDetailsPage />} />
         <Route path={ROUTE_PATHS.groupTournamentDetails} element={<TournamentPage />} />

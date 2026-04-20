@@ -1,30 +1,69 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
-import type { WinningTeam } from '../TournamentConstants';
+import { useMatchPredictionForm } from '../hooks/useMatchPredictionForm';
+import type { PredictMatchHandler } from '../types/predictionActions';
 import TeamDisplay from './TeamDisplay';
 import TimeBadge from './TimeBadge';
 import WinnerButton from './WinnerButton';
-import { buildPrediction, deriveTimeStyle, formatKickoffTime, } from '../utils/matchCardUtils';
+import { deriveTimeStyle, formatKickoffTime } from '../utils/matchCardUtils';
 
 type MatchCardProps = {
     match: TournamentMatchPrediction;
-    onPredict?: (id: string, home: number, away: number, winningTeam: WinningTeam) => void | Promise<void>;
+    onPredict?: PredictMatchHandler;
     isSaving?: boolean;
 };
 
-function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
-    const prediction = buildPrediction(match);
+function getValidationKey(code: 'missing_scores' | 'missing_winner' | 'invalid_winner_for_score'): string {
+    return {
+        missing_scores: 'matchCard.enterBothScores',
+        missing_winner: 'matchCard.selectWinner',
+        invalid_winner_for_score: 'matchCard.invalidWinnerForScore',
+    }[code];
+}
+
+function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
     const { t } = useTranslation();
-
-    const [homeScore, setHomeScore] = useState(prediction.home);
-    const [awayScore, setAwayScore] = useState(prediction.away);
-    const [winningTeam, setWinningTeam] = useState<WinningTeam>(prediction.winningTeam);
-
-    function handlePredictClick() {
-        onPredict?.(match.matchId, homeScore, awayScore, winningTeam);
-    }
+    const {
+        homeScore,
+        awayScore,
+        winningTeam,
+        isLocked,
+        isDirty,
+        hasExistingPrediction,
+        showSuccessMessage,
+        showSuccessHighlight,
+        inlineError,
+        validationErrorCode,
+        canSubmit,
+        setHomeScore,
+        setAwayScore,
+        selectWinner,
+        blurHomeScore,
+        blurAwayScore,
+        submit,
+    } = useMatchPredictionForm({
+        match,
+        isSaving,
+        onPredict,
+        defaultSaveErrorMessage: t('matchCard.saveFailed'),
+    });
+    const validationMessage = validationErrorCode ? t(getValidationKey(validationErrorCode)) : null;
+    const helperText = isLocked ? t('matchCard.predictionClosedHelper') : t('matchCard.editUntilKickoff');
+    const ctaLabel = isLocked
+        ? t('matchCard.predictionClosed')
+        : isSaving
+            ? t('matchCard.saving')
+            : hasExistingPrediction && !isDirty
+                ? t('matchCard.saved')
+                : hasExistingPrediction
+                    ? t('matchCard.updatePrediction')
+                    : t('matchCard.savePrediction');
+    const ctaTone = isLocked
+        ? 'bg-slate-400 text-white'
+        : hasExistingPrediction && !isDirty
+            ? 'bg-green-700 text-white'
+            : 'bg-orange-600 text-white hover:bg-orange-700';
 
     return (
         <div className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm group flex flex-col sm:flex-row items-center gap-8">
@@ -32,71 +71,96 @@ function MatchCard({ match, onPredict, isSaving = false, }: MatchCardProps) {
 
             <TeamDisplay
                 imageUrl={match.homeTeamImage}
-                label=""
                 name={match.homeTeamName}
                 align="right"
             />
 
-            {/* Score inputs and winner selector */}
-            <div className="flex flex-col items-center gap-4 bg-slate-50 rounded-2xl p-4 min-w-[50px]">
-                <div className="flex items-center gap-4">
+            <div
+                className={`flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl p-4 transition-colors ${showSuccessHighlight ? 'bg-green-100' : 'bg-slate-50'}`}
+            >
+                <div className="flex w-full items-center justify-center gap-3">
                     <input
-                        className="w-14 h-14 bg-white rounded-xl text-center text-2xl font-black border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        className="h-14 w-16 rounded-xl border border-slate-200 bg-white text-center text-2xl font-black focus:outline-none focus:ring-2 focus:ring-green-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                         type="number"
                         min={0}
+                        inputMode="numeric"
                         value={homeScore}
-                        onChange={(e) => setHomeScore(Number(e.target.value))}
-                        disabled={isSaving}
+                        onChange={(e) => setHomeScore(e.target.value)}
+                        onBlur={blurHomeScore}
+                        aria-label={t('matchCard.scoreInputAria', { team: match.homeTeamName })}
+                        aria-invalid={Boolean(validationMessage)}
+                        disabled={isSaving || isLocked}
                     />
-                    <span className="text-slate-400 font-bold">{t('matchCard.vs')}</span>
+                    <span
+                        className="text-slate-400 font-bold text-2xl"
+                        aria-hidden="true"
+                    >
+                        -
+                    </span>
                     <input
-                        className="w-14 h-14 bg-white rounded-xl text-center text-2xl font-black border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        className="h-14 w-16 rounded-xl border border-slate-200 bg-white text-center text-2xl font-black focus:outline-none focus:ring-2 focus:ring-green-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                         type="number"
                         min={0}
+                        inputMode="numeric"
                         value={awayScore}
-                        onChange={(e) => setAwayScore(Number(e.target.value))}
-                        disabled={isSaving}
+                        onChange={(e) => setAwayScore(e.target.value)}
+                        onBlur={blurAwayScore}
+                        aria-label={t('matchCard.scoreInputAria', { team: match.awayTeamName })}
+                        aria-invalid={Boolean(validationMessage)}
+                        disabled={isSaving || isLocked}
                     />
                 </div>
 
-                {/* Winner selector */}
-                <div className="flex w-full gap-10">
+                <div className="flex w-full gap-2">
                     <WinnerButton
                         isActive={winningTeam === 'Home'}
-                        onClick={() => setWinningTeam('Home')}
+                        onClick={() => selectWinner('Home')}
+                        disabled={isSaving || isLocked}
                     >
                         {match.homeTeamName}
                     </WinnerButton>
                     <WinnerButton
                         isActive={winningTeam === 'Draw'}
-                        onClick={() => setWinningTeam('Draw')}
+                        onClick={() => selectWinner('Draw')}
+                        disabled={isSaving || isLocked}
                     >
                         {t('matchCard.draw')}
                     </WinnerButton>
                     <WinnerButton
                         isActive={winningTeam === 'Away'}
-                        onClick={() => setWinningTeam('Away')}
+                        onClick={() => selectWinner('Away')}
+                        disabled={isSaving || isLocked}
                     >
                         {match.awayTeamName}
                     </WinnerButton>
                 </div>
 
-                {/* Submit */}
+                {inlineError ? (
+                    <p className="w-full text-center text-xs text-red-600" role="alert">
+                        {inlineError}
+                    </p>
+                ) : validationMessage ? (
+                    <p className="w-full text-center text-xs text-red-600" role="alert">
+                        {validationMessage}
+                    </p>
+                ) : showSuccessMessage && !isDirty ? (
+                    <p className="w-full text-center text-xs text-green-700">{t('matchCard.savedInline')}</p>
+                ) : (
+                    <p className="w-full text-center text-xs text-slate-500">{helperText}</p>
+                )}
+
                 <button
-                    onClick={handlePredictClick}
-                    disabled={isSaving}
-                    className={`w-full px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-transform active:scale-95 ${prediction.saved
-                        ? 'bg-green-700 text-white'
-                        : 'bg-orange-600 text-white hover:bg-orange-700'
-                        } ${isSaving ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    type="button"
+                    onClick={submit}
+                    disabled={!canSubmit}
+                    className={`w-full rounded-full px-6 py-2 text-xs font-bold uppercase tracking-widest transition-transform active:scale-95 ${ctaTone} ${!canSubmit ? 'cursor-not-allowed opacity-60' : ''}`}
                 >
-                    {isSaving ? t('matchCard.saving') : prediction.saved ? t('matchCard.saved') : t('matchCard.predictNow')}
+                    {ctaLabel}
                 </button>
             </div>
 
             <TeamDisplay
                 imageUrl={match.awayTeamImage}
-                label=""
                 name={match.awayTeamName}
                 align="left"
             />

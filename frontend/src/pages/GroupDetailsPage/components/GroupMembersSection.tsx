@@ -1,4 +1,5 @@
 import type { FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { GroupMemberResponse } from '../../../services/groupApi';
 
@@ -33,13 +34,21 @@ export function GroupMembersSection({
   onResetMemberFeedback,
   onRemoveMember,
 }: GroupMembersSectionProps) {
+  const { t } = useTranslation();
+  const roleLabelByCode: Record<string, string> = {
+    ADMIN: t('groups.roles.admin'),
+    USER: t('groups.roles.user'),
+  };
+
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
-      <h2 className="text-xl font-bold text-slate-900">Members</h2>
-      {isLoadingMembers && <p className="text-sm text-slate-500">Loading members...</p>}
+      <h2 className="text-xl font-bold text-slate-900">{t('groups.membersSection.title')}</h2>
+      {isLoadingMembers && (
+        <p className="text-sm text-slate-500">{t('groups.membersSection.loadingMembers')}</p>
+      )}
       {membersError && <p className="text-sm text-red-600">{membersError}</p>}
       {!isLoadingMembers && !membersError && members.length === 0 && (
-        <p className="text-sm text-slate-500">No members found in this group yet.</p>
+        <p className="text-sm text-slate-500">{t('groups.membersSection.emptyMembers')}</p>
       )}
       {!isLoadingMembers && !membersError && members.length > 0 && (
         <ul className="space-y-2.5">
@@ -51,7 +60,7 @@ export function GroupMembersSection({
               <span className="text-sm font-medium text-slate-700 truncate">{member.name}</span>
               <div className="flex items-center gap-2.5">
                 <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                  {member.memberRole}
+                  {roleLabelByCode[member.memberRole] ?? member.memberRole}
                 </span>
                 {isAdmin && member.memberRole !== 'ADMIN' && (
                   <button
@@ -60,7 +69,9 @@ export function GroupMembersSection({
                     disabled={removingMemberUserId === member.userId}
                     className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-700 hover:bg-red-100 disabled:opacity-60 disabled:hover:bg-red-50"
                   >
-                    {removingMemberUserId === member.userId ? 'Removing...' : 'Remove'}
+                    {removingMemberUserId === member.userId
+                      ? t('groups.membersSection.removing')
+                      : t('groups.membersSection.remove')}
                   </button>
                 )}
               </div>
@@ -72,13 +83,13 @@ export function GroupMembersSection({
       {isAdmin ? (
         <form onSubmit={onAddMember} className="pt-4 border-t border-slate-100 space-y-2.5">
           <label htmlFor="member-email" className="block text-sm font-semibold text-slate-700">
-            Add member by email
+            {t('groups.membersSection.addMemberByEmail')}
           </label>
           <div className="flex gap-2">
             <input
               id="member-email"
               type="email"
-              placeholder="teammate@example.com"
+              placeholder={t('groups.membersSection.memberEmailPlaceholder')}
               value={memberEmail}
               onChange={(event) => {
                 onMemberEmailChange(event.target.value);
@@ -92,7 +103,7 @@ export function GroupMembersSection({
               disabled={isAddingMember || memberEmail.trim().length === 0}
               className="rounded-lg bg-green-700 hover:bg-green-800 text-white px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:hover:bg-green-700"
             >
-              {isAddingMember ? 'Adding...' : 'Add'}
+              {isAddingMember ? t('groups.membersSection.adding') : t('groups.membersSection.add')}
             </button>
           </div>
           {memberActionMessage && <p className="text-sm text-emerald-700">{memberActionMessage}</p>}
@@ -100,7 +111,7 @@ export function GroupMembersSection({
         </form>
       ) : (
         <p className="text-xs text-slate-500 pt-4 border-t border-slate-100">
-          Admin-only action: adding members is only available to group admins.
+          {t('groups.membersSection.adminOnlyAction')}
         </p>
       )}
     </section>
