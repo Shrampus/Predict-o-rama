@@ -1,4 +1,7 @@
+import { apiFetch } from '../lib/apiClient';
+
 /** Request/response types matching the backend DTOs. */
+
 export interface CreateGroupRequest {
   name: string;
   description: string;
@@ -75,9 +78,8 @@ type MyGroupsApiResponse = {
 
 /** Create a new prediction group. */
 export async function createGroup(request: CreateGroupRequest): Promise<GroupResponse> {
-  const response = await fetch('/api/groups', {
+  const response = await apiFetch('/api/groups', {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
@@ -95,9 +97,8 @@ export async function createGroup(request: CreateGroupRequest): Promise<GroupRes
 
 /** Join an existing group via invite code. */
 export async function joinGroup(request: JoinGroupRequest): Promise<GroupMemberResponse> {
-  const response = await fetch('/api/groups/join', {
+  const response = await apiFetch('/api/groups/join', {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
@@ -123,9 +124,8 @@ export async function joinGroup(request: JoinGroupRequest): Promise<GroupMemberR
 
 /** Leave a group. */
 export async function leaveGroup(groupId: string): Promise<void> {
-  const response = await fetch(`/api/groups/${groupId}/leave`, {
+  const response = await apiFetch(`/api/groups/${groupId}/leave`, {
     method: 'DELETE',
-    credentials: 'include',
   });
 
   if (response.status === 401) {
@@ -139,9 +139,7 @@ export async function leaveGroup(groupId: string): Promise<void> {
 
 /** Fetch all groups the current user is a member of. */
 export async function getMyGroups(): Promise<MyGroupsResponse[]> {
-  const response = await fetch('/api/groups/my', {
-    credentials: 'include',
-  });
+  const response = await apiFetch('/api/groups/my');
 
   if (response.status === 401) {
     throw new Error('You must be logged in to view your groups.');
@@ -165,9 +163,7 @@ export async function getMyGroups(): Promise<MyGroupsResponse[]> {
 
 /** Fetch details for one group. */
 export async function getGroupDetails(groupId: string): Promise<GroupDetailsResponse> {
-  const response = await fetch(`/api/groups/${groupId}`, {
-    credentials: 'include',
-  });
+  const response = await apiFetch(`/api/groups/${groupId}`);
 
   if (response.status === 401) {
     throw new Error('You must be logged in to view group details.');
@@ -190,9 +186,7 @@ export async function getGroupDetails(groupId: string): Promise<GroupDetailsResp
 
 /** Fetch all members in a group. */
 export async function getGroupMembers(groupId: string): Promise<GroupMemberResponse[]> {
-  const response = await fetch(`/api/groups/${groupId}/members`, {
-    credentials: 'include',
-  });
+  const response = await apiFetch(`/api/groups/${groupId}/members`);
 
   if (response.status === 401) {
     throw new Error('You must be logged in to view group members.');
@@ -218,9 +212,8 @@ export async function addGroupMember(
   groupId: string,
   request: AddGroupMemberRequest,
 ): Promise<GroupMemberResponse> {
-  const response = await fetch(`/api/groups/${groupId}/members`, {
+  const response = await apiFetch(`/api/groups/${groupId}/members`, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
@@ -250,9 +243,8 @@ export async function addGroupMember(
 
 /** Remove a member from a group. Admin only. */
 export async function removeGroupMember(groupId: string, memberUserId: string): Promise<void> {
-  const response = await fetch(`/api/groups/${groupId}/members/${memberUserId}`, {
+  const response = await apiFetch(`/api/groups/${groupId}/members/${memberUserId}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
 
   if (response.status === 401) {
@@ -280,9 +272,7 @@ export async function removeGroupMember(groupId: string, memberUserId: string): 
 
 /** Fetch tournaments linked to a group. */
 export async function getGroupTournaments(groupId: string): Promise<GroupTournamentResponse[]> {
-  const response = await fetch(`/api/groups/${groupId}/tournaments`, {
-    credentials: 'include',
-  });
+  const response = await apiFetch(`/api/groups/${groupId}/tournaments`);
 
   if (response.status === 401) {
     throw new Error('You must be logged in to view group tournaments.');
@@ -308,9 +298,8 @@ export async function addGroupTournament(
   groupId: string,
   request: AddGroupTournamentRequest,
 ): Promise<void> {
-  const response = await fetch(`/api/groups/${groupId}/tournaments`, {
+  const response = await apiFetch(`/api/groups/${groupId}/tournaments`, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
@@ -338,9 +327,8 @@ export async function addGroupTournament(
 
 /** Remove a tournament link from a group. Admin only. */
 export async function removeGroupTournament(groupId: string, tournamentId: string): Promise<void> {
-  const response = await fetch(`/api/groups/${groupId}/tournaments/${tournamentId}`, {
+  const response = await apiFetch(`/api/groups/${groupId}/tournaments/${tournamentId}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
 
   if (response.status === 401) {
@@ -362,9 +350,7 @@ export async function removeGroupTournament(groupId: string, tournamentId: strin
 
 /** Fetch available tournaments for selection. */
 export async function getTournaments(): Promise<TournamentOption[]> {
-  const response = await fetch('/api/tournaments', {
-    credentials: 'include',
-  });
+  const response = await apiFetch('/api/tournaments');
 
   if (response.status === 401) {
     throw new Error('You must be logged in to view tournaments.');

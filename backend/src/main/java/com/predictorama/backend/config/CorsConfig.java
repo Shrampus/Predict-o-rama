@@ -15,11 +15,15 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
 
+                String[] extraOrigins = System.getenv().getOrDefault("ALLOWED_ORIGINS", "http://localhost:5173")
+                        .split(",");
+                String[] allOrigins = java.util.stream.Stream.concat(
+                        java.util.stream.Stream.of("http://localhost:5173"),
+                        java.util.stream.Stream.of(extraOrigins)
+                ).toArray(String[]::new);
+
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                                "http://localhost:5173",
-                                System.getenv().getOrDefault("ALLOWED_ORIGIN", "http://localhost:5173")
-                        )
+                        .allowedOrigins(allOrigins)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

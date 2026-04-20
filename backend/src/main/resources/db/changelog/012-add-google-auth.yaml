@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-add-google-id-to-users
+      author: hlp
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: google_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+                    unique: true
+        - dropNotNullConstraint:
+            tableName: users
+            columnName: username
+            columnDataType: VARCHAR(50)

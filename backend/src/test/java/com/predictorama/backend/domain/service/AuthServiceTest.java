@@ -1,10 +1,14 @@
 package com.predictorama.backend.domain.service;
 
+import com.predictorama.backend.domain.entity.GoogleUserInfo;
 import com.predictorama.backend.domain.entity.Role;
 import com.predictorama.backend.domain.entity.User;
 import com.predictorama.backend.domain.exception.InvalidCredentialsException;
+import com.predictorama.backend.domain.exception.InvalidGoogleTokenException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
+import com.predictorama.backend.domain.exception.UsernameTakenException;
 import com.predictorama.backend.domain.port.PasswordVerifier;
+import com.predictorama.backend.domain.port.external.GoogleTokenValidatorPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,11 +22,13 @@ class AuthServiceTest {
 
     private AuthService authService;
     private InMemoryUserRepository userRepository;
+    private FakeGoogleTokenValidator googleTokenValidator;
 
     @BeforeEach
     void setUp() {
         userRepository = new InMemoryUserRepository();
-        authService = new AuthService(userRepository, new FakePasswordVerifier());
+        googleTokenValidator = new FakeGoogleTokenValidator();
+        authService = new AuthService(userRepository, googleTokenValidator, new FakePasswordVerifier());
     }
 
     @Test
@@ -32,7 +38,7 @@ class AuthServiceTest {
 
         var result = authService.login("alice@test.com", "password123");
 
-        assertThat(result.getEmail()).isEqualTo("alice@test.com");
+        assertThat(result.user().getEmail()).isEqualTo("alice@test.com");
     }
 
     @Test
@@ -60,6 +66,78 @@ class AuthServiceTest {
     }
 
     @Test
+    void loginWithGoogle_createsNewUser_whenGoogleIdNotFound() {
+        googleTokenValidator.returnInfo = new GoogleUserInfo("google-123", "new@test.com", "New User");
+
+        var result = authService.loginWithGoogle("valid-token");
+
+        assertThat(result.user().getEmail()).isEqualTo("new@test.com");
+        assertThat(result.user().getGoogleId()).isEqualTo("google-123");
+        assertThat(result.user().getUsername()).isNull();
+        assertThat(result.needsOnboarding()).isTrue();
+    }
+
+    @Test
+    void loginWithGoogle_returnsExistingUser_whenGoogleIdAlreadyLinked() {
+        var existing = userWithGoogleId("bob@test.com", "google-456", "bob");
+        userRepository.save(existing);
+        googleTokenValidator.returnInfo = new GoogleUserInfo("google-456", "bob@test.com", "Bob");
+
+        var result = authService.loginWithGoogle("valid-token");
+
+        assertThat(result.user().getId()).isEqualTo(existing.getId());
+        assertThat(result.needsOnboarding()).isFalse();
+    }
+
+    @Test
+    void loginWithGoogle_setsNeedsOnboarding_whenExistingUserHasNoUsername() {
+        var existing = userWithGoogleId("bob@test.com", "google-456", null);
+        userRepository.save(existing);
+        googleTokenValidator.returnInfo = new GoogleUserInfo("google-456", "bob@test.com", "Bob");
+
+        var result = authService.loginWithGoogle("valid-token");
+
+        assertThat(result.needsOnboarding()).isTrue();
+    }
+
+    @Test
+    void loginWithGoogle_throws_whenTokenIsInvalid() {
+        googleTokenValidator.throwException = true;
+
+        assertThatThrownBy(() -> authService.loginWithGoogle("bad-token"))
+                .isInstanceOf(InvalidGoogleTokenException.class);
+    }
+
+    @Test
+    void completeProfile_setsUsername_whenAvailable() {
+        var user = userWithGoogleId("carol@test.com", "google-789", null);
+        userRepository.save(user);
+
+        authService.completeProfile(user.getId(), "carol");
+
+        assertThat(userRepository.findById(user.getId()).get().getUsername()).isEqualTo("carol");
+    }
+
+    @Test
+    void completeProfile_throws_whenUsernameTaken() {
+        var user1 = userWithHash("alice@test.com", "hashed:pass");
+        user1.setUsername("alice");
+        userRepository.save(user1);
+
+        var user2 = userWithGoogleId("carol@test.com", "google-789", null);
+        userRepository.save(user2);
+
+        assertThatThrownBy(() -> authService.completeProfile(user2.getId(), "alice"))
+                .isInstanceOf(UsernameTakenException.class);
+    }
+
+    @Test
+    void completeProfile_throws_whenUserNotFound() {
+        assertThatThrownBy(() -> authService.completeProfile(UUID.randomUUID(), "newname"))
+                .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
     void getById_returnsUser_whenExists() {
         var user = userWithHash("alice@test.com", "hashed:password123");
         userRepository.save(user);
@@ -75,8 +153,6 @@ class AuthServiceTest {
                 .isInstanceOf(UserNotFoundException.class);
     }
 
-    // --- Helpers ---
-
     private User userWithHash(String email, String hash) {
         return User.builder()
                 .id(UUID.randomUUID())
@@ -87,7 +163,27 @@ class AuthServiceTest {
                 .build();
     }
 
-    // Fake: interprets encoded as "hashed:<raw>" so tests can control matching
+    private User userWithGoogleId(String email, String googleId, String username) {
+        return User.builder()
+                .id(UUID.randomUUID())
+                .username(username)
+                .email(email)
+                .googleId(googleId)
+                .systemRole(Role.USER)
+                .build();
+    }
+
+    static class FakeGoogleTokenValidator implements GoogleTokenValidatorPort {
+        GoogleUserInfo returnInfo;
+        boolean throwException = false;
+
+        @Override
+        public GoogleUserInfo validate(String idToken) {
+            if (throwException) throw new InvalidGoogleTokenException("invalid token");
+            return returnInfo;
+        }
+    }
+
     static class FakePasswordVerifier implements PasswordVerifier {
         @Override
         public boolean matches(String rawPassword, String encodedPassword) {
@@ -121,12 +217,17 @@ class AuthServiceTest {
 
         @Override
         public boolean existsByUsername(String username) {
-            return store.values().stream().anyMatch(u -> u.getUsername().equals(username));
+            return store.values().stream().anyMatch(u -> username.equals(u.getUsername()));
         }
 
         @Override
         public boolean existsByEmail(String email) {
             return store.values().stream().anyMatch(u -> u.getEmail().equals(email));
+        }
+
+        @Override
+        public Optional<User> findByGoogleId(String googleId) {
+            return store.values().stream().filter(u -> googleId.equals(u.getGoogleId())).findFirst();
         }
     }
 }

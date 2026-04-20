@@ -67,6 +67,9 @@ http://localhost:8080
 
 Local dev spins up all three services: frontend, backend, and PostgreSQL.
 
+Add .env file for local dev, check the example file.
+- JWT_SECRET: each dev can generate their own secret for local dev: openssl rand -base64 64
+
 ```bash
 cd local-env
 docker compose up --build

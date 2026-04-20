@@ -1,0 +1,3 @@
+predictorama.online, www.predictorama.online {
+    reverse_proxy frontend:80
+}

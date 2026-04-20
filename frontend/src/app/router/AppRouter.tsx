@@ -6,6 +6,7 @@ import GroupDetailsPage from '../../pages/GroupDetailsPage/GroupDetailsPage';
 import GroupsPage from '../../pages/GroupPage/GroupsPage';
 import HomePage from '../../pages/HomePage/HomePage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
+import OnboardingPage from '../../pages/OnboardingPage/OnboardingPage';
 import PredictionsPage from '../../pages/PredictionsPage/PredictionsPage';
 import TournamentPage from '../../pages/TournamentPage/TournamentPage';
 import { ROUTE_PATHS } from '../routePaths';
@@ -14,6 +15,14 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path={ROUTE_PATHS.login} element={<LoginPage />} />
+      <Route
+        path={ROUTE_PATHS.onboarding}
+        element={
+          <RequireAuth>
+            <OnboardingPage />
+          </RequireAuth>
+        }
+      />
       <Route
         element={
           <RequireAuth>

@@ -26,6 +26,8 @@ export type SavePredictionRequest = {
     predictedWinner: 'HOME' | 'AWAY' | 'DRAW';
 };
 
+import { apiFetch } from '../lib/apiClient';
+
 export type PredictionResponse = {
     predictionId: string;
     matchId: string;
@@ -45,11 +47,8 @@ export async function getPredictions(
     competition: string,
     groupId: string
 ): Promise<TournamentPredictionsResponse> {
-    const response = await fetch(
-        `/api/predictions?competition=${encodeURIComponent(competition)}&groupId=${groupId}`,
-        {
-            credentials: 'include',
-        }
+    const response = await apiFetch(
+        `/api/predictions?competition=${encodeURIComponent(competition)}&groupId=${groupId}`
     );
 
     if (!response.ok) {
@@ -62,12 +61,9 @@ export async function getPredictions(
 export async function savePrediction(
     payload: SavePredictionRequest
 ): Promise<PredictionResponse> {
-    const response = await fetch('/api/predictions', {
+    const response = await apiFetch('/api/predictions', {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     });
     if (!response.ok) {

@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/012-drop-unique-team-name.yaml
   - include:
       file: db/changelog/013-add-unique-match-external-id.yaml
+  - include:
+      file: db/changelog/014-add-google-auth.yaml

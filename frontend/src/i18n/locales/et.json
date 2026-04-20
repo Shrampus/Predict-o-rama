@@ -12,7 +12,19 @@
     "error": "Vale e-post või parool.",
     "signingIn": "Sisselogimine…",
     "signIn": "Logi sisse",
-    "devAccounts": "Testkontod — klõpsa täitmiseks"
+    "devAccounts": "Testkontod — klõpsa täitmiseks",
+    "or": "või",
+    "role": "Roll",
+    "googleError": "Google'i sisselogimine ebaõnnestus."
+  },
+  "onboarding": {
+    "title": "Tere tulemast!",
+    "subtitle": "Sisse logitud kui {{email}}. Vali kasutajanimi jätkamiseks.",
+    "usernameLabel": "Kasutajanimi",
+    "usernamePlaceholder": "nt. jalgpallifänn42",
+    "usernameTaken": "Kasutajanimi on juba võetud. Palun vali teine.",
+    "saving": "Salvestamine…",
+    "continue": "Jätka"
   },
   "tournament": {
     "roundOf16": "16 PARIMAT",
