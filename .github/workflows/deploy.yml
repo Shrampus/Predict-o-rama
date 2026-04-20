@@ -35,6 +35,8 @@ jobs:
           tags: |
             ghcr.io/shrampus/predictorama-frontend:latest
             ghcr.io/shrampus/predictorama-frontend:${{ github.sha }}
+          build-args: |
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
