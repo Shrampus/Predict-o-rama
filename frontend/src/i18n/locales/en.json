@@ -11,7 +11,19 @@
     "error": "Invalid email or password.",
     "signingIn": "Signing in…",
     "signIn": "Sign in",
-    "devAccounts": "Dev accounts — click to fill"
+    "devAccounts": "Dev accounts — click to fill",
+    "or": "or",
+    "role": "Role",
+    "googleError": "Google sign-in failed."
+  },
+  "onboarding": {
+    "title": "Welcome!",
+    "subtitle": "Signed in as {{email}}. Choose a username to continue.",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "e.g. footballfan42",
+    "usernameTaken": "Username is already taken. Please choose another.",
+    "saving": "Saving…",
+    "continue": "Continue"
   },
   "tournament": {
     "roundOf16": "ROUND OF 16",

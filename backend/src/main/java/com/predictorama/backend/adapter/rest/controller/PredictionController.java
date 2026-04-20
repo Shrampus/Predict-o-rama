@@ -1,6 +1,5 @@
 package com.predictorama.backend.adapter.rest.controller;
 
-import com.predictorama.backend.adapter.rest.SessionService;
 import com.predictorama.backend.adapter.rest.dto.CreatePredictionRequest;
 import com.predictorama.backend.adapter.rest.dto.PredictionResponse;
 import com.predictorama.backend.adapter.rest.dto.TournamentPredictionsResponse;
@@ -9,9 +8,9 @@ import com.predictorama.backend.domain.entity.Prediction;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.service.PredictionService;
 import com.predictorama.backend.domain.service.TournamentPredictionQueryService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,14 +22,16 @@ public class PredictionController {
 
     private final PredictionService predictionService;
     private final TournamentPredictionQueryService tournamentPredictionQueryService;
-    private final SessionService sessionService;
+
+    private UUID currentUserId() {
+        return UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    }
 
     @PostMapping
     public PredictionResponse createPrediction(
-            @Valid @RequestBody CreatePredictionRequest request,
-            HttpSession session
+            @Valid @RequestBody CreatePredictionRequest request
     ) {
-        UUID userId = sessionService.getUserIdOrThrow(session);
+        UUID userId = currentUserId();
 
         Prediction savedPrediction = predictionService.savePrediction(
                 userId,
@@ -47,10 +48,9 @@ public class PredictionController {
     @GetMapping
     public TournamentPredictionsResponse getTournamentPredictions(
             @RequestParam String competition,
-            @RequestParam UUID groupId,
-            HttpSession session
+            @RequestParam UUID groupId
     ) {
-        UUID userId = sessionService.getUserIdOrThrow(session);
+        UUID userId = currentUserId();
 
         return TournamentPredictionsRestMapper.toResponse(
                 tournamentPredictionQueryService.getTournamentPredictions(

@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-drop-unique-team-name
+      author: codex
+      changes:
+        - dropUniqueConstraint:
+            tableName: teams
+            constraintName: teams_name_key

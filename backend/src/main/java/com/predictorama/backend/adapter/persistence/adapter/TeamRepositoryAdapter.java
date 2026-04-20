@@ -40,7 +40,7 @@ public class TeamRepositoryAdapter implements TeamRepositoryPort {
     }
 
     @Override
-    public Optional<Team> findByName(String name) {
-        return jpaRepository.findByName(name).map(TeamMapper::toDomain);
+    public Optional<Team> findByExternalId(String externalId) {
+        return jpaRepository.findByExternalId(externalId).map(TeamMapper::toDomain);
     }
 }
