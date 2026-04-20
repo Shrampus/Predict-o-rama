@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
 
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import type { WinningTeam } from '../TournamentConstants';
@@ -381,6 +381,8 @@ export function useMatchPredictionForm({
         };
     }, [state.showSuccessHighlight, state.showSuccessMessage]);
 
+    const isSubmittingRef = useRef(false);
+
     const isLocked = isMatchLocked(match);
     const isDirty = computeIsDirty(state);
     const hasExistingPrediction = state.baseline.hasPrediction;
@@ -398,6 +400,10 @@ export function useMatchPredictionForm({
         (!hasExistingPrediction || isDirty);
 
     async function submit() {
+        if (isSubmittingRef.current) {
+            return;
+        }
+
         dispatch({ type: 'submit_attempt' });
 
         if (validationResult.errorCode !== null) {
@@ -414,31 +420,39 @@ export function useMatchPredictionForm({
             return;
         }
 
-        const result: PredictActionResult = await onPredict(
-            match.matchId,
-            validationResult.parsedScores.home,
-            validationResult.parsedScores.away,
-            state.winningTeam
-        );
+        isSubmittingRef.current = true;
+        try {
+            const result: PredictActionResult = await onPredict(
+                match.matchId,
+                validationResult.parsedScores.home,
+                validationResult.parsedScores.away,
+                state.winningTeam
+            );
 
-        if (!result.ok) {
+            if (!result.ok) {
+                if (result.skipped) {
+                    return;
+                }
+                dispatch({
+                    type: 'submit_failure',
+                    error: result.error || defaultSaveErrorMessage,
+                });
+                return;
+            }
+
             dispatch({
-                type: 'submit_failure',
-                error: result.error || defaultSaveErrorMessage,
+                type: 'submit_success',
+                baseline: {
+                    homeScore: String(validationResult.parsedScores.home),
+                    awayScore: String(validationResult.parsedScores.away),
+                    winningTeam: state.winningTeam,
+                    hasPrediction: true,
+                    baselineSignature: `local:${match.matchId}:${validationResult.parsedScores.home}:${validationResult.parsedScores.away}:${state.winningTeam}`,
+                },
             });
-            return;
+        } finally {
+            isSubmittingRef.current = false;
         }
-
-        dispatch({
-            type: 'submit_success',
-            baseline: {
-                homeScore: String(validationResult.parsedScores.home),
-                awayScore: String(validationResult.parsedScores.away),
-                winningTeam: state.winningTeam,
-                hasPrediction: true,
-                baselineSignature: `local:${match.matchId}:${validationResult.parsedScores.home}:${validationResult.parsedScores.away}:${state.winningTeam}`,
-            },
-        });
     }
 
     return {

@@ -14,10 +14,10 @@ export type SavedPredictionPayload = {
 
 export type SavePredictionResult =
   | { ok: true; prediction: SavedPredictionPayload }
-  | { ok: false; error?: string };
+  | { ok: false; skipped?: true; error?: string };
 
 type UsePredictionSaverReturn = {
-  savingMatchId: string | null;
+  isSavingMatch: (matchId: string) => boolean;
   saveMatchPrediction: (
     groupId: string,
     matchId: string,
@@ -29,8 +29,8 @@ type UsePredictionSaverReturn = {
 
 export function usePredictionSaver(): UsePredictionSaverReturn {
   // Ref guards overlap synchronously between calls; state drives reactive UI rendering.
-  const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
-  const activeSaveMatchIdRef = useRef<string | null>(null);
+  const [savingMatchIds, setSavingMatchIds] = useState<Set<string>>(new Set());
+  const activeSaveMatchIdsRef = useRef<Set<string>>(new Set());
 
   async function saveMatchPrediction(
     groupId: string,
@@ -39,16 +39,17 @@ export function usePredictionSaver(): UsePredictionSaverReturn {
     awayScore: number,
     winningTeam: WinningTeam,
   ): Promise<SavePredictionResult> {
-    if (activeSaveMatchIdRef.current !== null) {
-      return {
-        ok: false,
-        error: undefined,
-      };
+    if (activeSaveMatchIdsRef.current.has(matchId)) {
+      return { ok: false, skipped: true };
     }
 
     try {
-      activeSaveMatchIdRef.current = matchId;
-      setSavingMatchId(matchId);
+      activeSaveMatchIdsRef.current.add(matchId);
+      setSavingMatchIds((previous) => {
+        const next = new Set(previous);
+        next.add(matchId);
+        return next;
+      });
 
       const response = await savePrediction({
         groupId,
@@ -74,12 +75,20 @@ export function usePredictionSaver(): UsePredictionSaverReturn {
         error: error instanceof Error ? error.message : undefined,
       };
     } finally {
-      if (activeSaveMatchIdRef.current === matchId) {
-        activeSaveMatchIdRef.current = null;
-      }
-      setSavingMatchId(null);
+      activeSaveMatchIdsRef.current.delete(matchId);
+      setSavingMatchIds((previous) => {
+        if (!previous.has(matchId)) {
+          return previous;
+        }
+        const next = new Set(previous);
+        next.delete(matchId);
+        return next;
+      });
     }
   }
 
-  return { savingMatchId, saveMatchPrediction };
+  return {
+    isSavingMatch: (matchId: string) => savingMatchIds.has(matchId),
+    saveMatchPrediction,
+  };
 }

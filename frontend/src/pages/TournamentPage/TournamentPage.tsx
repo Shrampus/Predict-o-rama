@@ -49,7 +49,7 @@ function TournamentPage() {
         useTournamentMatches(resolvedTournament, resolvedGroupId);
     const { t } = useTranslation();
 
-    const { savingMatchId, saveMatchPrediction } = usePredictionSaver();
+    const { isSavingMatch, saveMatchPrediction } = usePredictionSaver();
 
     if (!groupId || !tournament) {
         return <Navigate to={ROUTE_PATHS.groups} replace />;
@@ -84,7 +84,7 @@ function TournamentPage() {
             return { ok: true };
         }
 
-        return { ok: false, error: saveResult.error };
+        return { ok: false, skipped: saveResult.skipped, error: saveResult.error };
     }
 
     return (
@@ -121,7 +121,7 @@ function TournamentPage() {
                                 key={match.matchId}
                                 match={match}
                                 onPredict={handlePredict}
-                                isSaving={savingMatchId === match.matchId}
+                                isSaving={isSavingMatch(match.matchId)}
                             />
                         ))}
                 </div>
