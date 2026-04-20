@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -61,8 +60,8 @@ public class MatchResultSyncService {
                             .awayTeam(savedAwayTeam)
                             .matchStatus(externalMatch.getMatchStatus())
                             .kickoffTime(externalMatch.getKickoffTime())
-                            .scores(List.of())
-                            .winner(null)
+                            .scores(externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
                             .externalId(externalMatch.getExternalId())
                             .build();
 
