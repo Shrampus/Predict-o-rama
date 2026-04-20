@@ -61,8 +61,8 @@ public class MatchResultSyncService {
                             .awayTeam(savedAwayTeam)
                             .matchStatus(externalMatch.getMatchStatus())
                             .kickoffTime(externalMatch.getKickoffTime())
-                            .scores(List.of())
-                            .winner(null)
+                            .scores(externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
                             .externalId(externalMatch.getExternalId())
                             .build();
 
