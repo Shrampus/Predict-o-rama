@@ -47,7 +47,7 @@ public class AuthService {
     }
 
     public User completeProfile(UUID userId, String username) {
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = getById(userId);
         if (userRepository.existsByUsername(username)) {
             throw new UsernameTakenException(username);
         };
@@ -55,6 +55,7 @@ public class AuthService {
         userRepository.save(user);
         return user;
     }
+
     public User getById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));

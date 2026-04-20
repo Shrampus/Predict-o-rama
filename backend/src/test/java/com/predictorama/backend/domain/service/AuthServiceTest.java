@@ -31,8 +31,6 @@ class AuthServiceTest {
         authService = new AuthService(userRepository, googleTokenValidator, new FakePasswordVerifier());
     }
 
-    // --- login ---
-
     @Test
     void login_returnsUser_whenCredentialsAreValid() {
         var user = userWithHash("alice@test.com", "hashed:password123");
@@ -66,8 +64,6 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login("alice@test.com", "password123"))
                 .isInstanceOf(InvalidCredentialsException.class);
     }
-
-    // --- loginWithGoogle ---
 
     @Test
     void loginWithGoogle_createsNewUser_whenGoogleIdNotFound() {
@@ -112,8 +108,6 @@ class AuthServiceTest {
                 .isInstanceOf(InvalidGoogleTokenException.class);
     }
 
-    // --- completeProfile ---
-
     @Test
     void completeProfile_setsUsername_whenAvailable() {
         var user = userWithGoogleId("carol@test.com", "google-789", null);
@@ -140,10 +134,8 @@ class AuthServiceTest {
     @Test
     void completeProfile_throws_whenUserNotFound() {
         assertThatThrownBy(() -> authService.completeProfile(UUID.randomUUID(), "newname"))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(UserNotFoundException.class);
     }
-
-    // --- getById ---
 
     @Test
     void getById_returnsUser_whenExists() {
@@ -160,8 +152,6 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.getById(UUID.randomUUID()))
                 .isInstanceOf(UserNotFoundException.class);
     }
-
-    // --- Helpers ---
 
     private User userWithHash(String email, String hash) {
         return User.builder()
@@ -194,7 +184,6 @@ class AuthServiceTest {
         }
     }
 
-    // Fake: interprets encoded as "hashed:<raw>" so tests can control matching
     static class FakePasswordVerifier implements PasswordVerifier {
         @Override
         public boolean matches(String rawPassword, String encodedPassword) {

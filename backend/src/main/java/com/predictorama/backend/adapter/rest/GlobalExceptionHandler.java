@@ -6,7 +6,9 @@ import com.predictorama.backend.domain.exception.GroupAccessDeniedException;
 import com.predictorama.backend.domain.exception.GroupMemberNotFoundException;
 import com.predictorama.backend.domain.exception.GroupNotFoundException;
 import com.predictorama.backend.domain.exception.InvalidCredentialsException;
+import com.predictorama.backend.domain.exception.InvalidGoogleTokenException;
 import com.predictorama.backend.domain.exception.TournamentAlreadyLinkedException;
+import com.predictorama.backend.domain.exception.UsernameTakenException;
 import com.predictorama.backend.domain.exception.TournamentNotLinkedException;
 import com.predictorama.backend.domain.exception.TournamentNotFoundException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
@@ -30,6 +32,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleUserNotFound(UserNotFoundException ex) {
         return error(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidGoogleTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidGoogleToken(InvalidGoogleTokenException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "INVALID_GOOGLE_TOKEN", ex.getMessage());
+    }
+
+    @ExceptionHandler(UsernameTakenException.class)
+    public ResponseEntity<ApiErrorResponse> handleUsernameTaken(UsernameTakenException ex) {
+        return error(HttpStatus.CONFLICT, "USERNAME_TAKEN", ex.getMessage());
     }
 
     @ExceptionHandler(AlreadyMemberException.class)
