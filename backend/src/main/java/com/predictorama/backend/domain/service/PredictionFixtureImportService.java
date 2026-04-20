@@ -5,7 +5,6 @@ import com.predictorama.backend.domain.entity.Team;
 import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
-import com.predictorama.backend.domain.port.persistence.TeamRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -24,7 +22,7 @@ public class PredictionFixtureImportService {
 
     private final FootballDataPort footballDataPort;
     private final MatchRepositoryPort matchRepositoryPort;
-    private final TeamRepositoryPort teamRepositoryPort;
+    private final TeamSyncService teamSyncService;
     private final TournamentRepositoryPort tournamentRepositoryPort;
     private final CompetitionCatalog competitionCatalog;
 
@@ -96,59 +94,27 @@ public class PredictionFixtureImportService {
             return false;
         }
 
+        if (isBlank(match.getHomeTeam().getExternalId())) {
+            log.warn("Skipping imported match externalId={} because homeTeam.externalId is missing", match.getExternalId());
+            return false;
+        }
+
         if (isBlank(match.getAwayTeam().getName())) {
             log.warn("Skipping imported match externalId={} because awayTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getExternalId())) {
+            log.warn("Skipping imported match externalId={} because awayTeam.externalId is missing", match.getExternalId());
             return false;
         }
 
         return true;
     }
 
-    private Team saveOrGetTeam(Team incomingTeam) {
-        if (incomingTeam == null || isBlank(incomingTeam.getName())) {
-            throw new IllegalArgumentException("Cannot save team with missing name");
-        }
-
-        return teamRepositoryPort.findByName(incomingTeam.getName())
-                .map(existingTeam -> {
-                    String existingImage = existingTeam.getImageUrl();
-                    String incomingImage = incomingTeam.getImageUrl();
-
-                    boolean imageChanged =
-                            incomingImage != null &&
-                            !Objects.equals(existingImage, incomingImage);
-
-                    if (!imageChanged) {
-                        return existingTeam;
-                    }
-
-                    Team updatedTeam = Team.builder()
-                            .id(existingTeam.getId())
-                            .name(existingTeam.getName())
-                            .imageUrl(incomingImage)
-                            .build();
-
-                    Team savedTeam = teamRepositoryPort.save(updatedTeam);
-                    log.info("Updated team image in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
-                    return savedTeam;
-                })
-                .orElseGet(() -> {
-                    Team savedTeam = teamRepositoryPort.save(
-                            Team.builder()
-                                    .id(UUID.randomUUID())
-                                    .name(incomingTeam.getName())
-                                    .imageUrl(incomingTeam.getImageUrl())
-                                    .build()
-                    );
-
-                    log.info("Created team in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
-                    return savedTeam;
-                });
-    }
-
     private Match saveOrUpdateMatch(Match externalMatch, Tournament tournament) {
-        Team savedHomeTeam = saveOrGetTeam(externalMatch.getHomeTeam());
-        Team savedAwayTeam = saveOrGetTeam(externalMatch.getAwayTeam());
+        Team savedHomeTeam = teamSyncService.saveOrGetTeam(externalMatch.getHomeTeam());
+        Team savedAwayTeam = teamSyncService.saveOrGetTeam(externalMatch.getAwayTeam());
 
         return matchRepositoryPort.findByExternalId(externalMatch.getExternalId())
                 .map(existingMatch -> {

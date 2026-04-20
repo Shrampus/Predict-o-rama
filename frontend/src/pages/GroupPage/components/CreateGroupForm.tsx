@@ -1,4 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import CopyInviteButton from '../../../components/ui/CopyInviteButton';
 import type { GroupResponse } from '../../../services/groupApi';
@@ -26,14 +27,16 @@ function CreateGroupForm({
   handleChange,
   handleSubmit,
 }: CreateGroupFormProps) {
+  const { t } = useTranslation();
+
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-2xl px-6 py-5 shadow-sm">
+    <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 sm:px-6 py-5 shadow-sm">
       <button
         onClick={toggleForm}
         className="flex items-center gap-1 text-gray-800 font-semibold hover:text-gray-600 transition-colors"
       >
         {isFormOpen ? <Minus size={16} /> : <Plus size={16} />}
-        {isFormOpen ? 'Add new group' : 'Add new group'}
+        {t('groups.addNewGroup')}
       </button>
 
       {isFormOpen && (
@@ -45,7 +48,7 @@ function CreateGroupForm({
             name="name"
             value={name}
             onChange={handleChange}
-            placeholder="Group name"
+            placeholder={t('groups.groupName')}
             className="flex-1 min-w-0 border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm
                        focus:outline-none focus:ring-2 focus:ring-gray-400"
             required
@@ -55,7 +58,7 @@ function CreateGroupForm({
             name="description"
             value={description}
             onChange={handleChange}
-            placeholder="Description"
+            placeholder={t('groups.description')}
             className="flex-1 min-w-0 border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm
                        focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
@@ -63,22 +66,22 @@ function CreateGroupForm({
             type="submit"
             disabled={isLoading}
             className="bg-gray-600 text-white px-5 py-2 rounded-lg text-sm font-semibold
-                       hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap"
+                       hover:bg-gray-700 disabled:opacity-50 whitespace-nowrap sm:w-auto w-full"
           >
-            {isLoading ? 'Creating...' : 'Create Group'}
+            {isLoading ? t('groups.creating') : t('groups.createGroup')}
           </button>
         </form>
       )}
 
       {createdGroup && (
         <div className="mt-3">
-          <p className="text-green-700 text-sm font-medium">Group created!</p>
+          <p className="text-green-700 text-sm font-medium">{t('groups.groupCreated')}</p>
           <p className="text-sm text-slate-600 mt-1 flex items-center gap-1">
-            Invite code: <span className="font-mono">{createdGroup.inviteCode}</span>
+            {t('groups.inviteCode')} <span className="font-mono">{createdGroup.inviteCode}</span>
             <CopyInviteButton inviteCode={createdGroup.inviteCode} />
           </p>
           <p className="text-xs text-slate-400 mt-1">
-            Share this code so others can join your group.
+            {t('groups.shareCode')}
           </p>
         </div>
       )}
