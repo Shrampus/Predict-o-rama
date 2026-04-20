@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-init
+      author: hlp
+      comment: Placeholder changeset to validate Liquibase is configured correctly
+      changes:
+        - sql:
+            sql: SELECT 1

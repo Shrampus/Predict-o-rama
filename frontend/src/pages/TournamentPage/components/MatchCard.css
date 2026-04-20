@@ -1,0 +1,27 @@
+.winnerBtnBase {
+    flex: 1;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.15s ease-in-out;
+}
+
+.winnerBtnActive {
+    background-color: rgb(21 128 61);
+    color: white;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.winnerBtnInactive {
+    background-color: white;
+    color: rgb(148 163 184);
+}
+
+.winnerBtnInactive:hover {
+    background-color: rgb(241 245 249);
+}

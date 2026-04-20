@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-seed-test-groups
+      author: dev
+      context: dev
+      changes:
+        - insert:
+            tableName: groups
+            columns:
+              - column: { name: id, value: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
+              - column: { name: owner_id, value: '00000000-0000-0000-0000-000000000002' } # bob
+              - column: { name: invite_code, value: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' }
+              - column: { name: name, value: "Bob's dev group" }
+              - column: { name: description, value: 'Seeded dev group for predictions flow' }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }
+
+        - insert:
+            tableName: group_members
+            columns:
+              - column: { name: id, value: 'cccccccc-cccc-cccc-cccc-cccccccccccc' }
+              - column: { name: user_id, value: '00000000-0000-0000-0000-000000000002' } # bob
+              - column: { name: group_id, value: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
+              - column: { name: status, value: ACTIVE }
+              - column: { name: member_role, value: ADMIN }
+              - column: { name: created_at, valueDate: 'now()' }
+              - column: { name: updated_at, valueDate: 'now()' }

@@ -1,0 +1,37 @@
+package com.predictorama.backend.adapter.persistence.entity;
+
+import com.predictorama.backend.domain.entity.Role;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserEntity extends BaseEntity{
+
+    @Id
+    private UUID id;
+
+    @Column(unique = true, length = 50, nullable = true)
+    private String username;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "system_role", nullable = false)
+    private Role systemRole;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+    @Column(name = "google_id", unique = true, nullable = true)
+    private String googleId;
+}

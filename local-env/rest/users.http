@@ -1,0 +1,7 @@
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "email": "{{$timestamp}}@user.com",
+  "username": "{{$timestamp}}"
+}
