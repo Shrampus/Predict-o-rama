@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 012-add-google-id-to-users
+      id: 014-add-google-id-to-users
       author: hlp
       changes:
         - addColumn:
