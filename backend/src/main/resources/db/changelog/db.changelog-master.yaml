@@ -20,6 +20,10 @@ databaseChangeLog:
   - include:
       file: db/changelog/010-create-group-tournaments.yaml
   - include:
-      file: db/changelog/011-add-unique-match-external-id.yaml
+      file: db/changelog/011-add-team-external-id.yaml
   - include:
-      file: db/changelog/012-add-google-auth.yaml
+      file: db/changelog/012-drop-unique-team-name.yaml
+  - include:
+      file: db/changelog/013-add-unique-match-external-id.yaml
+  - include:
+      file: db/changelog/014-add-google-auth.yaml

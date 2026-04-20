@@ -11,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Team {
     private UUID id;
+    private String externalId;
     private String name;
     private String imageUrl;
 }
