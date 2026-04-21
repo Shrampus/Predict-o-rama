@@ -16,5 +16,6 @@ public class UpcomingMatchDto {
     private String awayTeamName;
     private String awayTeamImage;
     private Instant kickoffTime;
+    private String tournamentName;
     private List<GroupReferenceDto> groups;
 }

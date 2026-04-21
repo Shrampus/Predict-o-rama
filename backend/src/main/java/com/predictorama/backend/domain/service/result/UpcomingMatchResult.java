@@ -12,5 +12,6 @@ import java.util.List;
 public class UpcomingMatchResult {
     private Match match;
     private String competitionCode;
+    private String tournamentName;
     private List<Group> userGroups;
 }

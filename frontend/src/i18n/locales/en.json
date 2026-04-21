@@ -39,6 +39,12 @@
     "group": "Group {{letter}}",
     "pts": "pts"
   },
+  "upcomingMatches": {
+    "title": "Upcoming Matches",
+    "loading": "Loading upcoming matches...",
+    "error": "Failed to load upcoming matches.",
+    "empty": "No upcoming matches."
+  },
   "groups": {
     "myGroups": "My Groups",
     "loading": "Loading...",

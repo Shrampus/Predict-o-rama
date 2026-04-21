@@ -39,6 +39,12 @@
     "group": "Grupp {{letter}}",
     "pts": "pts"
   },
+  "upcomingMatches": {
+    "title": "Eelseisvad mängud",
+    "loading": "Laadin eelseisvaid mänge...",
+    "error": "Eelseisvate mängude laadimine ebaõnnestus.",
+    "empty": "Eelseisvaid mänge pole."
+  },
   "groups": {
     "myGroups": "Minu grupid",
     "loading": "Laadimine...",

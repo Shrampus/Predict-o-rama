@@ -11,6 +11,6 @@ export interface UpcomingMatch {
     homeTeamImage: string;
     awayTeamImage: string;
     kickoffTime: string;
+    tournamentName: string | null;
     groups: GroupReference[];
-
 }

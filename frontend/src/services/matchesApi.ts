@@ -7,6 +7,7 @@ interface UpcomingMatchResponse {
     awayTeamName: string;
     awayTeamImage: string;
     kickoffTime: string;
+    tournamentName: string | null;
     groups: { groupId: string; groupName: string; competitionId: string }[];
 }
 
@@ -18,6 +19,7 @@ function mapResponse(data: UpcomingMatchResponse[]): UpcomingMatch[] {
         awayTeamName: m.awayTeamName,
         awayTeamImage: m.awayTeamImage,
         kickoffTime: m.kickoffTime,
+        tournamentName: m.tournamentName,
         groups: m.groups,
     }));
 }

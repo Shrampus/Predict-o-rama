@@ -54,13 +54,18 @@ public class UserUpcomingMatchQueryService {
                                     .contains(match.getTournamentId()))
                             .toList();
 
-                    String competitionCode = tournamentRepositoryPort.findById(match.getTournamentId())
+                    var tournament = tournamentRepositoryPort.findById(match.getTournamentId());
+                    String competitionCode = tournament
                             .map(t -> competitionCatalog.toCompetitionCode(t.getName()))
+                            .orElse(null);
+                    String tournamentName = tournament
+                            .map(t -> t.getName())
                             .orElse(null);
 
                     return UpcomingMatchResult.builder()
                             .match(match)
                             .competitionCode(competitionCode)
+                            .tournamentName(tournamentName)
                             .userGroups(relevantGroups)
                             .build();
                 })

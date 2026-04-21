@@ -26,6 +26,7 @@ public final class UpcomingMatchRestMapper {
                 .awayTeamName(match.getAwayTeam().getName())
                 .awayTeamImage(match.getAwayTeam().getImageUrl())
                 .kickoffTime(match.getKickoffTime())
+                .tournamentName(result.getTournamentName())
                 .groups(groups)
                 .build();
     }

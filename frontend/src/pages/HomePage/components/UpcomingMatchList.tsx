@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import type { UpcomingMatch } from "../types";
 import UpcomingMatchCard from './UpcomingMatchCard';
-import { groupMatchesByGroup } from '../utils/upcomingMatchUtils';
+import { groupMatchesByTournament } from '../utils/upcomingMatchUtils';
 
 type UpcomingMatchListProps = {
     matches: UpcomingMatch[];
@@ -9,14 +10,16 @@ type UpcomingMatchListProps = {
 };
 
 function UpcomingMatchList({ matches, isLoading, hasError }: UpcomingMatchListProps) {
+    const { t } = useTranslation();
+
     if (isLoading) {
-        return <p className="text-slate-400 text-sm">Loading upcoming matches...</p>;
+        return <p className="text-slate-400 text-sm">{t('upcomingMatches.loading')}</p>;
     }
     if (hasError) {
-        return <p className="text-red-500 text-sm">Failed to load upcoming matches.</p>;
+        return <p className="text-red-500 text-sm">{t('upcomingMatches.error')}</p>;
     }
     if (matches.length === 0) {
-        return <p className="text-slate-400 text-sm">No upcoming matches.</p>;
+        return <p className="text-slate-400 text-sm">{t('upcomingMatches.empty')}</p>;
     }
 
     const hasGroups = matches.some(m => m.groups.length > 0);
@@ -31,17 +34,17 @@ function UpcomingMatchList({ matches, isLoading, hasError }: UpcomingMatchListPr
         );
     }
 
-    const grouped = groupMatchesByGroup(matches);
+    const grouped = groupMatchesByTournament(matches);
 
     return (
         <div className="space-y-8">
-            {[...grouped.values()].map(({ group, matches: groupMatches }) => (
-                <div key={group.groupId}>
+            {[...grouped.values()].map(({ tournamentName, matches: tournamentMatches }) => (
+                <div key={tournamentName}>
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-400 mb-3">
-                        {group.groupName}
+                        {tournamentName}
                     </h3>
                     <div className="space-y-4">
-                        {groupMatches.map((match) => (
+                        {tournamentMatches.map((match) => (
                             <UpcomingMatchCard key={match.matchId} match={match} />
                         ))}
                     </div>
