@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,6 +48,7 @@ public class TournamentPredictionQueryService {
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
         List<TournamentMatchPredictionView> responseMatches = matches.stream()
+                .sorted(Comparator.comparing(Match::getKickoffTime))
                 .map(match -> toView(match, predictionsByMatchId.get(match.getId())))
                 .toList();
 

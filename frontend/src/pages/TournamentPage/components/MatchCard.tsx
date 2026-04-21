@@ -64,10 +64,8 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
         : hasExistingPrediction && !isDirty
             ? 'bg-green-700 text-white'
             : 'bg-orange-600 text-white hover:bg-orange-700';
-    const metadataParts = [
-        match.groupIdentifier ? match.groupIdentifier : null,
-        match.matchdayIdentifier != null ? `Matchday ${match.matchdayIdentifier}` : null,
-    ].filter(Boolean);
+    const shouldShowGroupIdentifier =
+        Boolean(match.groupIdentifier) && !match.roundIdentifier?.includes(match.groupIdentifier ?? '');
 
     return (
         <div className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm group flex flex-col sm:flex-row items-center gap-8">
@@ -87,9 +85,9 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
                         {match.roundIdentifier}
                     </p>
                 ) : null}
-                {metadataParts.length > 0 ? (
+                {shouldShowGroupIdentifier ? (
                     <p className="text-[11px] text-slate-400">
-                        {metadataParts.join(' · ')}
+                        {match.groupIdentifier}
                     </p>
                 ) : null}
                 <div className="flex w-full items-center justify-center gap-3">
