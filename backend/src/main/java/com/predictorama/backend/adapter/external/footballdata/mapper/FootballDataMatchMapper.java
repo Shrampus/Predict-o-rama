@@ -1,6 +1,7 @@
 package com.predictorama.backend.adapter.external.footballdata.mapper;
 
 import com.predictorama.backend.adapter.external.footballdata.FootballDataMatchResponse;
+import com.predictorama.backend.adapter.external.footballdata.FootballDataSeasonResponse;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
@@ -72,20 +73,36 @@ public final class FootballDataMatchMapper {
     }
 
     public static String extractSeasonIdentifier(FootballDataMatchResponse matchResponse) {
-        if (matchResponse == null || matchResponse.getSeason() == null || matchResponse.getSeason().getId() == null) {
+        if (matchResponse == null) {
             return null;
         }
 
-        return String.valueOf(matchResponse.getSeason().getId());
+        return extractSeasonIdentifier(matchResponse.getSeason());
     }
 
     public static String extractSeasonLabel(FootballDataMatchResponse matchResponse) {
-        if (matchResponse == null || matchResponse.getSeason() == null) {
+        if (matchResponse == null) {
             return null;
         }
 
-        String startDate = normalize(matchResponse.getSeason().getStartDate());
-        String endDate = normalize(matchResponse.getSeason().getEndDate());
+        return extractSeasonLabel(matchResponse.getSeason());
+    }
+
+    public static String extractSeasonIdentifier(FootballDataSeasonResponse seasonResponse) {
+        if (seasonResponse == null || seasonResponse.getId() == null) {
+            return null;
+        }
+
+        return String.valueOf(seasonResponse.getId());
+    }
+
+    public static String extractSeasonLabel(FootballDataSeasonResponse seasonResponse) {
+        if (seasonResponse == null) {
+            return null;
+        }
+
+        String startDate = normalize(seasonResponse.getStartDate());
+        String endDate = normalize(seasonResponse.getEndDate());
 
         if (startDate == null || endDate == null || startDate.length() < 4 || endDate.length() < 4) {
             return null;

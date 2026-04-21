@@ -1,5 +1,6 @@
 package com.predictorama.backend.domain.service;
 
+import com.predictorama.backend.domain.entity.CompetitionSeasonMetadata;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
@@ -41,11 +42,12 @@ public class PredictionFixtureImportService {
 
         List<Match> externalMatches = footballDataPort.getMatches(competition, dateFrom, dateTo);
         Tournament tournament = getOrCreateTournament(competition);
-        Tournament tournamentWithSeasonIdentifier = withSeasonIdentifier(tournament, externalMatches);
+        Tournament tournamentWithSeasonMetadata = withSeasonMetadata(tournament, externalMatches);
+        Tournament hydratedTournament = hydrateMissingSeasonMetadata(competition, tournamentWithSeasonMetadata);
 
         return externalMatches.stream()
                 .filter(this::isValidExternalMatch)
-                .map(match -> saveOrUpdateMatch(match, tournamentWithSeasonIdentifier))
+                .map(match -> saveOrUpdateMatch(match, hydratedTournament))
                 .toList();
     }
 
@@ -57,18 +59,18 @@ public class PredictionFixtureImportService {
         String tournamentName = competitionCatalog.toTournamentName(competition);
 
         return tournamentRepositoryPort.findByNameIgnoreCase(tournamentName)
-        .orElseGet(() -> {
-            Tournament savedTournament = tournamentRepositoryPort.save(
-                    Tournament.builder()
-                            .id(UUID.randomUUID())
-                            .name(tournamentName)
-                            .sport(Tournament.Sport.FOOTBALL)
-                            .build()
-            );
+                .orElseGet(() -> {
+                    Tournament savedTournament = tournamentRepositoryPort.save(
+                            Tournament.builder()
+                                    .id(UUID.randomUUID())
+                                    .name(tournamentName)
+                                    .sport(Tournament.Sport.FOOTBALL)
+                                    .build()
+                    );
 
-            log.info("Created tournament in DB name={} id={}", savedTournament.getName(), savedTournament.getId());
-            return savedTournament;
-        });
+                    log.info("Created tournament in DB name={} id={}", savedTournament.getName(), savedTournament.getId());
+                    return savedTournament;
+                });
     }
 
     private boolean isValidExternalMatch(Match match) {
@@ -177,7 +179,7 @@ public class PredictionFixtureImportService {
         return homeTeam.getName() + " vs " + awayTeam.getName();
     }
 
-    private Tournament withSeasonIdentifier(Tournament tournament, List<Match> externalMatches) {
+    private Tournament withSeasonMetadata(Tournament tournament, List<Match> externalMatches) {
         String seasonIdentifier = externalMatches.stream()
                 .map(Match::getSeasonIdentifier)
                 .filter(value -> value != null && !value.isBlank())
@@ -189,8 +191,32 @@ public class PredictionFixtureImportService {
                 .findFirst()
                 .orElse(null);
 
-        boolean seasonIdentifierChanged = seasonIdentifier != null && !seasonIdentifier.equals(tournament.getSeasonIdentifier());
-        boolean seasonLabelChanged = seasonLabel != null && !seasonLabel.equals(tournament.getSeasonLabel());
+        return updateTournamentSeasonMetadata(
+                tournament,
+                CompetitionSeasonMetadata.builder()
+                        .seasonIdentifier(seasonIdentifier)
+                        .seasonLabel(seasonLabel)
+                        .build()
+        );
+    }
+
+    private Tournament hydrateMissingSeasonMetadata(String competition, Tournament tournament) {
+        if (!isBlank(tournament.getSeasonIdentifier()) && !isBlank(tournament.getSeasonLabel())) {
+            return tournament;
+        }
+
+        return footballDataPort.getCurrentSeasonMetadata(competition)
+                .map(metadata -> updateTournamentSeasonMetadata(tournament, metadata))
+                .orElse(tournament);
+    }
+
+    private Tournament updateTournamentSeasonMetadata(Tournament tournament, CompetitionSeasonMetadata metadata) {
+        String seasonIdentifier = metadata.getSeasonIdentifier();
+        String seasonLabel = metadata.getSeasonLabel();
+        boolean seasonIdentifierChanged = !isBlank(seasonIdentifier)
+                && !seasonIdentifier.equals(tournament.getSeasonIdentifier());
+        boolean seasonLabelChanged = !isBlank(seasonLabel)
+                && !seasonLabel.equals(tournament.getSeasonLabel());
 
         if (!seasonIdentifierChanged && !seasonLabelChanged) {
             return tournament;
@@ -199,8 +225,8 @@ public class PredictionFixtureImportService {
         Tournament updatedTournament = Tournament.builder()
                 .id(tournament.getId())
                 .name(tournament.getName())
-                .seasonLabel(seasonLabel != null ? seasonLabel : tournament.getSeasonLabel())
-                .seasonIdentifier(seasonIdentifier != null ? seasonIdentifier : tournament.getSeasonIdentifier())
+                .seasonLabel(!isBlank(seasonLabel) ? seasonLabel : tournament.getSeasonLabel())
+                .seasonIdentifier(!isBlank(seasonIdentifier) ? seasonIdentifier : tournament.getSeasonIdentifier())
                 .sport(tournament.getSport())
                 .build();
 

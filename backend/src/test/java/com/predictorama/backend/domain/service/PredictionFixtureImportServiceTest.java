@@ -1,5 +1,6 @@
 package com.predictorama.backend.domain.service;
 
+import com.predictorama.backend.domain.entity.CompetitionSeasonMetadata;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
@@ -152,12 +153,86 @@ class PredictionFixtureImportServiceTest {
         assertThat(tournamentRepository.findAll()).singleElement().extracting(Tournament::getSeasonLabel).isEqualTo("2025/26");
     }
 
+    @Test
+    void importMatches_hydratesSeasonMetadataFromCompetitionResourceWhenMatchWindowIsEmpty() {
+        footballDataPort.currentSeasonMetadata = Optional.of(CompetitionSeasonMetadata.builder()
+                .seasonIdentifier("999")
+                .seasonLabel("2026")
+                .build());
+
+        List<Match> importedMatches = service.importMatches("WC", LocalDate.of(2026, 4, 19), LocalDate.of(2026, 4, 21));
+
+        assertThat(importedMatches).isEmpty();
+        Tournament tournament = tournamentRepository.findAll().getFirst();
+        assertThat(tournament.getSeasonIdentifier()).isEqualTo("999");
+        assertThat(tournament.getSeasonLabel()).isEqualTo("2026");
+        assertThat(footballDataPort.currentSeasonRequestCount).isEqualTo(1);
+    }
+
+    @Test
+    void importMatches_doesNotFetchCompetitionResourceWhenMatchResponseProvidesSeasonMetadata() {
+        footballDataPort.currentSeasonMetadata = Optional.of(CompetitionSeasonMetadata.builder()
+                .seasonIdentifier("999")
+                .seasonLabel("2026")
+                .build());
+        footballDataPort.matchesToReturn = List.of(Match.builder()
+                .id(null)
+                .tournamentId(null)
+                .name("Fresh Home vs Fresh Away")
+                .description(null)
+                .homeTeam(Team.builder().name("Fresh Home").externalId("30").imageUrl("home.png").build())
+                .awayTeam(Team.builder().name("Fresh Away").externalId("40").imageUrl("away.png").build())
+                .matchStatus(Match.MatchStatus.SCHEDULED)
+                .kickoffTime(Instant.parse("2026-04-20T20:00:00Z"))
+                .seasonIdentifier("777")
+                .seasonLabel("2025/26")
+                .scores(List.of())
+                .winner(null)
+                .externalId("match-3")
+                .build());
+
+        List<Match> importedMatches = service.importMatches("CL", LocalDate.of(2026, 4, 19), LocalDate.of(2026, 4, 21));
+
+        assertThat(importedMatches).hasSize(1);
+        Tournament tournament = tournamentRepository.findAll().getFirst();
+        assertThat(tournament.getSeasonIdentifier()).isEqualTo("777");
+        assertThat(tournament.getSeasonLabel()).isEqualTo("2025/26");
+        assertThat(footballDataPort.currentSeasonRequestCount).isZero();
+    }
+
+    @Test
+    void importMatches_doesNotFetchCompetitionResourceWhenMetadataAlreadyExists() {
+        tournamentRepository.save(Tournament.builder()
+                .id(UUID.randomUUID())
+                .name("UEFA Champions League")
+                .seasonIdentifier("777")
+                .seasonLabel("2025/26")
+                .sport(Tournament.Sport.FOOTBALL)
+                .build());
+
+        List<Match> importedMatches = service.importMatches("CL", LocalDate.of(2026, 4, 19), LocalDate.of(2026, 4, 21));
+
+        assertThat(importedMatches).isEmpty();
+        Tournament tournament = tournamentRepository.findAll().getFirst();
+        assertThat(tournament.getSeasonIdentifier()).isEqualTo("777");
+        assertThat(tournament.getSeasonLabel()).isEqualTo("2025/26");
+        assertThat(footballDataPort.currentSeasonRequestCount).isZero();
+    }
+
     private static final class StubFootballDataPort implements FootballDataPort {
         private List<Match> matchesToReturn = List.of();
+        private Optional<CompetitionSeasonMetadata> currentSeasonMetadata = Optional.empty();
+        private int currentSeasonRequestCount = 0;
 
         @Override
         public List<Match> getMatches(String competition, LocalDate dateFrom, LocalDate dateTo) {
             return matchesToReturn;
+        }
+
+        @Override
+        public Optional<CompetitionSeasonMetadata> getCurrentSeasonMetadata(String competition) {
+            currentSeasonRequestCount++;
+            return currentSeasonMetadata;
         }
     }
 

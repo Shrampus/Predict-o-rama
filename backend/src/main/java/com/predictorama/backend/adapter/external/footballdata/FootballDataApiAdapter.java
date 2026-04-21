@@ -1,6 +1,7 @@
 package com.predictorama.backend.adapter.external.footballdata;
 
 import com.predictorama.backend.adapter.external.footballdata.mapper.FootballDataMatchMapper;
+import com.predictorama.backend.domain.entity.CompetitionSeasonMetadata;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -29,6 +31,68 @@ public class FootballDataApiAdapter implements FootballDataPort {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
+    }
+
+    @Override
+    public Optional<CompetitionSeasonMetadata> getCurrentSeasonMetadata(String competition) {
+        try {
+            FootballDataCompetitionResponse response = restClient.get()
+                    .uri("/competitions/{competition}", competition)
+                    .header("X-Auth-Token", apiKey)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, (request, clientResponse) -> {
+                        throw new FootballDataApiException(
+                                "Football-data competition client error: HTTP " + clientResponse.getStatusCode().value()
+                                        + " for competition=" + competition
+                        );
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError, (request, clientResponse) -> {
+                        throw new FootballDataApiException(
+                                "Football-data competition server error: HTTP " + clientResponse.getStatusCode().value()
+                                        + " for competition=" + competition
+                        );
+                    })
+                    .body(FootballDataCompetitionResponse.class);
+
+            if (response == null || response.getCurrentSeason() == null) {
+                log.warn("Football-data returned no current season for competition={}", competition);
+                return Optional.empty();
+            }
+
+            String seasonIdentifier = FootballDataMatchMapper.extractSeasonIdentifier(response.getCurrentSeason());
+            String seasonLabel = FootballDataMatchMapper.extractSeasonLabel(response.getCurrentSeason());
+
+            if (normalize(seasonIdentifier) == null && normalize(seasonLabel) == null) {
+                log.warn("Football-data current season metadata was empty for competition={}", competition);
+                return Optional.empty();
+            }
+
+            return Optional.of(CompetitionSeasonMetadata.builder()
+                    .seasonIdentifier(seasonIdentifier)
+                    .seasonLabel(seasonLabel)
+                    .build());
+
+        } catch (FootballDataApiException e) {
+            log.warn("Football-data competition request failed for competition={}: {}", competition, e.getMessage());
+            return Optional.empty();
+
+        } catch (RestClientResponseException e) {
+            log.warn(
+                    "Football-data competition HTTP error for competition={}: status={} body={}",
+                    competition,
+                    e.getStatusCode().value(),
+                    e.getResponseBodyAsString()
+            );
+            return Optional.empty();
+
+        } catch (RestClientException e) {
+            log.error("Football-data competition transport error for competition={}: {}", competition, e.getMessage(), e);
+            return Optional.empty();
+
+        } catch (Exception e) {
+            log.error("Unexpected football-data competition adapter error for competition={}", competition, e);
+            return Optional.empty();
+        }
     }
 
     @Override
