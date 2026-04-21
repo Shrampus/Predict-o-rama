@@ -49,16 +49,7 @@ export function AppNavbar() {
             >
               {t('nav.groups')}
             </NavLink>
-          ) : (
-            <NavLink
-              to={ROUTE_PATHS.login}
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
-              }
-            >
-              {t('nav.login')}
-            </NavLink>
-          )}
+          ) : null}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -82,13 +73,25 @@ export function AppNavbar() {
             <>
               <span className="text-sm text-gray-600">{currentUser.username}</span>
               <button
+                type="button"
                 onClick={handleLogout}
                 className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100"
               >
                 {t('nav.signOut')}
               </button>
             </>
-          ) : null}
+          ) : (
+            <NavLink
+              to={ROUTE_PATHS.login}
+              className={({ isActive }) =>
+                `rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100 ${
+                  isActive ? 'bg-gray-100' : ''
+                }`
+              }
+            >
+              {t('nav.login')}
+            </NavLink>
+          )}
         </div>
       </div>
     </header>
