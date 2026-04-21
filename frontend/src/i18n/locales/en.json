@@ -43,7 +43,9 @@
     "title": "Upcoming Matches",
     "loading": "Loading upcoming matches...",
     "error": "Failed to load upcoming matches.",
-    "empty": "No upcoming matches."
+    "empty": "No upcoming matches.",
+    "predict": "Predict · {{groupName}}",
+    "predicted": "✓ Predicted · {{groupName}}"
   },
   "groups": {
     "myGroups": "My Groups",

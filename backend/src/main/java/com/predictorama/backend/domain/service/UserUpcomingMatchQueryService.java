@@ -5,6 +5,7 @@ import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPor
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.service.result.UpcomingMatchResult;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class UserUpcomingMatchQueryService {
     private final GroupTournamentRepositoryPort groupTournamentRepositoryPort;
     private final MatchRepositoryPort matchRepositoryPort;
     private final TournamentRepositoryPort tournamentRepositoryPort;
+    private final PredictionRepositoryPort predictionRepositoryPort;
     private final CompetitionCatalog competitionCatalog;
 
     public List<UpcomingMatchResult> getUpcomingMatches(UUID userId) {
@@ -43,6 +45,10 @@ public class UserUpcomingMatchQueryService {
                         group -> new HashSet<>(groupTournamentRepositoryPort.findTournamentIdsByGroupId(group.getId()))
                 ));
 
+        Set<String> predictedKeys = predictionRepositoryPort.findByUserId(userId).stream()
+                .map(p -> p.getMatchId() + ":" + p.getGroupId())
+                .collect(Collectors.toSet());
+
         Instant now = Instant.now();
         Instant end = now.plus(28, ChronoUnit.DAYS);
 
@@ -53,6 +59,11 @@ public class UserUpcomingMatchQueryService {
                                     .getOrDefault(group.getId(), Set.of())
                                     .contains(match.getTournamentId()))
                             .toList();
+
+                    Set<UUID> groupIdsWithPrediction = relevantGroups.stream()
+                            .filter(g -> predictedKeys.contains(match.getId() + ":" + g.getId()))
+                            .map(Group::getId)
+                            .collect(Collectors.toSet());
 
                     var tournament = tournamentRepositoryPort.findById(match.getTournamentId());
                     String competitionCode = tournament
@@ -67,6 +78,7 @@ public class UserUpcomingMatchQueryService {
                             .competitionCode(competitionCode)
                             .tournamentName(tournamentName)
                             .userGroups(relevantGroups)
+                            .groupIdsWithPrediction(groupIdsWithPrediction)
                             .build();
                 })
                 .toList();

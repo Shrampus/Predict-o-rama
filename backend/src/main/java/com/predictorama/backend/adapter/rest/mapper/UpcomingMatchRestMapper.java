@@ -11,11 +11,13 @@ public final class UpcomingMatchRestMapper {
 
     public static UpcomingMatchDto toDto(UpcomingMatchResult result) {
         var match = result.getMatch();
+        var predictedGroupIds = result.getGroupIdsWithPrediction();
         var groups = result.getUserGroups().stream()
                 .map(group -> GroupReferenceDto.builder()
                         .groupId(group.getId().toString())
                         .groupName(group.getName())
                         .competitionId(result.getCompetitionCode())
+                        .hasPrediction(predictedGroupIds != null && predictedGroupIds.contains(group.getId()))
                         .build())
                 .toList();
 

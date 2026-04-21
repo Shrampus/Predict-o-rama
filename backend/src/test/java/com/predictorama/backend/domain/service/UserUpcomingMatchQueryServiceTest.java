@@ -20,6 +20,7 @@ class UserUpcomingMatchQueryServiceTest {
     private InMemoryGroupTournamentRepository groupTournamentRepository;
     private InMemoryMatchRepository matchRepository;
     private InMemoryTournamentRepository tournamentRepository;
+    private InMemoryPredictionRepository predictionRepository;
 
     @BeforeEach
     void setUp() {
@@ -28,12 +29,14 @@ class UserUpcomingMatchQueryServiceTest {
         groupTournamentRepository = new InMemoryGroupTournamentRepository();
         matchRepository = new InMemoryMatchRepository();
         tournamentRepository = new InMemoryTournamentRepository();
+        predictionRepository = new InMemoryPredictionRepository();
         service = new UserUpcomingMatchQueryService(
                 groupMemberRepository,
                 groupRepository,
                 groupTournamentRepository,
                 matchRepository,
                 tournamentRepository,
+                predictionRepository,
                 new CompetitionCatalog()
         );
     }
@@ -91,6 +94,37 @@ class UserUpcomingMatchQueryServiceTest {
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getUserGroups()).hasSize(2);
+    }
+
+    @Test
+    void getUpcomingMatches_marksPredictedGroupsCorrectly() {
+        UUID userId = UUID.randomUUID();
+        UUID tournamentId = UUID.randomUUID();
+        Group groupA = group("Group A");
+        Group groupB = group("Group B");
+        groupRepository.save(groupA);
+        groupRepository.save(groupB);
+        groupMemberRepository.add(member(userId, groupA.getId()));
+        groupMemberRepository.add(member(userId, groupB.getId()));
+        groupTournamentRepository.save(groupA.getId(), tournamentId);
+        groupTournamentRepository.save(groupB.getId(), tournamentId);
+
+        Match match = matchWithTournament(tournamentId, Instant.now().plus(5, ChronoUnit.DAYS));
+        matchRepository.add(match);
+
+        predictionRepository.add(Prediction.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .matchId(match.getId())
+                .groupId(groupA.getId())
+                .predictedWinner(Winner.HOME)
+                .build());
+
+        List<UpcomingMatchResult> results = service.getUpcomingMatches(userId);
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getGroupIdsWithPrediction()).containsExactly(groupA.getId());
+        assertThat(results.get(0).getGroupIdsWithPrediction()).doesNotContain(groupB.getId());
     }
 
     // --- Helpers ---
@@ -263,5 +297,41 @@ class UserUpcomingMatchQueryServiceTest {
 
         @Override
         public List<Tournament> findAll() { return List.of(); }
+    }
+
+    static class InMemoryPredictionRepository implements PredictionRepositoryPort {
+        private final List<Prediction> store = new ArrayList<>();
+
+        void add(Prediction prediction) { store.add(prediction); }
+
+        @Override
+        public Prediction save(Prediction prediction) { store.add(prediction); return prediction; }
+
+        @Override
+        public Optional<Prediction> findById(UUID id) { return Optional.empty(); }
+
+        @Override
+        public Optional<Prediction> findByUserIdAndMatchIdAndGroupId(UUID userId, UUID matchId, UUID groupId) {
+            return store.stream()
+                    .filter(p -> p.getUserId().equals(userId) && p.getMatchId().equals(matchId) && p.getGroupId().equals(groupId))
+                    .findFirst();
+        }
+
+        @Override
+        public List<Prediction> findByMatchIdAndGroupId(UUID matchId, UUID groupId) { return List.of(); }
+
+        @Override
+        public List<Prediction> findByUserIdAndGroupId(UUID userId, UUID groupId) { return List.of(); }
+
+        @Override
+        public List<Prediction> findByUserId(UUID userId) {
+            return store.stream().filter(p -> p.getUserId().equals(userId)).toList();
+        }
+
+        @Override
+        public List<Prediction> findByGroupId(UUID groupId) { return List.of(); }
+
+        @Override
+        public List<Prediction> findByMatchId(UUID matchId) { return List.of(); }
     }
 }

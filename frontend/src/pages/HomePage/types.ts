@@ -2,6 +2,7 @@ export interface GroupReference {
     groupId: string;
     groupName: string;
     competitionId: string;
+    hasPrediction: boolean;
 }
 
 export interface UpcomingMatch {

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -14,4 +16,5 @@ public class UpcomingMatchResult {
     private String competitionCode;
     private String tournamentName;
     private List<Group> userGroups;
+    private Set<UUID> groupIdsWithPrediction;
 }

@@ -43,7 +43,9 @@
     "title": "Eelseisvad mängud",
     "loading": "Laadin eelseisvaid mänge...",
     "error": "Eelseisvate mängude laadimine ebaõnnestus.",
-    "empty": "Eelseisvaid mänge pole."
+    "empty": "Eelseisvaid mänge pole.",
+    "predict": "Ennusta · {{groupName}}",
+    "predicted": "✓ Ennustatud · {{groupName}}"
   },
   "groups": {
     "myGroups": "Minu grupid",

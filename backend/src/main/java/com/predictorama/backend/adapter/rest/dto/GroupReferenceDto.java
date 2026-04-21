@@ -9,4 +9,5 @@ public class GroupReferenceDto {
     private String groupId;
     private String groupName;
     private String competitionId;
+    private boolean hasPrediction;
 }
