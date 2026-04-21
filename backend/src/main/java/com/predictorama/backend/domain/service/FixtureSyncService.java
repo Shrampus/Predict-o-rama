@@ -1,11 +1,13 @@
 package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.config.FixtureSyncProperties;
+import com.predictorama.backend.domain.entity.Match;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +23,7 @@ public class FixtureSyncService {
     private final FixtureSyncProperties fixtureSyncProperties;
     private final CompetitionCatalog competitionCatalog;
     private final PredictionFixtureImportService predictionFixtureImportService;
+    private final PredictionScoringService predictionScoringService;
 
     private int currentCompetitionIndex = 0;
 
@@ -42,12 +45,19 @@ public class FixtureSyncService {
         try {
             log.info("Starting scheduled fixture sync for competition={}", competition);
 
-            int importedCount = predictionFixtureImportService.importUpcomingMatches(competition).size();
+            LocalDate dateFrom = LocalDate.now().minusDays(fixtureSyncProperties.getLookbackDays());
+            LocalDate dateTo = LocalDate.now().plusDays(fixtureSyncProperties.getFutureDays());
+
+            List<Match> importedMatches = predictionFixtureImportService.importMatches(competition, dateFrom, dateTo);
+
+            scoreCompletedMatches(importedMatches, competition);
 
             log.info(
-                    "Finished scheduled fixture sync for competition={} importedCount={}",
+                    "Finished scheduled fixture sync for competition={} importedCount={} dateFrom={} dateTo={}",
                     competition,
-                    importedCount
+                    importedMatches.size(),
+                    dateFrom,
+                    dateTo
             );
         } catch (Exception e) {
             log.error("Scheduled fixture sync failed for competition={}", competition, e);
@@ -114,5 +124,25 @@ public class FixtureSyncService {
         }
 
         return trimmedCompetition.toUpperCase(Locale.ROOT);
+    }
+
+    private void scoreCompletedMatches(List<Match> importedMatches, String competition) {
+        for (Match match : importedMatches) {
+            if (match.getMatchStatus() != Match.MatchStatus.COMPLETED) {
+                continue;
+            }
+
+            try {
+                predictionScoringService.distributePredictionScores(match.getId());
+            } catch (IllegalStateException e) {
+                log.warn(
+                        "Skipping prediction scoring for competition={} matchId={} externalId={} reason={}",
+                        competition,
+                        match.getId(),
+                        match.getExternalId(),
+                        e.getMessage()
+                );
+            }
+        }
     }
 }

@@ -42,6 +42,7 @@ public class TournamentPredictionQueryService {
 
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
         List<Match> matches = getTournamentMatches(competition, tournament);
+        Tournament refreshedTournament = predictionFixtureImportService.getOrCreateTournament(competition);
         Map<UUID, Prediction> predictionsByMatchId =
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
@@ -51,7 +52,8 @@ public class TournamentPredictionQueryService {
 
         return new TournamentPredictionsView(
                 competitionCatalog.toTournamentName(competition),
-                resolveSeasonLabel(competition, tournament),
+                refreshedTournament.getSeasonIdentifier(),
+                resolveSeasonLabel(competition, refreshedTournament),
                 competitionCatalog.toPhaseLabel(competition),
                 responseMatches
         );
@@ -69,6 +71,9 @@ public class TournamentPredictionQueryService {
                 .awayTeamImage(match.getAwayTeam().getImageUrl())
                 .kickoffTime(match.getKickoffTime())
                 .matchStatus(match.getMatchStatus().name())
+                .roundIdentifier(match.getRoundIdentifier())
+                .groupIdentifier(match.getGroupIdentifier())
+                .matchdayIdentifier(match.getMatchdayIdentifier())
                 .predictionId(prediction != null ? prediction.getId() : null)
                 .predictedHomeScore(primaryPredictedScore != null ? primaryPredictedScore.getHomeScore() : null)
                 .predictedAwayScore(primaryPredictedScore != null ? primaryPredictedScore.getAwayScore() : null)

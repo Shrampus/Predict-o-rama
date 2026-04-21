@@ -19,7 +19,7 @@ public final class FootballDataMatchMapper {
         List<Score> scores = List.of();
         Winner winner = null;
 
-        if (scoreResponse != null && scoreResponse.getFullTime() != null) {
+        if (hasCompleteFullTimeScore(scoreResponse)) {
             scores = List.of(Score.builder()
                     .homeScore(scoreResponse.getFullTime().getHome())
                     .awayScore(scoreResponse.getFullTime().getAway())
@@ -51,10 +51,87 @@ public final class FootballDataMatchMapper {
                         .build())
                 .matchStatus(mapStatus(matchResponse.getStatus()))
                 .kickoffTime(Instant.parse(matchResponse.getUtcDate()))
+                .seasonIdentifier(extractSeasonIdentifier(matchResponse))
+                .seasonLabel(extractSeasonLabel(matchResponse))
+                .roundIdentifier(buildRoundIdentifier(matchResponse))
+                .groupIdentifier(extractGroupIdentifier(matchResponse))
+                .matchdayIdentifier(matchResponse.getMatchday())
                 .scores(scores)
                 .winner(winner)
                 .externalId(String.valueOf(matchResponse.getId()))
                 .build();
+    }
+
+    private static boolean hasCompleteFullTimeScore(com.predictorama.backend.adapter.external.footballdata.FootballDataScoreResponse scoreResponse) {
+        if (scoreResponse == null || scoreResponse.getFullTime() == null) {
+            return false;
+        }
+
+        return scoreResponse.getFullTime().getHome() != null
+                && scoreResponse.getFullTime().getAway() != null;
+    }
+
+    public static String extractSeasonIdentifier(FootballDataMatchResponse matchResponse) {
+        if (matchResponse == null || matchResponse.getSeason() == null || matchResponse.getSeason().getId() == null) {
+            return null;
+        }
+
+        return String.valueOf(matchResponse.getSeason().getId());
+    }
+
+    public static String extractSeasonLabel(FootballDataMatchResponse matchResponse) {
+        if (matchResponse == null || matchResponse.getSeason() == null) {
+            return null;
+        }
+
+        String startDate = normalize(matchResponse.getSeason().getStartDate());
+        String endDate = normalize(matchResponse.getSeason().getEndDate());
+
+        if (startDate == null || endDate == null || startDate.length() < 4 || endDate.length() < 4) {
+            return null;
+        }
+
+        String startYear = startDate.substring(0, 4);
+        String endYear = endDate.substring(0, 4);
+
+        if (startYear.equals(endYear)) {
+            return startYear;
+        }
+
+        return startYear + "/" + endYear.substring(2);
+    }
+
+    private static String buildRoundIdentifier(FootballDataMatchResponse matchResponse) {
+        String stage = normalize(matchResponse.getStage());
+        String humanizedGroup = extractGroupIdentifier(matchResponse);
+        Integer matchday = matchResponse.getMatchday();
+
+        if (humanizedGroup != null && matchday != null) {
+            return humanizedGroup + " - Matchday " + matchday;
+        }
+
+        if (humanizedGroup != null) {
+            return humanizedGroup;
+        }
+
+        if (stage != null && matchday != null) {
+            return humanize(stage) + " - Matchday " + matchday;
+        }
+
+        if (matchday != null) {
+            return "Matchday " + matchday;
+        }
+
+        if (stage != null) {
+            return humanize(stage);
+        }
+
+        return null;
+    }
+
+    public static String extractGroupIdentifier(FootballDataMatchResponse matchResponse) {
+        String group = normalize(matchResponse.getGroup());
+        return group != null ? humanize(group) : null;
     }
 
     private static Match.MatchStatus mapStatus(String status) {
@@ -75,5 +152,17 @@ public final class FootballDataMatchMapper {
             case "DRAW" -> Winner.DRAW;
             default -> null;
         };
+    }
+
+    private static String normalize(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
+    }
+
+    private static String humanize(String value) {
+        return value.replace('_', ' ').trim();
     }
 }

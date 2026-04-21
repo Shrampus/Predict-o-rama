@@ -27,3 +27,7 @@ databaseChangeLog:
       file: db/changelog/013-add-unique-match-external-id.yaml
   - include:
       file: db/changelog/014-add-google-auth.yaml
+  - include:
+      file: db/changelog/015-add-season-and-round-identifiers.yaml
+  - include:
+      file: db/changelog/016-add-group-and-matchday-identifiers.yaml

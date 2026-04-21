@@ -13,6 +13,7 @@ public class Tournament {
     private UUID id;
     private String name;
     private String description;
+    private String seasonIdentifier;
     private Sport sport;
 
     public enum Sport{

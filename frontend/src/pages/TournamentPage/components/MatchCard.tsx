@@ -64,6 +64,10 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
         : hasExistingPrediction && !isDirty
             ? 'bg-green-700 text-white'
             : 'bg-orange-600 text-white hover:bg-orange-700';
+    const metadataParts = [
+        match.groupIdentifier ? match.groupIdentifier : null,
+        match.matchdayIdentifier != null ? `Matchday ${match.matchdayIdentifier}` : null,
+    ].filter(Boolean);
 
     return (
         <div className="relative overflow-hidden rounded-xl bg-white p-6 shadow-sm group flex flex-col sm:flex-row items-center gap-8">
@@ -78,6 +82,16 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
             <div
                 className={`flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl p-4 transition-colors ${showSuccessHighlight ? 'bg-green-100' : 'bg-slate-50'}`}
             >
+                {match.roundIdentifier ? (
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        {match.roundIdentifier}
+                    </p>
+                ) : null}
+                {metadataParts.length > 0 ? (
+                    <p className="text-[11px] text-slate-400">
+                        {metadataParts.join(' · ')}
+                    </p>
+                ) : null}
                 <div className="flex w-full items-center justify-center gap-3">
                     <input
                         className="h-14 w-16 rounded-xl border border-slate-200 bg-white text-center text-2xl font-black focus:outline-none focus:ring-2 focus:ring-green-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"

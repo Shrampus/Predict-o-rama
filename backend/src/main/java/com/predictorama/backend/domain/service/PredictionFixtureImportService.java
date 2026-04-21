@@ -1,8 +1,10 @@
 package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.domain.entity.Match;
+import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
 import com.predictorama.backend.domain.entity.Tournament;
+import com.predictorama.backend.domain.entity.Winner;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,16 +30,22 @@ public class PredictionFixtureImportService {
     private final CompetitionCatalog competitionCatalog;
 
     public List<Match> importUpcomingMatches(String competition) {
+        return importMatches(competition, LocalDate.now(), LocalDate.now().plusDays(28));
+    }
+
+    public List<Match> importMatches(String competition, LocalDate dateFrom, LocalDate dateTo) {
         if (!competitionCatalog.isSupportedCompetition(competition)) {
             log.warn("Rejected fixture import for unsupported competition code={}", competition);
             return List.of();
         }
 
+        List<Match> externalMatches = footballDataPort.getMatches(competition, dateFrom, dateTo);
         Tournament tournament = getOrCreateTournament(competition);
+        Tournament tournamentWithSeasonIdentifier = withSeasonIdentifier(tournament, externalMatches);
 
-        return footballDataPort.getUpcomingMatches(competition).stream()
+        return externalMatches.stream()
                 .filter(this::isValidExternalMatch)
-                .map(match -> saveOrUpdateMatch(match, tournament))
+                .map(match -> saveOrUpdateMatch(match, tournamentWithSeasonIdentifier))
                 .toList();
     }
 
@@ -127,8 +136,12 @@ public class PredictionFixtureImportService {
                             .awayTeam(savedAwayTeam)
                             .matchStatus(externalMatch.getMatchStatus())
                             .kickoffTime(externalMatch.getKickoffTime())
-                            .scores(existingMatch.getScores())
-                            .winner(existingMatch.getWinner())
+                            .seasonIdentifier(existingMatch.getSeasonIdentifier())
+                            .roundIdentifier(externalMatch.getRoundIdentifier())
+                            .groupIdentifier(externalMatch.getGroupIdentifier())
+                            .matchdayIdentifier(externalMatch.getMatchdayIdentifier())
+                            .scores(resolveScores(existingMatch, externalMatch))
+                            .winner(resolveWinner(existingMatch, externalMatch))
                             .externalId(existingMatch.getExternalId())
                             .build();
 
@@ -146,8 +159,12 @@ public class PredictionFixtureImportService {
                             .awayTeam(savedAwayTeam)
                             .matchStatus(externalMatch.getMatchStatus())
                             .kickoffTime(externalMatch.getKickoffTime())
-                            .scores(List.of())
-                            .winner(null)
+                            .seasonIdentifier(externalMatch.getSeasonIdentifier())
+                            .roundIdentifier(externalMatch.getRoundIdentifier())
+                            .groupIdentifier(externalMatch.getGroupIdentifier())
+                            .matchdayIdentifier(externalMatch.getMatchdayIdentifier())
+                            .scores(externalMatch.getScores() == null ? List.of() : externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
                             .externalId(externalMatch.getExternalId())
                             .build();
 
@@ -159,6 +176,59 @@ public class PredictionFixtureImportService {
 
     private String buildMatchName(Team homeTeam, Team awayTeam) {
         return homeTeam.getName() + " vs " + awayTeam.getName();
+    }
+
+    private Tournament withSeasonIdentifier(Tournament tournament, List<Match> externalMatches) {
+        String seasonIdentifier = externalMatches.stream()
+                .map(Match::getSeasonIdentifier)
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
+        String seasonLabel = externalMatches.stream()
+                .map(Match::getSeasonLabel)
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
+
+        boolean seasonIdentifierChanged = seasonIdentifier != null && !seasonIdentifier.equals(tournament.getSeasonIdentifier());
+        boolean seasonLabelChanged = seasonLabel != null && !seasonLabel.equals(tournament.getDescription());
+
+        if (!seasonIdentifierChanged && !seasonLabelChanged) {
+            return tournament;
+        }
+
+        Tournament updatedTournament = Tournament.builder()
+                .id(tournament.getId())
+                .name(tournament.getName())
+                .description(seasonLabel != null ? seasonLabel : tournament.getDescription())
+                .seasonIdentifier(seasonIdentifier != null ? seasonIdentifier : tournament.getSeasonIdentifier())
+                .sport(tournament.getSport())
+                .build();
+
+        Tournament savedTournament = tournamentRepositoryPort.save(updatedTournament);
+        log.info(
+                "Updated tournament season metadata name={} seasonIdentifier={} seasonLabel={}",
+                savedTournament.getName(),
+                savedTournament.getSeasonIdentifier(),
+                savedTournament.getDescription()
+        );
+        return savedTournament;
+    }
+
+    private List<Score> resolveScores(Match existingMatch, Match externalMatch) {
+        if (externalMatch.getScores() == null || externalMatch.getScores().isEmpty()) {
+            return existingMatch.getScores();
+        }
+
+        return externalMatch.getScores();
+    }
+
+    private Winner resolveWinner(Match existingMatch, Match externalMatch) {
+        if (externalMatch.getWinner() == null) {
+            return existingMatch.getWinner();
+        }
+
+        return externalMatch.getWinner();
     }
 
     private boolean isBlank(String value) {

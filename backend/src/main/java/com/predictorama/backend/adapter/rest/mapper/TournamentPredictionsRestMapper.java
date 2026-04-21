@@ -13,6 +13,7 @@ public final class TournamentPredictionsRestMapper {
     public static TournamentPredictionsResponse toResponse(TournamentPredictionsView view) {
         return new TournamentPredictionsResponse(
                 view.getTournamentName(),
+                view.getSeasonIdentifier(),
                 view.getSeasonLabel(),
                 view.getPhaseLabel(),
                 view.getMatches().stream()
@@ -31,6 +32,9 @@ public final class TournamentPredictionsRestMapper {
                 .awayTeamImage(view.getAwayTeamImage())
                 .kickoffTime(view.getKickoffTime())
                 .matchStatus(view.getMatchStatus())
+                .roundIdentifier(view.getRoundIdentifier())
+                .groupIdentifier(view.getGroupIdentifier())
+                .matchdayIdentifier(view.getMatchdayIdentifier())
                 .predictionId(view.getPredictionId())
                 .predictedHomeScore(view.getPredictedHomeScore())
                 .predictedAwayScore(view.getPredictedAwayScore())
