@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/016-add-group-and-matchday-identifiers.yaml
   - include:
       file: db/changelog/017-rename-tournament-description-to-season-label.yaml
+  - include:
+      file: db/changelog/018-ensure-google-auth-schema.yaml

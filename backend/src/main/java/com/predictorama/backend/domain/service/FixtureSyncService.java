@@ -171,6 +171,14 @@ public class FixtureSyncService {
                         match.getExternalId(),
                         e.getMessage()
                 );
+            } catch (Exception e) {
+                log.error(
+                        "Failed to score completed match for competition={} matchId={} externalId={}",
+                        competition,
+                        match.getId(),
+                        match.getExternalId(),
+                        e
+                );
             }
         }
 
