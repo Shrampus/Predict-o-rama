@@ -92,37 +92,19 @@ public class TournamentPredictionQueryService {
         Instant now = Instant.now();
         Instant in28Days = now.plus(28, ChronoUnit.DAYS);
 
-        List<Match> existingMatches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
+        List<Match> matches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
                 now,
                 in28Days
         );
 
-        if (!existingMatches.isEmpty()) {
-            log.info(
-                    "Using cached matches from DB for competition={} tournament={} count={}",
-                    competition,
-                    tournament.getName(),
-                    existingMatches.size()
-            );
-            return existingMatches;
-        }
-
         log.info(
-                "Fetching matches from football-data API for competition={} tournament={}",
+                "Using matches from DB for competition={} tournament={} count={}",
                 competition,
-                competitionCatalog.toTournamentName(competition)
+                tournament.getName(),
+                matches.size()
         );
 
-        List<Match> savedMatches = predictionFixtureImportService.importUpcomingMatches(competition);
-
-        log.info(
-                "Fetched and saved matches from API for competition={} tournament={} count={}",
-                competition,
-                competitionCatalog.toTournamentName(competition),
-                savedMatches.size()
-        );
-
-        return savedMatches;
+        return matches;
     }
 }

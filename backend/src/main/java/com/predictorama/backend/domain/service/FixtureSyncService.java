@@ -48,20 +48,46 @@ public class FixtureSyncService {
             LocalDate dateFrom = LocalDate.now().minusDays(fixtureSyncProperties.getLookbackDays());
             LocalDate dateTo = LocalDate.now().plusDays(fixtureSyncProperties.getFutureDays());
 
-            List<Match> importedMatches = predictionFixtureImportService.importMatches(competition, dateFrom, dateTo);
-
-            scoreCompletedMatches(importedMatches, competition);
+            FixtureSyncResult result = syncCompetition(competition, dateFrom, dateTo);
 
             log.info(
-                    "Finished scheduled fixture sync for competition={} importedCount={} dateFrom={} dateTo={}",
-                    competition,
-                    importedMatches.size(),
-                    dateFrom,
-                    dateTo
+                    "Finished scheduled fixture sync for competition={} importedCount={} scoredCount={} dateFrom={} dateTo={}",
+                    result.competition(),
+                    result.importedCount(),
+                    result.scoredCount(),
+                    result.dateFrom(),
+                    result.dateTo()
             );
         } catch (Exception e) {
             log.error("Scheduled fixture sync failed for competition={}", competition, e);
         }
+    }
+
+    public FixtureSyncResult syncCompetition(String competition, LocalDate dateFrom, LocalDate dateTo) {
+        String normalizedCompetition = normalizeCompetitionCode(competition);
+
+        if (normalizedCompetition == null || !competitionCatalog.isSupportedCompetition(normalizedCompetition)) {
+            throw new IllegalArgumentException("Unsupported competition code: " + competition);
+        }
+
+        if (dateFrom == null || dateTo == null) {
+            throw new IllegalArgumentException("dateFrom and dateTo are required");
+        }
+
+        if (dateFrom.isAfter(dateTo)) {
+            throw new IllegalArgumentException("dateFrom must be on or before dateTo");
+        }
+
+        List<Match> importedMatches = predictionFixtureImportService.importMatches(normalizedCompetition, dateFrom, dateTo);
+        int scoredCount = scoreCompletedMatches(importedMatches, normalizedCompetition);
+
+        return new FixtureSyncResult(
+                normalizedCompetition,
+                dateFrom,
+                dateTo,
+                importedMatches.size(),
+                scoredCount
+        );
     }
 
     public List<String> getOrderedConfiguredCompetitions() {
@@ -126,7 +152,9 @@ public class FixtureSyncService {
         return trimmedCompetition.toUpperCase(Locale.ROOT);
     }
 
-    private void scoreCompletedMatches(List<Match> importedMatches, String competition) {
+    private int scoreCompletedMatches(List<Match> importedMatches, String competition) {
+        int scoredCount = 0;
+
         for (Match match : importedMatches) {
             if (match.getMatchStatus() != Match.MatchStatus.COMPLETED) {
                 continue;
@@ -134,6 +162,7 @@ public class FixtureSyncService {
 
             try {
                 predictionScoringService.distributePredictionScores(match.getId());
+                scoredCount++;
             } catch (IllegalStateException e) {
                 log.warn(
                         "Skipping prediction scoring for competition={} matchId={} externalId={} reason={}",
@@ -144,5 +173,7 @@ public class FixtureSyncService {
                 );
             }
         }
+
+        return scoredCount;
     }
 }

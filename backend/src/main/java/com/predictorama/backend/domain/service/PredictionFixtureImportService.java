@@ -30,10 +30,6 @@ public class PredictionFixtureImportService {
     private final TournamentRepositoryPort tournamentRepositoryPort;
     private final CompetitionCatalog competitionCatalog;
 
-    public List<Match> importUpcomingMatches(String competition) {
-        return importMatches(competition, LocalDate.now(), LocalDate.now().plusDays(28));
-    }
-
     public List<Match> importMatches(String competition, LocalDate dateFrom, LocalDate dateTo) {
         if (!competitionCatalog.isSupportedCompetition(competition)) {
             log.warn("Rejected fixture import for unsupported competition code={}", competition);
