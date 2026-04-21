@@ -28,6 +28,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 
 class GroupServiceTest {
 
@@ -163,7 +164,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void getGroupLeaderboards_returnsSeparateScoresForEachTournament() {
+    void getGroupLeaderboards_sumsScoredPredictionResultsSeparatelyForEachTournament() {
         UUID adminId = UUID.randomUUID();
         UUID memberId = UUID.randomUUID();
         Group group = groupService.createGroup(adminId, "Legends", "Best group");
@@ -177,12 +178,16 @@ class GroupServiceTest {
         groupTournamentRepository.save(group.getId(), premierLeague.getId());
 
         Match championsLeagueMatch = match(UUID.randomUUID(), championsLeague.getId());
+        Match secondChampionsLeagueMatch = match(UUID.randomUUID(), championsLeague.getId());
         Match premierLeagueMatch = match(UUID.randomUUID(), premierLeague.getId());
         matchRepository.save(championsLeagueMatch);
+        matchRepository.save(secondChampionsLeagueMatch);
         matchRepository.save(premierLeagueMatch);
 
         predictionRepository.save(prediction(adminId, group.getId(), championsLeagueMatch.getId(), 3));
+        predictionRepository.save(prediction(adminId, group.getId(), secondChampionsLeagueMatch.getId(), 1));
         predictionRepository.save(prediction(memberId, group.getId(), championsLeagueMatch.getId(), 5));
+        predictionRepository.save(prediction(memberId, group.getId(), secondChampionsLeagueMatch.getId(), null));
         predictionRepository.save(prediction(adminId, group.getId(), premierLeagueMatch.getId(), 2));
 
         List<GroupLeaderboardView> leaderboards = groupService.getGroupLeaderboards(adminId, group.getId());
@@ -198,16 +203,26 @@ class GroupServiceTest {
                 .orElseThrow();
 
         assertThat(championsLeagueLeaderboard.entries())
-                .extracting(GroupLeaderboardView.Entry::userId, GroupLeaderboardView.Entry::totalScore)
+                .extracting(
+                        GroupLeaderboardView.Entry::userId,
+                        GroupLeaderboardView.Entry::totalScore,
+                        GroupLeaderboardView.Entry::scoredPredictions,
+                        GroupLeaderboardView.Entry::totalPredictions
+                )
                 .containsExactly(
-                        org.assertj.core.groups.Tuple.tuple(memberId, 5),
-                        org.assertj.core.groups.Tuple.tuple(adminId, 3)
+                        tuple(memberId, 5, 1, 2),
+                        tuple(adminId, 4, 2, 2)
                 );
         assertThat(premierLeagueLeaderboard.entries())
-                .extracting(GroupLeaderboardView.Entry::userId, GroupLeaderboardView.Entry::totalScore)
+                .extracting(
+                        GroupLeaderboardView.Entry::userId,
+                        GroupLeaderboardView.Entry::totalScore,
+                        GroupLeaderboardView.Entry::scoredPredictions,
+                        GroupLeaderboardView.Entry::totalPredictions
+                )
                 .containsExactly(
-                        org.assertj.core.groups.Tuple.tuple(adminId, 2),
-                        org.assertj.core.groups.Tuple.tuple(memberId, 0)
+                        tuple(adminId, 2, 1, 1),
+                        tuple(memberId, 0, 0, 0)
                 );
     }
 
