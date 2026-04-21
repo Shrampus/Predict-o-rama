@@ -6,12 +6,14 @@ import {
   addGroupMember,
   addGroupTournament,
   getGroupDetails,
+  getGroupLeaderboards,
   getGroupMembers,
   getGroupTournaments,
   getTournaments,
   removeGroupMember,
   removeGroupTournament,
   type GroupDetailsResponse,
+  type GroupLeaderboardResponse,
   type GroupMemberResponse,
   type GroupTournamentResponse,
   type TournamentOption,
@@ -27,6 +29,9 @@ type UseGroupDetailsReturn = {
   tournaments: GroupTournamentResponse[];
   tournamentsError: string;
   isLoadingTournaments: boolean;
+  leaderboards: GroupLeaderboardResponse[];
+  leaderboardsError: string;
+  isLoadingLeaderboards: boolean;
   memberEmail: string;
   handleMemberEmailChange: (value: string) => void;
   memberActionMessage: string;
@@ -65,6 +70,10 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
   const [tournaments, setTournaments] = useState<GroupTournamentResponse[]>([]);
   const [tournamentsError, setTournamentsError] = useState('');
   const [isLoadingTournaments, setIsLoadingTournaments] = useState(false);
+
+  const [leaderboards, setLeaderboards] = useState<GroupLeaderboardResponse[]>([]);
+  const [leaderboardsError, setLeaderboardsError] = useState('');
+  const [isLoadingLeaderboards, setIsLoadingLeaderboards] = useState(false);
 
   const [memberEmail, setMemberEmail] = useState('');
   const [memberActionMessage, setMemberActionMessage] = useState('');
@@ -110,6 +119,8 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     setMembersError('');
     setTournaments([]);
     setTournamentsError('');
+    setLeaderboards([]);
+    setLeaderboardsError('');
     setAvailableTournaments([]);
     setAvailableTournamentsError('');
     setSelectedTournamentId('');
@@ -124,6 +135,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       setIsLoadingGroup(false);
       setIsLoadingMembers(false);
       setIsLoadingTournaments(false);
+      setIsLoadingLeaderboards(false);
       setIsLoadingAvailableTournaments(false);
       return;
     }
@@ -196,9 +208,32 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       }
     }
 
+    async function loadLeaderboards() {
+      setIsLoadingLeaderboards(true);
+      setLeaderboardsError('');
+      try {
+        // @ts-expect-error groupId is guarded before this async function runs
+        const data = await getGroupLeaderboards(groupId);
+        if (isMounted) {
+          setLeaderboards(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setLeaderboardsError(
+            err instanceof Error ? err.message : t('groups.groupErrors.failedToLoadLeaderboards'),
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingLeaderboards(false);
+        }
+      }
+    }
+
     void loadGroupDetails();
     void loadMembers();
     void loadTournaments();
+    void loadLeaderboards();
 
     return () => {
       isMounted = false;
@@ -258,11 +293,13 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
 
     try {
       const addedMember = await addGroupMember(groupId, { email: memberEmail.trim() });
+      const latestLeaderboards = await getGroupLeaderboards(groupId);
       setMembers((currentMembers) =>
         currentMembers.some((member) => member.id === addedMember.id)
           ? currentMembers
           : [...currentMembers, addedMember],
       );
+      setLeaderboards(latestLeaderboards);
       setMemberEmail('');
       setMemberActionMessage(t('groups.memberAction.memberAdded'));
     } catch (err) {
@@ -285,7 +322,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     try {
       await addGroupTournament(groupId, { tournamentId: selectedTournamentId });
       const latestTournaments = await getGroupTournaments(groupId);
+      const latestLeaderboards = await getGroupLeaderboards(groupId);
       setTournaments(latestTournaments);
+      setLeaderboards(latestLeaderboards);
       setSelectedTournamentId('');
       setTournamentActionMessage(t('groups.tournamentAction.tournamentLinked'));
     } catch (err) {
@@ -318,6 +357,12 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       setMembers((currentMembers) =>
         currentMembers.filter((currentMember) => currentMember.userId !== member.userId),
       );
+      setLeaderboards((currentLeaderboards) =>
+        currentLeaderboards.map((leaderboard) => ({
+          ...leaderboard,
+          entries: leaderboard.entries.filter((entry) => entry.userId !== member.userId),
+        })),
+      );
       setMemberActionMessage(t('groups.memberAction.memberRemoved'));
     } catch (err) {
       setMemberActionError(
@@ -349,6 +394,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
       setTournaments((currentTournaments) =>
         currentTournaments.filter((currentTournament) => currentTournament.id !== tournament.id),
       );
+      setLeaderboards((currentLeaderboards) =>
+        currentLeaderboards.filter((leaderboard) => leaderboard.tournamentId !== tournament.id),
+      );
       setTournamentActionMessage(t('groups.tournamentAction.tournamentRemoved'));
     } catch (err) {
       setTournamentActionError(
@@ -369,6 +417,9 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     tournaments,
     tournamentsError,
     isLoadingTournaments,
+    leaderboards,
+    leaderboardsError,
+    isLoadingLeaderboards,
     memberEmail,
     handleMemberEmailChange,
     memberActionMessage,

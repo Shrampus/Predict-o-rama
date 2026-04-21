@@ -5,6 +5,8 @@ import com.predictorama.backend.domain.port.external.GoogleTokenValidatorPort;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.AuthService;
@@ -35,14 +37,18 @@ public class DomainConfig {
             GroupMemberRepositoryPort groupMemberRepository,
             UserRepositoryPort userRepository,
             TournamentRepositoryPort tournamentRepository,
-            GroupTournamentRepositoryPort groupTournamentRepository
+            GroupTournamentRepositoryPort groupTournamentRepository,
+            MatchRepositoryPort matchRepository,
+            PredictionRepositoryPort predictionRepository
     ) {
         return new GroupService(
                 groupRepository,
                 groupMemberRepository,
                 userRepository,
                 tournamentRepository,
-                groupTournamentRepository
+                groupTournamentRepository,
+                matchRepository,
+                predictionRepository
         );
     }
 
