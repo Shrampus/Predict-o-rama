@@ -38,6 +38,14 @@ npm install
 npm run dev
 ```
 
+### Frontend environment variables
+
+Copy `frontend/.env.example` to `frontend/.env.local` to override defaults locally.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `VITE_API_BASE_URL` | empty (relative paths) | Prefix for backend API calls. Leave empty when the frontend is served from the same origin as the backend API path, or when a reverse proxy (Vite dev proxy, nginx, etc.) forwards `/api` to the backend. Set to a full origin (e.g. `https://api.example.com`) when the UI is deployed on a different origin than the backend. |
+
 ## Tailwind CSS (Frontend Styling)
 
 Tailwind CSS is installed in the frontend. It lets you style UI directly in JSX using utility classes like `p-4`, `text-lg`, and `bg-blue-600`.
@@ -66,6 +74,9 @@ http://localhost:8080
 # Running with Docker (local)
 
 Local dev spins up all three services: frontend, backend, and PostgreSQL.
+
+Add .env file for local dev, check the example file.
+- JWT_SECRET: each dev can generate their own secret for local dev: openssl rand -base64 64
 
 ```bash
 cd local-env

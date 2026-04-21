@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import type { MyGroupsResponse } from '../../services/groupApi';
@@ -15,6 +16,7 @@ function isGroupDetailsLocationState(value: unknown): value is GroupDetailsLocat
 }
 
 function GroupDetailsPageContent({ groupId }: { groupId: string }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const groupState = isGroupDetailsLocationState(location.state) ? location.state : null;
   const initialGroup = groupState?.group ?? null;
@@ -56,8 +58,9 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
   const selectableTournaments = availableTournaments.filter(
     (tournament) => !linkedTournamentIds.has(tournament.id),
   );
-  const groupName = group?.name ?? initialGroup?.name ?? 'Group';
-  const groupDescription = group?.description ?? initialGroup?.description ?? 'No description yet.';
+  const groupName = group?.name ?? initialGroup?.name ?? t('groups.groupFallbackName');
+  const groupDescription =
+    group?.description ?? initialGroup?.description ?? t('groups.groupFallbackDescription');
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -108,12 +111,13 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
 }
 
 function GroupDetailsPageRoute() {
+  const { t } = useTranslation();
   const { groupId } = useParams<{ groupId: string }>();
 
   if (!groupId) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <p className="text-red-600">Invalid group URL</p>
+        <p className="text-red-600">{t('groups.invalidGroupUrl')}</p>
       </div>
     );
   }

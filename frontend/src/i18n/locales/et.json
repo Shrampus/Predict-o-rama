@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Avaleht",
-    "predictions": "Ennustused",
     "tournaments": "Turniirid",
     "groups": "Grupid",
     "signOut": "Logi välja"
@@ -12,14 +11,28 @@
     "error": "Vale e-post või parool.",
     "signingIn": "Sisselogimine…",
     "signIn": "Logi sisse",
-    "devAccounts": "Testkontod — klõpsa täitmiseks"
+    "devAccounts": "Testkontod — klõpsa täitmiseks",
+    "or": "või",
+    "role": "Roll",
+    "googleError": "Google'i sisselogimine ebaõnnestus."
+  },
+  "onboarding": {
+    "title": "Tere tulemast!",
+    "subtitle": "Sisse logitud kui {{email}}. Vali kasutajanimi jätkamiseks.",
+    "usernameLabel": "Kasutajanimi",
+    "usernamePlaceholder": "nt. jalgpallifänn42",
+    "usernameTaken": "Kasutajanimi on juba võetud. Palun vali teine.",
+    "saving": "Salvestamine…",
+    "continue": "Jätka"
   },
   "tournament": {
     "roundOf16": "16 PARIMAT",
     "upcoming": "Eelseisvad",
     "viewCalendar": "Vaata kalendrit",
     "loadingMatches": "Laadin mänge...",
-    "noMatches": "Mänge pole saadaval."
+    "noMatches": "Mänge pole saadaval.",
+    "phaseFallback": "Turniiri faas",
+    "fetchError": "Mängude laadimine ebaõnnestus"
   },
   "heroBanner": {
     "matchesLive": "{{count}} mängu ülekanne"
@@ -29,11 +42,22 @@
     "standings": "Tabeliseis"
   },
   "matchCard": {
-    "vs": "VS",
     "draw": "Viik",
     "saving": "Salvestamine...",
     "saved": "✓ Salvestatud",
-    "predictNow": "Ennusta nüüd"
+    "savedInline": "Ennustus salvestatud.",
+    "savePrediction": "Salvesta ennustus",
+    "updatePrediction": "Uuenda ennustust",
+    "predictionClosed": "Ennustus suletud",
+    "predictionClosedHelper": "Selle mängu ennustusaken on suletud.",
+    "editUntilKickoff": "Saad ennustust muuta kuni avavileteni.",
+    "enterBothScores": "Sisesta mõlemad skoorid",
+    "selectWinner": "Vali võitja",
+    "invalidWinnerForScore": "Valitud tulemus ei sobi selle skooriga",
+    "saveFailed": "Ennustuse salvestamine ebaõnnestus. Proovi uuesti.",
+    "scoreInputAria": "{{team}} skoor",
+    "predictNow": "Ennusta nüüd",
+    "enterValidScore": "Sisesta korrektne skoor (0 või rohkem)."
   },
   "standings": {
     "group": "Grupp {{letter}}",
@@ -77,6 +101,65 @@
     "groupCount_one": "{{count}} grupp",
     "groupCount_other": "{{count}} gruppi",
     "leaveGroup": "Lahku grupist",
-    "leaveGroupError": "Grupist lahkumine ebaõnnestus"
+    "leaveGroupError": "Grupist lahkumine ebaõnnestus",
+    "groupFallbackName": "Grupp",
+    "groupFallbackDescription": "Kirjeldus puudub.",
+    "invalidGroupUrl": "Vigane grupi URL",
+    "detailsHeader": {
+      "title": "Grupi detailid",
+      "loading": "Grupi detailide laadimine..."
+    },
+    "membersSection": {
+      "title": "Liikmed",
+      "loadingMembers": "Liikmete laadimine...",
+      "emptyMembers": "Selles grupis pole veel liikmeid.",
+      "removing": "Eemaldamine...",
+      "remove": "Eemalda",
+      "addMemberByEmail": "Lisa liige e-posti järgi",
+      "memberEmailPlaceholder": "tiimikaaslane@naide.com",
+      "adding": "Lisamine...",
+      "add": "Lisa",
+      "adminOnlyAction": "Ainult adminitele: liikmete lisamine on saadaval ainult grupi adminitele."
+    },
+    "groupErrors": {
+      "failedToLoadGroupDetails": "Grupi detailide laadimine ebaõnnestus.",
+      "failedToLoadMembers": "Liikmete laadimine ebaõnnestus.",
+      "failedToLoadTournaments": "Turniiride laadimine ebaõnnestus.",
+      "failedToLoadTournamentOptions": "Turniiri valikute laadimine ebaõnnestus."
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "Liige"
+    },
+    "memberAction": {
+      "memberAdded": "Liige lisati edukalt.",
+      "addFailed": "Liikme lisamine ebaõnnestus.",
+      "removeConfirmation": "Kas eemaldada {{name}} sellest grupist?",
+      "memberRemoved": "Liige eemaldati edukalt.",
+      "removeFailed": "Liikme eemaldamine ebaõnnestus."
+    },
+    "tournamentAction": {
+      "tournamentLinked": "Turniir seoti edukalt.",
+      "addFailed": "Turniiri lisamine ebaõnnestus.",
+      "removeConfirmation": "Kas eemaldada {{name}} sellest grupist?",
+      "tournamentRemoved": "Turniir eemaldati edukalt.",
+      "removeFailed": "Turniiri eemaldamine ebaõnnestus."
+    },
+    "tournamentsSection": {
+      "title": "Turniirid",
+      "loadingTournaments": "Turniiride laadimine...",
+      "emptyTournaments": "Ühtegi turniiri pole veel seotud.",
+      "open": "Ava",
+      "unavailable": "Pole saadaval",
+      "removing": "Eemaldamine...",
+      "remove": "Eemalda",
+      "addTournament": "Lisa turniir",
+      "selectTournament": "Vali turniir",
+      "adding": "Lisamine...",
+      "add": "Lisa",
+      "loadingOptions": "Turniiri valikute laadimine...",
+      "emptyOptions": "Seostamiseks pole rohkem turniire saadaval.",
+      "adminOnlyAction": "Ainult adminitele: turniiride lisamine on saadaval ainult grupi adminitele."
+    }
   }
 }

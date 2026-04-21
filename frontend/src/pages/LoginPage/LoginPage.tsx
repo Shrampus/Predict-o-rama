@@ -1,3 +1,4 @@
+import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +14,7 @@ const TEST_USERS = [
 ]
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -26,10 +27,23 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      navigate(ROUTE_PATHS.home);
+      const { needsOnboarding } = await login(email, password);
+      navigate(needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home);
     } catch {
       setError(t('login.error'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleSuccess(idToken: string) {
+    setError('');
+    setLoading(true);
+    try {
+      const { needsOnboarding } = await googleLogin(idToken);
+      navigate(needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home);
+    } catch {
+      setError(t('login.googleError'));
     } finally {
       setLoading(false);
     }
@@ -46,7 +60,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <h1 className="mb-6 text-center text-2xl font-semibold">Predict-o-rama</h1>
 
-        <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mb-4 space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="email">
               {t('login.email')}
@@ -86,6 +100,21 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div className="mb-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-xs text-gray-400">{t('login.or')}</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <div className="mb-6 flex justify-center">
+          <GoogleLogin
+            onSuccess={response => {
+              if (response.credential) handleGoogleSuccess(response.credential);
+            }}
+            onError={() => setError(t('login.googleError'))}
+          />
+        </div>
+
         <div className="rounded border border-gray-200 bg-white p-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
             {t('login.devAccounts')}
@@ -95,7 +124,7 @@ export default function LoginPage() {
               <tr className="text-left text-gray-400">
                 <th className="pb-1 pr-2">{t('login.email')}</th>
                 <th className="pb-1 pr-2">{t('login.password')}</th>
-                <th className="pb-1">Role</th>
+                <th className="pb-1">{t('login.role')}</th>
               </tr>
             </thead>
             <tbody>

@@ -65,7 +65,7 @@ function MyGroupsList({ groups, isLoading, errorMessage, onLeave }: MyGroupsList
   }
 
   function shouldIgnoreRowNavigation(target: EventTarget | null): boolean {
-    if (!(target instanceof HTMLElement)) {
+    if (!(target instanceof Element)) {
       return false;
     }
     return target.closest('button, a') !== null;

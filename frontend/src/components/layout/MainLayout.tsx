@@ -24,7 +24,11 @@ export function MainLayout() {
     <div>
       <header>
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <h1 className="text-lg font-semibold">Predict-o-rama</h1>
+          <h1 className="text-lg font-semibold">
+            <NavLink to={ROUTE_PATHS.home} end className="hover:opacity-80 transition-opacity">
+              Predict-o-rama
+            </NavLink>
+          </h1>
 
           <nav aria-label="Primary" className="flex items-center gap-2">
             <NavLink
@@ -35,24 +39,6 @@ export function MainLayout() {
               }
             >
               {t('nav.home')}
-            </NavLink>
-
-            <NavLink
-              to={ROUTE_PATHS.predictions}
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
-              }
-            >
-              {t('nav.predictions')}
-            </NavLink>
-
-            <NavLink
-              to={ROUTE_PATHS.tournaments}
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
-              }
-            >
-              {t('nav.tournaments')}
             </NavLink>
 
             <NavLink

@@ -17,7 +17,10 @@ public class TeamEntity extends BaseEntity {
     @Id
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "external_id", unique = true)
+    private String externalId;
+
+    @Column(nullable = false)
     private String name;
 
     @Column(name = "image_url", length = 500)

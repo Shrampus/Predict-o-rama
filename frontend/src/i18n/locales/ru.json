@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Главная",
-    "predictions": "Прогнозы",
     "tournaments": "Турниры",
     "groups": "Группы",
     "signOut": "Выйти"
@@ -12,14 +11,28 @@
     "error": "Неверный адрес почты или пароль.",
     "signingIn": "Вход…",
     "signIn": "Войти",
-    "devAccounts": "Тестовые аккаунты — нажмите для заполнения"
+    "devAccounts": "Тестовые аккаунты — нажмите для заполнения",
+    "or": "или",
+    "role": "Роль",
+    "googleError": "Вход через Google не удался."
+  },
+  "onboarding": {
+    "title": "Добро пожаловать!",
+    "subtitle": "Вы вошли как {{email}}. Выберите имя пользователя для продолжения.",
+    "usernameLabel": "Имя пользователя",
+    "usernamePlaceholder": "напр. футболфан42",
+    "usernameTaken": "Имя пользователя уже занято. Пожалуйста, выберите другое.",
+    "saving": "Сохранение…",
+    "continue": "Продолжить"
   },
   "tournament": {
     "roundOf16": "1/8 ФИНАЛА",
     "upcoming": "Предстоящие",
     "viewCalendar": "Смотреть календарь",
     "loadingMatches": "Загрузка матчей...",
-    "noMatches": "Матчи недоступны."
+    "noMatches": "Матчи недоступны.",
+    "phaseFallback": "Этап турнира",
+    "fetchError": "Не удалось загрузить матчи"
   },
   "heroBanner": {
     "matchesLive": "{{count}} матча в прямом эфире"
@@ -29,11 +42,22 @@
     "standings": "Таблица"
   },
   "matchCard": {
-    "vs": "VS",
     "draw": "Ничья",
     "saving": "Сохранение...",
-    "saved": "✓ Сохранено",
-    "predictNow": "Сделать прогноз"
+    "saved": "Сохранено",
+    "savedInline": "Прогноз сохранен.",
+    "savePrediction": "Сохранить прогноз",
+    "updatePrediction": "Обновить прогноз",
+    "predictionClosed": "Прием прогнозов закрыт",
+    "predictionClosedHelper": "Для этого матча прием прогнозов уже закрыт.",
+    "editUntilKickoff": "Вы можете изменить прогноз до начала матча.",
+    "enterBothScores": "Введите оба счета",
+    "selectWinner": "Выберите победителя",
+    "invalidWinnerForScore": "Выбранный исход не подходит для этого счета",
+    "saveFailed": "Не удалось сохранить прогноз. Попробуйте еще раз.",
+    "scoreInputAria": "Счет команды {{team}}",
+    "predictNow": "Сделать прогноз",
+    "enterValidScore": "Введите корректный счет (0 или больше)."
   },
   "standings": {
     "group": "Группа {{letter}}",
@@ -82,6 +106,65 @@
     "groupCount_many": "{{count}} групп",
     "groupCount_other": "{{count}} группы",
     "leaveGroup": "Покинуть группу",
-    "leaveGroupError": "Не удалось покинуть группу"
+    "leaveGroupError": "Не удалось покинуть группу",
+    "groupFallbackName": "Группа",
+    "groupFallbackDescription": "Пока нет описания.",
+    "invalidGroupUrl": "Неверный URL группы",
+    "detailsHeader": {
+      "title": "Детали группы",
+      "loading": "Загрузка деталей группы..."
+    },
+    "membersSection": {
+      "title": "Участники",
+      "loadingMembers": "Загрузка участников...",
+      "emptyMembers": "В этой группе пока нет участников.",
+      "removing": "Удаление...",
+      "remove": "Удалить",
+      "addMemberByEmail": "Добавить участника по почте",
+      "memberEmailPlaceholder": "teammate@example.com",
+      "adding": "Добавление...",
+      "add": "Добавить",
+      "adminOnlyAction": "Действие только для админов: добавлять участников могут только администраторы группы."
+    },
+    "groupErrors": {
+      "failedToLoadGroupDetails": "Не удалось загрузить детали группы.",
+      "failedToLoadMembers": "Не удалось загрузить участников.",
+      "failedToLoadTournaments": "Не удалось загрузить турниры.",
+      "failedToLoadTournamentOptions": "Не удалось загрузить варианты турниров."
+    },
+    "roles": {
+      "admin": "Админ",
+      "user": "Участник"
+    },
+    "memberAction": {
+      "memberAdded": "Участник успешно добавлен.",
+      "addFailed": "Не удалось добавить участника.",
+      "removeConfirmation": "Удалить {{name}} из этой группы?",
+      "memberRemoved": "Участник успешно удален.",
+      "removeFailed": "Не удалось удалить участника."
+    },
+    "tournamentAction": {
+      "tournamentLinked": "Турнир успешно привязан.",
+      "addFailed": "Не удалось добавить турнир.",
+      "removeConfirmation": "Удалить {{name}} из этой группы?",
+      "tournamentRemoved": "Турнир успешно удален.",
+      "removeFailed": "Не удалось удалить турнир."
+    },
+    "tournamentsSection": {
+      "title": "Турниры",
+      "loadingTournaments": "Загрузка турниров...",
+      "emptyTournaments": "Пока нет привязанных турниров.",
+      "open": "Открыть",
+      "unavailable": "Недоступно",
+      "removing": "Удаление...",
+      "remove": "Удалить",
+      "addTournament": "Добавить турнир",
+      "selectTournament": "Выберите турнир",
+      "adding": "Добавление...",
+      "add": "Добавить",
+      "loadingOptions": "Загрузка вариантов турниров...",
+      "emptyOptions": "Больше нет турниров для привязки.",
+      "adminOnlyAction": "Действие только для админов: добавлять турниры могут только администраторы группы."
+    }
   }
 }

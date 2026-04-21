@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Home",
-    "predictions": "Predictions",
     "tournaments": "Tournaments",
     "groups": "Groups",
     "signOut": "Sign out"
@@ -12,14 +11,28 @@
     "error": "Invalid email or password.",
     "signingIn": "Signing in…",
     "signIn": "Sign in",
-    "devAccounts": "Dev accounts — click to fill"
+    "devAccounts": "Dev accounts — click to fill",
+    "or": "or",
+    "role": "Role",
+    "googleError": "Google sign-in failed."
+  },
+  "onboarding": {
+    "title": "Welcome!",
+    "subtitle": "Signed in as {{email}}. Choose a username to continue.",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "e.g. footballfan42",
+    "usernameTaken": "Username is already taken. Please choose another.",
+    "saving": "Saving…",
+    "continue": "Continue"
   },
   "tournament": {
     "roundOf16": "ROUND OF 16",
     "upcoming": "Upcoming",
     "viewCalendar": "View Calendar",
     "loadingMatches": "Loading matches...",
-    "noMatches": "No matches available."
+    "noMatches": "No matches available.",
+    "phaseFallback": "Tournament Phase",
+    "fetchError": "Failed to fetch matches"
   },
   "heroBanner": {
     "matchesLive": "{{count}} Matches Live"
@@ -29,11 +42,22 @@
     "standings": "Standings"
   },
   "matchCard": {
-    "vs": "VS",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
-    "predictNow": "Predict Now"
+    "savedInline": "Prediction saved.",
+    "savePrediction": "Save prediction",
+    "updatePrediction": "Update prediction",
+    "predictionClosed": "Prediction closed",
+    "predictionClosedHelper": "Prediction window has closed for this match.",
+    "editUntilKickoff": "You can edit your prediction until kickoff.",
+    "enterBothScores": "Enter both scores",
+    "selectWinner": "Select a winner",
+    "invalidWinnerForScore": "Selected outcome is not valid for this score",
+    "saveFailed": "Could not save prediction. Try again.",
+    "scoreInputAria": "{{team}} score",
+    "predictNow": "Predict Now",
+    "enterValidScore": "Enter a valid score (0 or more)."
   },
   "standings": {
     "group": "Group {{letter}}",
@@ -77,6 +101,65 @@
     "groupCount_one": "{{count}} group",
     "groupCount_other": "{{count}} groups",
     "leaveGroup": "Leave group",
-    "leaveGroupError": "Failed to leave group"
+    "leaveGroupError": "Failed to leave group",
+    "groupFallbackName": "Group",
+    "groupFallbackDescription": "No description yet.",
+    "invalidGroupUrl": "Invalid group URL",
+    "detailsHeader": {
+      "title": "Group Details",
+      "loading": "Loading group details..."
+    },
+    "membersSection": {
+      "title": "Members",
+      "loadingMembers": "Loading members...",
+      "emptyMembers": "No members found in this group yet.",
+      "removing": "Removing...",
+      "remove": "Remove",
+      "addMemberByEmail": "Add member by email",
+      "memberEmailPlaceholder": "teammate@example.com",
+      "adding": "Adding...",
+      "add": "Add",
+      "adminOnlyAction": "Admin-only action: adding members is only available to group admins."
+    },
+    "groupErrors": {
+      "failedToLoadGroupDetails": "Failed to load group details.",
+      "failedToLoadMembers": "Failed to load members.",
+      "failedToLoadTournaments": "Failed to load tournaments.",
+      "failedToLoadTournamentOptions": "Failed to load tournament options."
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "Member"
+    },
+    "memberAction": {
+      "memberAdded": "Member added successfully.",
+      "addFailed": "Failed to add member.",
+      "removeConfirmation": "Remove {{name}} from this group?",
+      "memberRemoved": "Member removed successfully.",
+      "removeFailed": "Failed to remove member."
+    },
+    "tournamentAction": {
+      "tournamentLinked": "Tournament linked successfully.",
+      "addFailed": "Failed to add tournament.",
+      "removeConfirmation": "Remove {{name}} from this group?",
+      "tournamentRemoved": "Tournament removed successfully.",
+      "removeFailed": "Failed to remove tournament."
+    },
+    "tournamentsSection": {
+      "title": "Tournaments",
+      "loadingTournaments": "Loading tournaments...",
+      "emptyTournaments": "No tournaments linked yet.",
+      "open": "Open",
+      "unavailable": "Unavailable",
+      "removing": "Removing...",
+      "remove": "Remove",
+      "addTournament": "Add tournament",
+      "selectTournament": "Select a tournament",
+      "adding": "Adding...",
+      "add": "Add",
+      "loadingOptions": "Loading tournament options...",
+      "emptyOptions": "No additional tournaments available to link.",
+      "adminOnlyAction": "Admin-only action: adding tournaments is only available to group admins."
+    }
   }
 }

@@ -5,7 +5,6 @@ import com.predictorama.backend.domain.entity.Team;
 import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
-import com.predictorama.backend.domain.port.persistence.TeamRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,51 +20,15 @@ public class MatchResultSyncService {
     private final PredictionFixtureImportService predictionFixtureImportService;
     private final FootballDataPort footballDataPort;
     private final MatchRepositoryPort matchRepositoryPort;
-    private final TeamRepositoryPort teamRepositoryPort;
+    private final TeamSyncService teamSyncService;
     private final CompetitionCatalog competitionCatalog;
     private final PredictionScoringService predictionScoringService;
 
     private static final Logger log = LoggerFactory.getLogger(MatchResultSyncService.class);
 
-    private Team saveOrGetTeam(Team incomingTeam) {
-        return teamRepositoryPort.findByName(incomingTeam.getName())
-                .map(existingTeam -> {
-                    String existingImage = existingTeam.getImageUrl();
-                    String incomingImage = incomingTeam.getImageUrl();
-
-                    boolean imageChanged = incomingImage != null &&
-                            (existingImage == null || !existingImage.equals(incomingImage));
-
-                    if (!imageChanged) {
-                        return existingTeam;
-                    }
-
-                    Team updatedTeam = Team.builder()
-                            .id(existingTeam.getId())
-                            .name(existingTeam.getName())
-                            .imageUrl(incomingImage)
-                            .build();
-
-                    Team savedTeam = teamRepositoryPort.save(updatedTeam);
-                    log.info("Updated team image in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
-                    return savedTeam;
-                })
-                .orElseGet(() -> {
-                    Team savedTeam = teamRepositoryPort.save(
-                            Team.builder()
-                                    .id(UUID.randomUUID())
-                                    .name(incomingTeam.getName())
-                                    .imageUrl(incomingTeam.getImageUrl())
-                                    .build());
-
-                    log.info("Created team in DB name={} id={}", savedTeam.getName(), savedTeam.getId());
-                    return savedTeam;
-                });
-    }
-
     private Match saveOrUpdateMatch(Match externalMatch, Tournament tournament) {
-        Team savedHomeTeam = saveOrGetTeam(externalMatch.getHomeTeam());
-        Team savedAwayTeam = saveOrGetTeam(externalMatch.getAwayTeam());
+        Team savedHomeTeam = teamSyncService.saveOrGetTeam(externalMatch.getHomeTeam());
+        Team savedAwayTeam = teamSyncService.saveOrGetTeam(externalMatch.getAwayTeam());
 
         return matchRepositoryPort.findByExternalId(externalMatch.getExternalId())
                 .map(existingMatch -> {
@@ -98,8 +61,8 @@ public class MatchResultSyncService {
                             .awayTeam(savedAwayTeam)
                             .matchStatus(externalMatch.getMatchStatus())
                             .kickoffTime(externalMatch.getKickoffTime())
-                            .scores(List.of())
-                            .winner(null)
+                            .scores(externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
                             .externalId(externalMatch.getExternalId())
                             .build();
 
@@ -113,6 +76,54 @@ public class MatchResultSyncService {
 
     private String buildMatchName(Team homeTeam, Team awayTeam) {
         return homeTeam.getName() + " vs " + awayTeam.getName();
+    }
+
+    private boolean isValidFinishedMatch(Match match) {
+        if (match == null) {
+            log.warn("Skipping finished match because it is null");
+            return false;
+        }
+
+        if (isBlank(match.getExternalId())) {
+            log.warn("Skipping finished match because externalId is missing");
+            return false;
+        }
+
+        if (match.getHomeTeam() == null) {
+            log.warn("Skipping finished match externalId={} because homeTeam is missing", match.getExternalId());
+            return false;
+        }
+
+        if (match.getAwayTeam() == null) {
+            log.warn("Skipping finished match externalId={} because awayTeam is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getHomeTeam().getName())) {
+            log.warn("Skipping finished match externalId={} because homeTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getHomeTeam().getExternalId())) {
+            log.warn("Skipping finished match externalId={} because homeTeam.externalId is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getName())) {
+            log.warn("Skipping finished match externalId={} because awayTeam.name is missing", match.getExternalId());
+            return false;
+        }
+
+        if (isBlank(match.getAwayTeam().getExternalId())) {
+            log.warn("Skipping finished match externalId={} because awayTeam.externalId is missing", match.getExternalId());
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     public void syncAllCompetitions() {
@@ -132,10 +143,23 @@ public class MatchResultSyncService {
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
 
         for (Match match : finishedMatches) {
-            Match savedMatch = saveOrUpdateMatch(match, tournament);
-            log.info("Synced match result for matchId={} externalId={} competition={}",
-                    savedMatch.getId(), savedMatch.getExternalId(), competition);
-            predictionScoringService.distributePredictionScores(savedMatch.getId());
+            if (!isValidFinishedMatch(match)) {
+                continue;
+            }
+
+            try {
+                Match savedMatch = saveOrUpdateMatch(match, tournament);
+                log.info("Synced match result for matchId={} externalId={} competition={}",
+                        savedMatch.getId(), savedMatch.getExternalId(), competition);
+                predictionScoringService.distributePredictionScores(savedMatch.getId());
+            } catch (Exception e) {
+                log.error(
+                        "Failed to sync finished match externalId={} competition={}",
+                        match.getExternalId(),
+                        competition,
+                        e
+                );
+            }
         }
     }
 }
