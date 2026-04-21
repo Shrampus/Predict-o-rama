@@ -297,6 +297,9 @@ class UserUpcomingMatchQueryServiceTest {
 
         @Override
         public List<Tournament> findAll() { return List.of(); }
+
+        @Override
+        public List<Tournament> findAllById(Set<UUID> ids) { return List.of(); }
     }
 
     static class InMemoryPredictionRepository implements PredictionRepositoryPort {

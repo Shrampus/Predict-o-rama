@@ -45,7 +45,14 @@
     "error": "Eelseisvate mängude laadimine ebaõnnestus.",
     "empty": "Eelseisvaid mänge pole.",
     "predict": "Ennusta · {{groupName}}",
-    "predicted": "✓ Ennustatud · {{groupName}}"
+    "predicted": "✓ Ennustatud · {{groupName}}",
+    "filters": {
+      "all": "Kõik",
+      "competition": "Liiga",
+      "group": "Grupp",
+      "dateRange": "Kuupäev",
+      "nextDays": "Järgmised {{count}} päeva"
+    }
   },
   "groups": {
     "myGroups": "Minu grupid",

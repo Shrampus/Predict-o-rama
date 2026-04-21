@@ -45,7 +45,17 @@
     "error": "Не удалось загрузить предстоящие матчи.",
     "empty": "Предстоящих матчей нет.",
     "predict": "Прогноз · {{groupName}}",
-    "predicted": "✓ Прогноз сделан · {{groupName}}"
+    "predicted": "✓ Прогноз сделан · {{groupName}}",
+    "filters": {
+      "all": "Все",
+      "competition": "Лига",
+      "group": "Группа",
+      "dateRange": "Дата",
+      "nextDays_one": "Следующий {{count}} день",
+      "nextDays_few": "Следующие {{count}} дня",
+      "nextDays_many": "Следующих {{count}} дней",
+      "nextDays_other": "Следующие {{count}} дня"
+    }
   },
   "groups": {
     "myGroups": "Мои группы",

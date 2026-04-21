@@ -1,6 +1,8 @@
 package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.domain.entity.Group;
+import com.predictorama.backend.domain.entity.Match;
+import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
@@ -52,7 +54,13 @@ public class UserUpcomingMatchQueryService {
         Instant now = Instant.now();
         Instant end = now.plus(28, ChronoUnit.DAYS);
 
-        return matchRepositoryPort.findByKickoffTimeBetween(now, end).stream()
+        List<Match> matches = matchRepositoryPort.findByKickoffTimeBetween(now, end);
+
+        Set<UUID> tournamentIds = matches.stream().map(Match::getTournamentId).collect(Collectors.toSet());
+        Map<UUID, Tournament> tournamentsById = tournamentRepositoryPort.findAllById(tournamentIds).stream()
+                .collect(Collectors.toMap(Tournament::getId, t -> t));
+
+        return matches.stream()
                 .map(match -> {
                     List<Group> relevantGroups = userGroups.stream()
                             .filter(group -> tournamentsByGroup
@@ -65,13 +73,11 @@ public class UserUpcomingMatchQueryService {
                             .map(Group::getId)
                             .collect(Collectors.toSet());
 
-                    var tournament = tournamentRepositoryPort.findById(match.getTournamentId());
-                    String competitionCode = tournament
-                            .map(t -> competitionCatalog.toCompetitionCode(t.getName()))
-                            .orElse(null);
-                    String tournamentName = tournament
-                            .map(t -> t.getName())
-                            .orElse(null);
+                    Tournament tournament = tournamentsById.get(match.getTournamentId());
+                    String competitionCode = tournament != null
+                            ? competitionCatalog.toCompetitionCode(tournament.getName())
+                            : null;
+                    String tournamentName = tournament != null ? tournament.getName() : null;
 
                     return UpcomingMatchResult.builder()
                             .match(match)

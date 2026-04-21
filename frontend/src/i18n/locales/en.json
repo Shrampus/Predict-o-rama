@@ -45,7 +45,14 @@
     "error": "Failed to load upcoming matches.",
     "empty": "No upcoming matches.",
     "predict": "Predict · {{groupName}}",
-    "predicted": "✓ Predicted · {{groupName}}"
+    "predicted": "✓ Predicted · {{groupName}}",
+    "filters": {
+      "all": "All",
+      "competition": "League",
+      "group": "Group",
+      "dateRange": "Date",
+      "nextDays": "Next {{count}} days"
+    }
   },
   "groups": {
     "myGroups": "My Groups",
