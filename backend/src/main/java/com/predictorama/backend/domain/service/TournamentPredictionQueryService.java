@@ -82,8 +82,8 @@ public class TournamentPredictionQueryService {
     }
 
     private String resolveSeasonLabel(String competition, Tournament tournament) {
-        if (tournament.getDescription() != null && !tournament.getDescription().isBlank()) {
-            return tournament.getDescription();
+        if (tournament.getSeasonLabel() != null && !tournament.getSeasonLabel().isBlank()) {
+            return tournament.getSeasonLabel();
         }
         return competitionCatalog.toSeasonLabel(competition);
     }

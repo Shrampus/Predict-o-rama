@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Tournament {
     private UUID id;
     private String name;
-    private String description;
+    private String seasonLabel;
     private String seasonIdentifier;
     private Sport sport;
 

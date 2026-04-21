@@ -54,7 +54,7 @@ class PredictionFixtureImportServiceTest {
         Tournament tournament = tournamentRepository.save(Tournament.builder()
                 .id(UUID.randomUUID())
                 .name("UEFA Champions League")
-                .description("Imported")
+                .seasonLabel("Imported")
                 .sport(Tournament.Sport.FOOTBALL)
                 .build());
 
@@ -115,7 +115,7 @@ class PredictionFixtureImportServiceTest {
         assertThat(importedMatch.getScores()).hasSize(1);
         assertThat(importedMatch.getScores().getFirst().getHomeScore()).isEqualTo(2);
         assertThat(importedMatch.getScores().getFirst().getAwayScore()).isEqualTo(1);
-        assertThat(tournamentRepository.findById(tournament.getId())).get().extracting(Tournament::getDescription).isEqualTo("2025/26");
+        assertThat(tournamentRepository.findById(tournament.getId())).get().extracting(Tournament::getSeasonLabel).isEqualTo("2025/26");
     }
 
     @Test
@@ -149,7 +149,7 @@ class PredictionFixtureImportServiceTest {
         assertThat(importedMatch.getScores()).hasSize(1);
         assertThat(importedMatch.getScores().getFirst().getHomeScore()).isEqualTo(3);
         assertThat(importedMatch.getScores().getFirst().getAwayScore()).isEqualTo(2);
-        assertThat(tournamentRepository.findAll()).singleElement().extracting(Tournament::getDescription).isEqualTo("2025/26");
+        assertThat(tournamentRepository.findAll()).singleElement().extracting(Tournament::getSeasonLabel).isEqualTo("2025/26");
     }
 
     private static final class StubFootballDataPort implements FootballDataPort {

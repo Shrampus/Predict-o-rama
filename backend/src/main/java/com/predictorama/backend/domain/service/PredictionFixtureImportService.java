@@ -62,7 +62,6 @@ public class PredictionFixtureImportService {
                     Tournament.builder()
                             .id(UUID.randomUUID())
                             .name(tournamentName)
-                            .description("Imported from football-data API")
                             .sport(Tournament.Sport.FOOTBALL)
                             .build()
             );
@@ -191,7 +190,7 @@ public class PredictionFixtureImportService {
                 .orElse(null);
 
         boolean seasonIdentifierChanged = seasonIdentifier != null && !seasonIdentifier.equals(tournament.getSeasonIdentifier());
-        boolean seasonLabelChanged = seasonLabel != null && !seasonLabel.equals(tournament.getDescription());
+        boolean seasonLabelChanged = seasonLabel != null && !seasonLabel.equals(tournament.getSeasonLabel());
 
         if (!seasonIdentifierChanged && !seasonLabelChanged) {
             return tournament;
@@ -200,7 +199,7 @@ public class PredictionFixtureImportService {
         Tournament updatedTournament = Tournament.builder()
                 .id(tournament.getId())
                 .name(tournament.getName())
-                .description(seasonLabel != null ? seasonLabel : tournament.getDescription())
+                .seasonLabel(seasonLabel != null ? seasonLabel : tournament.getSeasonLabel())
                 .seasonIdentifier(seasonIdentifier != null ? seasonIdentifier : tournament.getSeasonIdentifier())
                 .sport(tournament.getSport())
                 .build();
@@ -210,7 +209,7 @@ public class PredictionFixtureImportService {
                 "Updated tournament season metadata name={} seasonIdentifier={} seasonLabel={}",
                 savedTournament.getName(),
                 savedTournament.getSeasonIdentifier(),
-                savedTournament.getDescription()
+                savedTournament.getSeasonLabel()
         );
         return savedTournament;
     }

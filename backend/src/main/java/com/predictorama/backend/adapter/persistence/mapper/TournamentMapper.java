@@ -9,7 +9,7 @@ public class TournamentMapper {
         return Tournament.builder()
                 .id(entity.getId())
                 .name(entity.getName())
-                .description(entity.getDescription())
+                .seasonLabel(entity.getSeasonLabel())
                 .seasonIdentifier(entity.getSeasonIdentifier())
                 .sport(entity.getSport())
                 .build();
@@ -19,7 +19,7 @@ public class TournamentMapper {
         return TournamentEntity.builder()
                 .id(tournament.getId())
                 .name(tournament.getName())
-                .description(tournament.getDescription())
+                .seasonLabel(tournament.getSeasonLabel())
                 .seasonIdentifier(tournament.getSeasonIdentifier())
                 .sport(tournament.getSport())
                 .build();
