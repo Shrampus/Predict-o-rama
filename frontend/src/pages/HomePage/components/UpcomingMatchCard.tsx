@@ -18,7 +18,6 @@ function UpcomingMatchCard({ match }: UpcomingMatchCardProps) {
 
             <TeamDisplay
                 imageUrl={match.homeTeamImage}
-                label=""
                 name={match.homeTeamName}
                 align="right"
             />
@@ -46,7 +45,6 @@ function UpcomingMatchCard({ match }: UpcomingMatchCardProps) {
 
             <TeamDisplay
                 imageUrl={match.awayTeamImage}
-                label=""
                 name={match.awayTeamName}
                 align="left"
             />
