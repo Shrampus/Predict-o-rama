@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -81,11 +82,9 @@ public class DevLeaderboardBootstrap {
                         .thenComparing(Match::getExternalId, Comparator.nullsLast(String::compareTo)))
                 .toList();
 
-        if (importedMatches.size() < properties.getSeededMatchCount()) {
+        if (importedMatches.isEmpty()) {
             log.warn(
-                    "Dev leaderboard bootstrap skipped prediction seeding because only {} matches were imported (need {})",
-                    importedMatches.size(),
-                    properties.getSeededMatchCount()
+                    "Dev leaderboard bootstrap skipped prediction seeding because no finished matches were imported"
             );
             return;
         }
@@ -93,13 +92,12 @@ public class DevLeaderboardBootstrap {
         ensureGroupMembers();
         ensureTournamentLink(importedMatches.get(0).getTournamentId());
 
-        List<Match> seededMatches = importedMatches.subList(0, properties.getSeededMatchCount());
-        seedPredictions(seededMatches);
-        seededMatches.forEach(match -> predictionScoringService.distributePredictionScores(match.getId()));
+        seedPredictions(importedMatches);
+        importedMatches.forEach(match -> predictionScoringService.distributePredictionScores(match.getId()));
 
         log.info(
                 "Finished dev leaderboard bootstrap seededMatches={} competition={} season={}",
-                seededMatches.size(),
+                importedMatches.size(),
                 properties.getCompetition(),
                 properties.getSeason()
         );
@@ -138,30 +136,15 @@ public class DevLeaderboardBootstrap {
         User alice = requireUser(ALICE);
         User carol = requireUser(CAROL);
 
-        Match matchOne = matches.get(0);
-        Match matchTwo = matches.get(1);
-        Match matchThree = matches.get(2);
-
-        savePrediction(bob.getId(), matchOne, PredictionPattern.EXACT);
-        savePrediction(alice.getId(), matchOne, PredictionPattern.WINNER_ONLY);
-        savePrediction(carol.getId(), matchOne, PredictionPattern.WRONG);
-
-        savePrediction(bob.getId(), matchTwo, PredictionPattern.EXACT);
-        savePrediction(alice.getId(), matchTwo, PredictionPattern.EXACT);
-        savePrediction(carol.getId(), matchTwo, PredictionPattern.WINNER_ONLY);
-
-        savePrediction(bob.getId(), matchThree, PredictionPattern.WRONG);
-        savePrediction(alice.getId(), matchThree, PredictionPattern.WINNER_ONLY);
-        savePrediction(carol.getId(), matchThree, PredictionPattern.EXACT);
+        matches.forEach(match -> {
+            savePrediction(bob.getId(), match);
+            savePrediction(alice.getId(), match);
+            savePrediction(carol.getId(), match);
+        });
     }
 
-    private void savePrediction(UUID userId, Match match, PredictionPattern pattern) {
-        Score actualScore = requireFullTimeScore(match);
-        Score predictedScore = switch (pattern) {
-            case EXACT -> score(actualScore.getHomeScore(), actualScore.getAwayScore());
-            case WINNER_ONLY -> winnerOnlyScore(actualScore, match.getWinner());
-            case WRONG -> wrongScore(match.getWinner());
-        };
+    private void savePrediction(UUID userId, Match match) {
+        Score predictedScore = randomScore();
 
         predictionService.savePrediction(
                 userId,
@@ -173,42 +156,17 @@ public class DevLeaderboardBootstrap {
         );
     }
 
-    private Score requireFullTimeScore(Match match) {
-        return match.getScores().stream()
-                .filter(score -> score.getScoreType() == Score.ScoreType.FULL_TIME)
-                .findFirst()
-                .orElseGet(() -> match.primaryScore()
-                        .orElseThrow(() -> new IllegalStateException("Missing score for match " + match.getId())));
-    }
-
-    private Score winnerOnlyScore(Score actualScore, Winner winner) {
-        int homeScore = actualScore.getHomeScore();
-        int awayScore = actualScore.getAwayScore();
-
-        return switch (winner) {
-            case HOME -> (homeScore - awayScore == 1)
-                    ? score(homeScore + 1, awayScore)
-                    : score(homeScore - 1, awayScore);
-            case AWAY -> (awayScore - homeScore == 1)
-                    ? score(homeScore, awayScore + 1)
-                    : score(homeScore, awayScore - 1);
-            case DRAW -> score(homeScore + 1, awayScore + 1);
-        };
-    }
-
-    private Score wrongScore(Winner winner) {
-        return switch (winner) {
-            case HOME, DRAW -> score(0, 1);
-            case AWAY -> score(1, 0);
-        };
-    }
-
     private Score score(int homeScore, int awayScore) {
         return Score.builder()
                 .homeScore(homeScore)
                 .awayScore(awayScore)
                 .scoreType(Score.ScoreType.NORMAL_TIME)
                 .build();
+    }
+
+    private Score randomScore() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        return score(random.nextInt(6), random.nextInt(6));
     }
 
     private Winner deriveWinner(Score score) {
@@ -224,11 +182,5 @@ public class DevLeaderboardBootstrap {
     private User requireUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Missing seeded dev user: " + username));
-    }
-
-    private enum PredictionPattern {
-        EXACT,
-        WINNER_ONLY,
-        WRONG
     }
 }

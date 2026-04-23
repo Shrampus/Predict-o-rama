@@ -20,6 +20,5 @@ public class DevLeaderboardBootstrapProperties {
     private Duration initialDelay = Duration.ofSeconds(5);
     private String competition = "EC";
     private int season = 2024;
-    private int seededMatchCount = 3;
     private UUID groupId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 }
