@@ -69,6 +69,25 @@ The backend will start on:
 http://localhost:8080
 ```
 
+### Manual fixture sync from terminal
+
+Manual fixture sync is terminal-only and is not exposed through the frontend or public REST API.
+
+Run it from the server like this:
+
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--manual-sync.competition=PL --manual-sync.date-from=2026-04-01 --manual-sync.date-to=2026-04-24"
+```
+
+Required arguments:
+
+* `manual-sync.competition` - competition code such as `PL`, `CL`, or `WC`
+* `manual-sync.date-from` - start date in `YYYY-MM-DD` format
+* `manual-sync.date-to` - end date in `YYYY-MM-DD` format
+
+By default the app exits after the manual sync finishes.
+
 ---
 
 # Running with Docker (local)
