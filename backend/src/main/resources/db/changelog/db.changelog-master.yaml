@@ -27,5 +27,3 @@ databaseChangeLog:
       file: db/changelog/013-add-unique-match-external-id.yaml
   - include:
       file: db/changelog/014-add-google-auth.yaml
-  - include:
-      file: db/changelog/015-seed-dev-leaderboard-data.yaml

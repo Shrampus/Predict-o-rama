@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -103,12 +104,28 @@ public class FootballDataApiAdapter implements FootballDataPort {
         LocalDate dateFrom = LocalDate.now().minusDays(14);
         LocalDate dateTo = LocalDate.now();
 
+        return fetchFinishedMatches(competition, Optional.of(dateFrom), Optional.of(dateTo), Optional.empty());
+    }
+
+    @Override
+    public List<Match> getFinishedMatches(String competition, int season) {
+        return fetchFinishedMatches(competition, Optional.empty(), Optional.empty(), Optional.of(season));
+    }
+
+    private List<Match> fetchFinishedMatches(
+            String competition,
+            Optional<LocalDate> dateFrom,
+            Optional<LocalDate> dateTo,
+            Optional<Integer> season
+    ) {
+
         try {
             FootballDataMatchesResponse response = restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/competitions/{competition}/matches")
-                            .queryParam("dateFrom", dateFrom)
-                            .queryParam("dateTo", dateTo)
+                            .queryParamIfPresent("dateFrom", dateFrom)
+                            .queryParamIfPresent("dateTo", dateTo)
+                            .queryParamIfPresent("season", season)
                             .build(competition))
                     .header("X-Auth-Token", apiKey)
                     .retrieve()

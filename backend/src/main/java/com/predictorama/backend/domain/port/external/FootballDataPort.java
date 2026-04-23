@@ -8,4 +8,6 @@ public interface FootballDataPort {
     List<Match> getUpcomingMatches(String competition);
 
     List<Match> getFinishedMatches(String competition);
+
+    List<Match> getFinishedMatches(String competition, int season);
 }
