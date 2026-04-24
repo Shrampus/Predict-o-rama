@@ -97,12 +97,44 @@ public class FootballDataApiAdapter implements FootballDataPort {
 
     @Override
     public List<Match> getMatches(String competition, LocalDate dateFrom, LocalDate dateTo) {
+        return fetchMatches(
+                competition,
+                Optional.ofNullable(dateFrom),
+                Optional.ofNullable(dateTo),
+                Optional.empty()
+        );
+    }
+
+    @Override
+    public List<Match> getFinishedMatches(String competition) {
+        LocalDate dateFrom = LocalDate.now().minusDays(14);
+        LocalDate dateTo = LocalDate.now();
+
+        return fetchMatches(competition, Optional.of(dateFrom), Optional.of(dateTo), Optional.empty()).stream()
+                .filter(match -> match.getMatchStatus() == Match.MatchStatus.COMPLETED)
+                .toList();
+    }
+
+    @Override
+    public List<Match> getFinishedMatches(String competition, int season) {
+        return fetchMatches(competition, Optional.empty(), Optional.empty(), Optional.of(season)).stream()
+                .filter(match -> match.getMatchStatus() == Match.MatchStatus.COMPLETED)
+                .toList();
+    }
+
+    private List<Match> fetchMatches(
+            String competition,
+            Optional<LocalDate> dateFrom,
+            Optional<LocalDate> dateTo,
+            Optional<Integer> season
+    ) {
         try {
             FootballDataMatchesResponse response = restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/competitions/{competition}/matches")
-                            .queryParam("dateFrom", dateFrom)
-                            .queryParam("dateTo", dateTo)
+                            .queryParamIfPresent("dateFrom", dateFrom)
+                            .queryParamIfPresent("dateTo", dateTo)
+                            .queryParamIfPresent("season", season)
                             .build(competition))
                     .header("X-Auth-Token", apiKey)
                     .retrieve()

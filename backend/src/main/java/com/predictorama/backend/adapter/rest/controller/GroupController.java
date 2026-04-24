@@ -138,6 +138,29 @@ public class GroupController {
         );
     }
 
+    @GetMapping("/{groupId}/leaderboards")
+    public ResponseEntity<List<GroupLeaderboardResponse>> getGroupLeaderboards(@PathVariable UUID groupId) {
+        UUID userId = currentUserId();
+        return ResponseEntity.ok(
+                groupService.getGroupLeaderboards(userId, groupId).stream()
+                        .map(leaderboard -> new GroupLeaderboardResponse(
+                                leaderboard.tournament().getId(),
+                                competitionCatalog.toCompetitionCode(leaderboard.tournament().getName()),
+                                leaderboard.tournament().getName(),
+                                leaderboard.entries().stream()
+                                        .map(entry -> new GroupLeaderboardEntryResponse(
+                                                entry.userId(),
+                                                entry.username(),
+                                                entry.totalScore(),
+                                                entry.scoredPredictions(),
+                                                entry.totalPredictions()
+                                        ))
+                                        .toList()
+                        ))
+                        .toList()
+        );
+    }
+
     @PostMapping("/{groupId}/tournaments")
     public ResponseEntity<Void> addGroupTournament(
             @PathVariable UUID groupId,

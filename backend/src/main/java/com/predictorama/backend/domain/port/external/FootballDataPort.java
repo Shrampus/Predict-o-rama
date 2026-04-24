@@ -10,5 +10,9 @@ import java.util.Optional;
 public interface FootballDataPort {
     List<Match> getMatches(String competition, LocalDate dateFrom, LocalDate dateTo);
 
+    List<Match> getFinishedMatches(String competition);
+
+    List<Match> getFinishedMatches(String competition, int season);
+
     Optional<CompetitionSeasonMetadata> getCurrentSeasonMetadata(String competition);
 }

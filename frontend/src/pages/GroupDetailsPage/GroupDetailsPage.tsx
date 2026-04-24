@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import type { MyGroupsResponse } from '../../services/groupApi';
 import { GroupDetailsHeader } from './components/GroupDetailsHeader';
+import { GroupLeaderboardsSection } from './components/GroupLeaderboardsSection';
 import { GroupMembersSection } from './components/GroupMembersSection';
 import { GroupTournamentsSection } from './components/GroupTournamentsSection';
 import { useGroupDetails } from './hooks/useGroupDetails';
@@ -30,6 +31,9 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
     tournaments,
     tournamentsError,
     isLoadingTournaments,
+    leaderboards,
+    leaderboardsError,
+    isLoadingLeaderboards,
     memberEmail,
     handleMemberEmailChange,
     memberActionMessage,
@@ -89,6 +93,12 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
         onSelectTournament={handleTournamentSelectionChange}
         onResetTournamentFeedback={resetTournamentFeedback}
         onRemoveTournament={(tournament) => void handleRemoveTournament(tournament)}
+      />
+
+      <GroupLeaderboardsSection
+        leaderboards={leaderboards}
+        isLoadingLeaderboards={isLoadingLeaderboards}
+        leaderboardsError={leaderboardsError}
       />
 
       <GroupMembersSection

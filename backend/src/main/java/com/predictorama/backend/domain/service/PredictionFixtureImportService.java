@@ -47,6 +47,20 @@ public class PredictionFixtureImportService {
                 .toList();
     }
 
+    public List<Match> importFinishedMatchesForSeason(String competition, int season) {
+        if (!competitionCatalog.isSupportedCompetition(competition)) {
+            log.warn("Rejected finished-match import for unsupported competition code={}", competition);
+            return List.of();
+        }
+
+        Tournament tournament = getOrCreateTournament(competition);
+
+        return footballDataPort.getFinishedMatches(competition, season).stream()
+                .filter(this::isValidExternalMatch)
+                .map(match -> saveOrUpdateFinishedMatch(match, tournament))
+                .toList();
+    }
+
     public Tournament getOrCreateTournament(String competition) {
         if (!competitionCatalog.isSupportedCompetition(competition)) {
             throw new IllegalArgumentException("Unsupported competition code: " + competition);
@@ -167,6 +181,51 @@ public class PredictionFixtureImportService {
 
                     Match savedMatch = matchRepositoryPort.save(newMatch);
                     log.debug("Created match in DB externalId={} localId={}", savedMatch.getExternalId(), savedMatch.getId());
+                    return savedMatch;
+                });
+    }
+
+    private Match saveOrUpdateFinishedMatch(Match externalMatch, Tournament tournament) {
+        Team savedHomeTeam = teamSyncService.saveOrGetTeam(externalMatch.getHomeTeam());
+        Team savedAwayTeam = teamSyncService.saveOrGetTeam(externalMatch.getAwayTeam());
+
+        return matchRepositoryPort.findByExternalId(externalMatch.getExternalId())
+                .map(existingMatch -> {
+                    Match updatedMatch = Match.builder()
+                            .id(existingMatch.getId())
+                            .tournamentId(existingMatch.getTournamentId())
+                            .name(buildMatchName(savedHomeTeam, savedAwayTeam))
+                            .description(existingMatch.getDescription())
+                            .homeTeam(savedHomeTeam)
+                            .awayTeam(savedAwayTeam)
+                            .matchStatus(externalMatch.getMatchStatus())
+                            .kickoffTime(externalMatch.getKickoffTime())
+                            .scores(externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
+                            .externalId(existingMatch.getExternalId())
+                            .build();
+
+                    Match savedMatch = matchRepositoryPort.save(updatedMatch);
+                    log.debug("Updated finished match in DB externalId={} localId={}", savedMatch.getExternalId(), savedMatch.getId());
+                    return savedMatch;
+                })
+                .orElseGet(() -> {
+                    Match newMatch = Match.builder()
+                            .id(UUID.randomUUID())
+                            .tournamentId(tournament.getId())
+                            .name(buildMatchName(savedHomeTeam, savedAwayTeam))
+                            .description(null)
+                            .homeTeam(savedHomeTeam)
+                            .awayTeam(savedAwayTeam)
+                            .matchStatus(externalMatch.getMatchStatus())
+                            .kickoffTime(externalMatch.getKickoffTime())
+                            .scores(externalMatch.getScores())
+                            .winner(externalMatch.getWinner())
+                            .externalId(externalMatch.getExternalId())
+                            .build();
+
+                    Match savedMatch = matchRepositoryPort.save(newMatch);
+                    log.debug("Created finished match in DB externalId={} localId={}", savedMatch.getExternalId(), savedMatch.getId());
                     return savedMatch;
                 });
     }

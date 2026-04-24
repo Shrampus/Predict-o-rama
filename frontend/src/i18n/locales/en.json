@@ -112,6 +112,7 @@
       "failedToLoadGroupDetails": "Failed to load group details.",
       "failedToLoadMembers": "Failed to load members.",
       "failedToLoadTournaments": "Failed to load tournaments.",
+      "failedToLoadLeaderboards": "Failed to load leaderboards.",
       "failedToLoadTournamentOptions": "Failed to load tournament options."
     },
     "roles": {
@@ -147,6 +148,13 @@
       "loadingOptions": "Loading tournament options...",
       "emptyOptions": "No additional tournaments available to link.",
       "adminOnlyAction": "Admin-only action: adding tournaments is only available to group admins."
+    },
+    "leaderboardsSection": {
+      "title": "Leaderboards",
+      "loadingLeaderboards": "Loading leaderboards...",
+      "emptyLeaderboards": "Link a tournament to see group scores here.",
+      "scoredPredictions": "{{scored}}/{{total}} scored predictions",
+      "points": "pts"
     }
   }
 }
