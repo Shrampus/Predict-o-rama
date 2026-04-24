@@ -1,6 +1,7 @@
 package com.predictorama.backend.adapter.external.footballdata;
 
 import com.predictorama.backend.adapter.external.footballdata.mapper.FootballDataMatchMapper;
+import com.predictorama.backend.domain.entity.CompetitionSeasonMetadata;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.port.external.FootballDataPort;
 import lombok.extern.slf4j.Slf4j;
@@ -33,70 +34,75 @@ public class FootballDataApiAdapter implements FootballDataPort {
     }
 
     @Override
-    public List<Match> getUpcomingMatches(String competition) {
-        LocalDate dateFrom = LocalDate.now();
-        LocalDate dateTo = dateFrom.plusDays(28);
-
+    public Optional<CompetitionSeasonMetadata> getCurrentSeasonMetadata(String competition) {
         try {
-            FootballDataMatchesResponse response = restClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/competitions/{competition}/matches")
-                            .queryParam("dateFrom", dateFrom)
-                            .queryParam("dateTo", dateTo)
-                            .build(competition))
+            FootballDataCompetitionResponse response = restClient.get()
+                    .uri("/competitions/{competition}", competition)
                     .header("X-Auth-Token", apiKey)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError, (request, clientResponse) -> {
                         throw new FootballDataApiException(
-                                "Football-data client error: HTTP " + clientResponse.getStatusCode().value()
+                                "Football-data competition client error: HTTP " + clientResponse.getStatusCode().value()
                                         + " for competition=" + competition
                         );
                     })
                     .onStatus(HttpStatusCode::is5xxServerError, (request, clientResponse) -> {
                         throw new FootballDataApiException(
-                                "Football-data server error: HTTP " + clientResponse.getStatusCode().value()
+                                "Football-data competition server error: HTTP " + clientResponse.getStatusCode().value()
                                         + " for competition=" + competition
                         );
                     })
-                    .body(FootballDataMatchesResponse.class);
+                    .body(FootballDataCompetitionResponse.class);
 
-            if (response == null || response.getMatches() == null) {
-                log.warn("Football-data returned empty response for competition={}", competition);
-                return List.of();
+            if (response == null || response.getCurrentSeason() == null) {
+                log.warn("Football-data returned no current season for competition={}", competition);
+                return Optional.empty();
             }
 
-            return response.getMatches().stream()
-                    .filter(match -> {
-                        String status = match.getStatus();
-                        return "SCHEDULED".equals(status) || "TIMED".equals(status);
-                    })
-                    .filter(match -> hasValidUtcDate(match, competition))
-                    .filter(match -> isFutureKickoff(match))
-                    .filter(match -> hasResolvedTeams(match, competition))
-                    .map(FootballDataMatchMapper::toDomainMatch)
-                    .toList();
+            String seasonIdentifier = FootballDataMatchMapper.extractSeasonIdentifier(response.getCurrentSeason());
+            String seasonLabel = FootballDataMatchMapper.extractSeasonLabel(response.getCurrentSeason());
+
+            if (normalize(seasonIdentifier) == null && normalize(seasonLabel) == null) {
+                log.warn("Football-data current season metadata was empty for competition={}", competition);
+                return Optional.empty();
+            }
+
+            return Optional.of(CompetitionSeasonMetadata.builder()
+                    .seasonIdentifier(seasonIdentifier)
+                    .seasonLabel(seasonLabel)
+                    .build());
 
         } catch (FootballDataApiException e) {
-            log.warn("Football-data API request failed for competition={}: {}", competition, e.getMessage());
-            return List.of();
+            log.warn("Football-data competition request failed for competition={}: {}", competition, e.getMessage());
+            return Optional.empty();
 
         } catch (RestClientResponseException e) {
             log.warn(
-                    "Football-data HTTP error for competition={}: status={} body={}",
+                    "Football-data competition HTTP error for competition={}: status={} body={}",
                     competition,
                     e.getStatusCode().value(),
                     e.getResponseBodyAsString()
             );
-            return List.of();
+            return Optional.empty();
 
         } catch (RestClientException e) {
-            log.error("Football-data transport error for competition={}: {}", competition, e.getMessage(), e);
-            return List.of();
+            log.error("Football-data competition transport error for competition={}: {}", competition, e.getMessage(), e);
+            return Optional.empty();
 
         } catch (Exception e) {
-            log.error("Unexpected football-data adapter error for competition={}", competition, e);
-            return List.of();
+            log.error("Unexpected football-data competition adapter error for competition={}", competition, e);
+            return Optional.empty();
         }
+    }
+
+    @Override
+    public List<Match> getMatches(String competition, LocalDate dateFrom, LocalDate dateTo) {
+        return fetchMatches(
+                competition,
+                Optional.ofNullable(dateFrom),
+                Optional.ofNullable(dateTo),
+                Optional.empty()
+        );
     }
 
     @Override
@@ -104,21 +110,24 @@ public class FootballDataApiAdapter implements FootballDataPort {
         LocalDate dateFrom = LocalDate.now().minusDays(14);
         LocalDate dateTo = LocalDate.now();
 
-        return fetchFinishedMatches(competition, Optional.of(dateFrom), Optional.of(dateTo), Optional.empty());
+        return fetchMatches(competition, Optional.of(dateFrom), Optional.of(dateTo), Optional.empty()).stream()
+                .filter(match -> match.getMatchStatus() == Match.MatchStatus.COMPLETED)
+                .toList();
     }
 
     @Override
     public List<Match> getFinishedMatches(String competition, int season) {
-        return fetchFinishedMatches(competition, Optional.empty(), Optional.empty(), Optional.of(season));
+        return fetchMatches(competition, Optional.empty(), Optional.empty(), Optional.of(season)).stream()
+                .filter(match -> match.getMatchStatus() == Match.MatchStatus.COMPLETED)
+                .toList();
     }
 
-    private List<Match> fetchFinishedMatches(
+    private List<Match> fetchMatches(
             String competition,
             Optional<LocalDate> dateFrom,
             Optional<LocalDate> dateTo,
             Optional<Integer> season
     ) {
-
         try {
             FootballDataMatchesResponse response = restClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -149,7 +158,8 @@ public class FootballDataApiAdapter implements FootballDataPort {
             }
 
             return response.getMatches().stream()
-                    .filter(match -> "FINISHED".equals(match.getStatus()))
+                    .filter(match -> hasValidUtcDate(match, competition))
+                    .filter(match -> hasResolvedTeams(match, competition))
                     .map(FootballDataMatchMapper::toDomainMatch)
                     .toList();
 
@@ -208,10 +218,6 @@ public class FootballDataApiAdapter implements FootballDataPort {
             );
             return false;
         }
-    }
-
-    private boolean isFutureKickoff(FootballDataMatchResponse match) {
-        return Instant.parse(match.getUtcDate()).isAfter(Instant.now());
     }
 
     private boolean hasResolvedTeams(FootballDataMatchResponse match, String competition) {

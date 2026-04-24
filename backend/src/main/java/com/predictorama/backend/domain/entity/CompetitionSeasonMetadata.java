@@ -4,19 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.UUID;
-
 @Getter
 @Builder
 @AllArgsConstructor
-public class Tournament {
-    private UUID id;
-    private String name;
-    private String seasonLabel;
+public class CompetitionSeasonMetadata {
     private String seasonIdentifier;
-    private Sport sport;
-
-    public enum Sport{
-        FOOTBALL
-    }
+    private String seasonLabel;
 }

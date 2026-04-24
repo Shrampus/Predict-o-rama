@@ -52,7 +52,7 @@ export interface GroupTournamentResponse {
   id: string;
   competitionCode: string | null;
   name: string;
-  description: string;
+  seasonLabel: string | null;
   sport: string;
 }
 
@@ -79,7 +79,7 @@ export interface TournamentOption {
   id: string;
   competitionCode: string | null;
   name: string;
-  description: string;
+  seasonLabel: string | null;
   sport: string;
 }
 

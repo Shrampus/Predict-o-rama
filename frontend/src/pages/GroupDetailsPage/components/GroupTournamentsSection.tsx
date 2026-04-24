@@ -56,7 +56,7 @@ export function GroupTournamentsSection({
   function openTournamentDetails(
     competitionCode: string | null,
     tournamentName?: string,
-    tournamentDescription?: string,
+    seasonLabel?: string | null,
   ) {
     if (!competitionCode) {
       return;
@@ -64,7 +64,7 @@ export function GroupTournamentsSection({
     navigate(getTournamentDetailsPath(competitionCode), {
       state: {
         tournamentName,
-        tournamentDescription,
+        seasonLabel,
       },
     });
   }
@@ -99,7 +99,7 @@ export function GroupTournamentsSection({
                 openTournamentDetails(
                   tournament.competitionCode,
                   tournament.name,
-                  tournament.description,
+                  tournament.seasonLabel,
                 );
               }}
               onKeyDown={(event) => {
@@ -111,7 +111,7 @@ export function GroupTournamentsSection({
                   openTournamentDetails(
                     tournament.competitionCode,
                     tournament.name,
-                    tournament.description,
+                    tournament.seasonLabel,
                   );
                 }
               }}
@@ -126,7 +126,7 @@ export function GroupTournamentsSection({
             >
               <div className="min-w-0">
                 <p className="font-bold text-slate-800">{tournament.name}</p>
-                <p className="text-xs text-slate-500">{tournament.description}</p>
+                {tournament.seasonLabel && <p className="text-xs text-slate-500">{tournament.seasonLabel}</p>}
               </div>
               <div className="flex items-center gap-2">
                 {tournament.competitionCode ? (
@@ -136,7 +136,7 @@ export function GroupTournamentsSection({
                       openTournamentDetails(
                         tournament.competitionCode,
                         tournament.name,
-                        tournament.description,
+                        tournament.seasonLabel,
                       )
                     }
                     className="rounded-lg border border-green-200 bg-green-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-green-700 hover:bg-green-100"

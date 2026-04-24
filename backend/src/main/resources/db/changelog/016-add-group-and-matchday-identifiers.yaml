@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-add-group-identifier-to-matches
+      author: codex
+      changes:
+        - addColumn:
+            tableName: matches
+            columns:
+              - column:
+                  name: group_identifier
+                  type: varchar(100)
+
+  - changeSet:
+      id: 016-add-matchday-identifier-to-matches
+      author: codex
+      changes:
+        - addColumn:
+            tableName: matches
+            columns:
+              - column:
+                  name: matchday_identifier
+                  type: integer

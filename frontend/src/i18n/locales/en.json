@@ -1,8 +1,10 @@
 {
   "nav": {
+    "appName": "Predict-o-rama",
     "home": "Home",
     "tournaments": "Tournaments",
     "groups": "Groups",
+    "login": "Login",
     "signOut": "Sign out"
   },
   "login": {

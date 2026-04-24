@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TournamentPredictionsView {
     private String tournamentName;
+    private String seasonIdentifier;
     private String seasonLabel;
     private String phaseLabel;
     private List<TournamentMatchPredictionView> matches;

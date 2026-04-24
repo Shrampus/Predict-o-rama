@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,16 +43,19 @@ public class TournamentPredictionQueryService {
 
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
         List<Match> matches = getTournamentMatches(competition, tournament);
+        Tournament refreshedTournament = predictionFixtureImportService.getOrCreateTournament(competition);
         Map<UUID, Prediction> predictionsByMatchId =
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
         List<TournamentMatchPredictionView> responseMatches = matches.stream()
+                .sorted(Comparator.comparing(Match::getKickoffTime))
                 .map(match -> toView(match, predictionsByMatchId.get(match.getId())))
                 .toList();
 
         return new TournamentPredictionsView(
                 competitionCatalog.toTournamentName(competition),
-                resolveSeasonLabel(competition, tournament),
+                refreshedTournament.getSeasonIdentifier(),
+                resolveSeasonLabel(competition, refreshedTournament),
                 competitionCatalog.toPhaseLabel(competition),
                 responseMatches
         );
@@ -69,6 +73,9 @@ public class TournamentPredictionQueryService {
                 .awayTeamImage(match.getAwayTeam().getImageUrl())
                 .kickoffTime(match.getKickoffTime())
                 .matchStatus(match.getMatchStatus().name())
+                .roundIdentifier(match.getRoundIdentifier())
+                .groupIdentifier(match.getGroupIdentifier())
+                .matchdayIdentifier(match.getMatchdayIdentifier())
                 .predictionId(prediction != null ? prediction.getId() : null)
                 .predictedHomeScore(primaryPredictedScore != null ? primaryPredictedScore.getHomeScore() : null)
                 .predictedAwayScore(primaryPredictedScore != null ? primaryPredictedScore.getAwayScore() : null)
@@ -77,8 +84,8 @@ public class TournamentPredictionQueryService {
     }
 
     private String resolveSeasonLabel(String competition, Tournament tournament) {
-        if (tournament.getDescription() != null && !tournament.getDescription().isBlank()) {
-            return tournament.getDescription();
+        if (tournament.getSeasonLabel() != null && !tournament.getSeasonLabel().isBlank()) {
+            return tournament.getSeasonLabel();
         }
         return competitionCatalog.toSeasonLabel(competition);
     }
@@ -87,37 +94,19 @@ public class TournamentPredictionQueryService {
         Instant now = Instant.now();
         Instant in28Days = now.plus(28, ChronoUnit.DAYS);
 
-        List<Match> existingMatches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
+        List<Match> matches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
                 now,
                 in28Days
         );
 
-        if (!existingMatches.isEmpty()) {
-            log.info(
-                    "Using cached matches from DB for competition={} tournament={} count={}",
-                    competition,
-                    tournament.getName(),
-                    existingMatches.size()
-            );
-            return existingMatches;
-        }
-
         log.info(
-                "Fetching matches from football-data API for competition={} tournament={}",
+                "Using matches from DB for competition={} tournament={} count={}",
                 competition,
-                competitionCatalog.toTournamentName(competition)
+                tournament.getName(),
+                matches.size()
         );
 
-        List<Match> savedMatches = predictionFixtureImportService.importUpcomingMatches(competition);
-
-        log.info(
-                "Fetched and saved matches from API for competition={} tournament={} count={}",
-                competition,
-                competitionCatalog.toTournamentName(competition),
-                savedMatches.size()
-        );
-
-        return savedMatches;
+        return matches;
     }
 }
