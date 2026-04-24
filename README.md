@@ -56,6 +56,28 @@ Where to look:
 
 Tip: when building new UI, prefer Tailwind utility classes first, then add custom CSS only when needed.
 
+## Frontend Testing
+
+Frontend tests use Vitest with React Testing Library and run in `jsdom`.
+
+Run tests from `frontend/`:
+
+```bash
+npm test
+npm run test:run
+```
+
+Notes:
+
+- Shared test setup is in `frontend/src/test/setup.ts`.
+- Vitest config lives in `frontend/vite.config.ts` (`test` block).
+- TypeScript test globals are configured in `frontend/tsconfig.app.json`.
+- The current focused test foundation includes:
+  - `frontend/src/context/AuthContext.test.tsx`
+  - `frontend/src/app/router/AppRouter.test.tsx`
+  - `frontend/src/pages/TournamentPage/hooks/useMatchPredictionForm.test.ts`
+  - `frontend/src/pages/HomePage/hooks/useUpcomingMatches.test.tsx`
+
 # Running the Backend
 
 ```bash
