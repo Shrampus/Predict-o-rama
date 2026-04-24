@@ -16,7 +16,7 @@ Predict-o-rama/
 
 Frontend:
 
-* Node.js (>=18 recommended)
+* Node.js (>=20.19 recommended; >=22.12 also supported)
 * npm
 
 Backend:
