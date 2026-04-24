@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { DayRange, GroupOption } from '../hooks/useUpcomingMatchFilters';
+import type { DayRange, GroupOption } from '../types';
 
 type UpcomingMatchFiltersProps = {
     tournamentOptions: string[];

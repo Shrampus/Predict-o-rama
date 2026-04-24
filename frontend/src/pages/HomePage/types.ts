@@ -15,3 +15,7 @@ export interface UpcomingMatch {
     tournamentName: string | null;
     groups: GroupReference[];
 }
+
+export type GroupOption = Pick<GroupReference, 'groupId' | 'groupName'>;
+
+export type DayRange = 'today' | 7 | 14 | 28;

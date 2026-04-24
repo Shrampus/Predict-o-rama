@@ -1,12 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { UpcomingMatch } from '../types';
-
-export type DayRange = 'today' | 7 | 14 | 28;
-
-export interface GroupOption {
-    groupId: string;
-    groupName: string;
-}
+import type { DayRange, GroupOption, UpcomingMatch } from '../types';
 
 interface UseUpcomingMatchFiltersResult {
     filteredMatches: UpcomingMatch[];
@@ -55,7 +48,8 @@ export function useUpcomingMatchFilters(matches: UpcomingMatch[]): UseUpcomingMa
             cutoff = new Date();
             cutoff.setHours(23, 59, 59, 999);
         } else if (selectedDays) {
-            cutoff = new Date(Date.now() + selectedDays * 24 * 60 * 60 * 1000);
+            cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() + selectedDays);
         }
 
         return matches.filter(match => {
