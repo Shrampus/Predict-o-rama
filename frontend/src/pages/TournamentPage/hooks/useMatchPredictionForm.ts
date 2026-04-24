@@ -406,6 +406,10 @@ export function useMatchPredictionForm({
 
         dispatch({ type: 'submit_attempt' });
 
+        if (isLocked) {
+            return;
+        }
+
         if (validationResult.errorCode !== null) {
             return;
         }

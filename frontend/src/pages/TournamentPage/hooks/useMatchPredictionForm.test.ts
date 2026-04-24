@@ -65,7 +65,7 @@ describe('useMatchPredictionForm', () => {
   });
 
   it('is locked after kickoff even when status is scheduled', async () => {
-    const onPredict = vi.fn();
+    const onPredict = vi.fn().mockResolvedValue({ ok: true });
     const match = makeMatch({ kickoffTime: '2026-04-24T10:00:00.000Z', matchStatus: 'SCHEDULED' });
     const { result } = renderHook(() =>
       useMatchPredictionForm({
@@ -93,7 +93,7 @@ describe('useMatchPredictionForm', () => {
   });
 
   it('is locked when match status is LIVE', async () => {
-    const onPredict = vi.fn();
+    const onPredict = vi.fn().mockResolvedValue({ ok: true });
     const match = makeMatch({ matchStatus: 'LIVE', kickoffTime: '2026-04-24T12:00:00.000Z' });
     const { result } = renderHook(() =>
       useMatchPredictionForm({
