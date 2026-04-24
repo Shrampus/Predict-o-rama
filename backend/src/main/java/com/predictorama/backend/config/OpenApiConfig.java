@@ -7,22 +7,22 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
+@ConditionalOnProperty(name = "springdoc.api-docs.enabled", havingValue = "true", matchIfMissing = true)
 public class OpenApiConfig {
 
     private static final String BEARER_AUTH_SCHEME = "bearerAuth";
-    private static final Set<String> PUBLIC_OPERATIONS = Set.of(
-            operationKey(HttpMethod.GET, "/"),
-            operationKey(HttpMethod.GET, "/health"),
-            operationKey(HttpMethod.POST, "/api/auth/google"),
-            operationKey(HttpMethod.POST, "/api/auth/login")
-    );
+    private static final Set<String> PUBLIC_OPERATIONS = PublicRoutes.ENTRIES.stream()
+            .map(r -> operationKey(r.method(), r.path()))
+            .collect(Collectors.toUnmodifiableSet());
 
     @Bean
     public OpenAPI predictoramaOpenApi() {

@@ -1,8 +1,8 @@
 package com.predictorama.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,6 +15,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    @Value("${springdoc.api-docs.enabled:true}")
+    private boolean swaggerEnabled;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -26,14 +29,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    PublicRoutes.ENTRIES.forEach(r -> auth.requestMatchers(r.method(), r.path()).permitAll());
+                    if (swaggerEnabled) {
+                        auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
+                    }
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

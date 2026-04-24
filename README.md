@@ -78,6 +78,14 @@ After the backend starts, open:
 
 For protected endpoints, use the Swagger UI `Authorize` button with a bearer JWT returned by `POST /api/auth/login` or `POST /api/auth/google`.
 
+Swagger is **enabled by default**. To disable it (e.g. in production), set the environment variable:
+
+```
+SPRINGDOC_ENABLED=false
+```
+
+This disables both the Swagger UI and the `/v3/api-docs` endpoint, and removes their security `permitAll` rules so the routes are no longer publicly accessible.
+
 ### Manual fixture sync from terminal
 
 Manual fixture sync is terminal-only and is not exposed through the frontend or public REST API.
