@@ -12,11 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -26,11 +27,10 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("/login")
-    public AuthResponseDto login(@RequestBody LoginRequestDto request) {
-        log.info("POST /api/auth/login - email={}", request.email());
-        AuthResult result = authService.login(request.email(), request.password());
-        String authToken = jwtService.generateToken(result.user().getId(), result.needsOnboarding());
-        return new AuthResponseDto(authToken, onboardingStatusMapper(result.needsOnboarding()), UserRestMapper.toResponse(result.user()));
+    public AuthResponseDto login(@RequestBody LoginRequestDto loginRequest, HttpServletRequest request) {
+        log.info("POST {} - email={}", request.getRequestURI(), loginRequest.email());
+        AuthResult result = authService.login(loginRequest.email(), loginRequest.password());
+        return toAuthResponse(result);
     }
 
     @GetMapping("/me")
@@ -43,8 +43,7 @@ public class AuthController {
     @PostMapping("/google")
     public AuthResponseDto googleLogin(@RequestBody GoogleLoginRequestDto request) {
         AuthResult result = authService.loginWithGoogle(request.idToken());
-        String authToken = jwtService.generateToken(result.user().getId(), result.needsOnboarding());
-        return new AuthResponseDto(authToken, onboardingStatusMapper(result.needsOnboarding()), UserRestMapper.toResponse(result.user()));
+        return toAuthResponse(result);
     }
 
     @PostMapping("/complete-profile")
@@ -56,7 +55,16 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponseDto(newAuthToken, "OK", UserRestMapper.toResponse(user)));
     }
 
-    private String onboardingStatusMapper(boolean needsOnboarding){
+    private String onboardingStatusMapper(boolean needsOnboarding) {
         return needsOnboarding ? "NEEDS_ONBOARDING" : "OK";
+    }
+
+    private AuthResponseDto toAuthResponse(AuthResult result) {
+        String token = jwtService.generateToken(result.user().getId(), result.needsOnboarding());
+        return new AuthResponseDto(
+                token,
+                onboardingStatusMapper(result.needsOnboarding()),
+                UserRestMapper.toResponse(result.user())
+        );
     }
 }

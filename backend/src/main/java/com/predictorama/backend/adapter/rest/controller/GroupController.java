@@ -6,6 +6,7 @@ import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/groups")
+@RequestMapping("/api/v1/groups")
 @RequiredArgsConstructor
 public class GroupController {
 
@@ -40,18 +41,18 @@ public class GroupController {
     }
 
     @PostMapping
-    public ResponseEntity<GroupResponseDto> createGroup(@RequestBody CreateGroupRequestDto request) {
+    public ResponseEntity<GroupResponseDto> createGroup(@RequestBody CreateGroupRequestDto request, HttpServletRequest httpRequest) {
         UUID userId = currentUserId();
-        log.info("POST /api/groups - userId={}, name={}", userId, request.getName());
+        log.info("POST {} - userId={}, name={}", httpRequest.getRequestURI(), userId, request.getName());
         GroupResponseDto response = GroupMapper.toResponse(groupService.createGroup(userId, request.getName(), request.getDescription()));
         log.info("Group created - id={}", response.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/join")
-    public ResponseEntity<GroupMemberResponseDto> joinGroup(@RequestBody JoinGroupRequestDto request) {
+    public ResponseEntity<GroupMemberResponseDto> joinGroup(@RequestBody JoinGroupRequestDto request, HttpServletRequest httpRequest) {
         UUID userId = currentUserId();
-        log.info("POST /api/groups/join - userId={}, inviteCode={}", userId, request.getInviteCode());
+        log.info("POST {} - userId={}, inviteCode={}", httpRequest.getRequestURI(), userId, request.getInviteCode());
         return groupService.joinGroup(userId, request.getInviteCode())
                 .map(member -> {
                     log.info("User joined group - memberId={}", member.getId());
@@ -59,22 +60,22 @@ public class GroupController {
                 })
                 .orElseGet(() -> {
                     log.warn("Join failed - invite code not found: {}", request.getInviteCode());
-                    return ResponseEntity.<GroupMemberResponseDto>notFound().build();
+                    return ResponseEntity.notFound().build();
                 });
     }
 
     @DeleteMapping("/{groupId}/leave")
-    public ResponseEntity<Void> leaveGroup(@PathVariable UUID groupId) {
+    public ResponseEntity<Void> leaveGroup(@PathVariable UUID groupId, HttpServletRequest httpRequest) {
         UUID userId = currentUserId();
-        log.info("DELETE /api/groups/{}/leave - userId={}", groupId, userId);
+        log.info("DELETE {} - groupId={}, userId={}", httpRequest.getRequestURI(), groupId, userId);
         groupService.leaveGroup(userId, groupId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<UserGroupsResponseDto>> getMyGroups() {
+    public ResponseEntity<List<UserGroupsResponseDto>> getMyGroups(HttpServletRequest httpRequest) {
         UUID userId = currentUserId();
-        log.info("GET /api/groups/my - userId={}", userId);
+        log.info("GET {} - userId={}", httpRequest.getRequestURI(), userId);
         List<UserGroupsResponseDto> response = groupService.getUserGroups(userId).stream()
                 .map(GroupMapper::toUserGroupsResponse)
                 .toList();

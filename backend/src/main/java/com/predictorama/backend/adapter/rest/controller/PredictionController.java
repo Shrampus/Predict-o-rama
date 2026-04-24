@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/predictions")
+@RequestMapping("/api/v1/predictions")
 @RequiredArgsConstructor
 public class PredictionController {
 
