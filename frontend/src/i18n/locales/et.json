@@ -1,8 +1,10 @@
 {
   "nav": {
+    "appName": "Predict-o-rama",
     "home": "Avaleht",
     "tournaments": "Turniirid",
     "groups": "Grupid",
+    "login": "Logi sisse",
     "signOut": "Logi välja"
   },
   "login": {
