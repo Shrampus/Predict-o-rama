@@ -69,6 +69,23 @@ The backend will start on:
 http://localhost:8080
 ```
 
+### Swagger / OpenAPI
+
+After the backend starts, open:
+
+* Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+* OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+For protected endpoints, use the Swagger UI `Authorize` button with a bearer JWT returned by `POST /api/auth/login` or `POST /api/auth/google`.
+
+Swagger is **enabled by default**. To disable it (e.g. in production), set the environment variable:
+
+```
+SPRINGDOC_ENABLED=false
+```
+
+This disables both the Swagger UI and the `/v3/api-docs` endpoint, and removes their security `permitAll` rules so the routes are no longer publicly accessible.
+
 ### Manual fixture sync from terminal
 
 Manual fixture sync is terminal-only and is not exposed through the frontend or public REST API.
@@ -155,9 +172,15 @@ Response:
 }
 ```
 
-## Auth (session cookie)
+## Auth (JWT bearer token)
 
-Login establishes an HTTP session; prediction endpoints require that session.
+Login returns a JWT; protected endpoints require the token in the `Authorization` header.
+
+Authorization header:
+
+```http
+Authorization: Bearer <token>
+```
 
 | Method | Path | Notes |
 |--------|------|--------|
@@ -166,7 +189,7 @@ Login establishes an HTTP session; prediction endpoints require that session.
 | `GET` | `/api/auth/me` or `/api/v1/auth/me` | Current user, or `401` if not logged in |
 | `POST` | `/api/auth/complete-profile` or `/api/v1/auth/complete-profile` | Body: `{ "username": "…" }` — completes onboarding and returns refreshed auth token |
 
-Example (save cookies to a jar, then reuse). Dev profile seeds users such as `bob@test.com` with password `password123` (see `007-seed-test-users.yaml` / `docs/plans/13-temp-simple-login.md`).
+Example login request. Dev profile seeds users such as `bob@test.com` with password `password123` (see `007-seed-test-users.yaml` / `docs/plans/13-temp-simple-login.md`).
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -174,9 +197,18 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   -d "{\"email\":\"bob@test.com\",\"password\":\"password123\"}"
 ```
 
+Copy the returned `authToken` and send it as a bearer token on protected requests.
+
 ## Predictions
 
-Both calls require an authenticated session (send the session cookie, e.g. `-b cookies.txt`).
+Both calls require authentication. Send the JWT as a bearer token.
+
+Example:
+
+```bash
+curl -X GET "http://localhost:8080/api/predictions?competition=PL&groupId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" \
+  -H "Authorization: Bearer YOUR_JWT_HERE"
+```
 
 | Method | Path | Description |
 |--------|------|-------------|
