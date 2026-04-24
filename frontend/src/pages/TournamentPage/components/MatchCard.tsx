@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import { useMatchPredictionForm } from '../hooks/useMatchPredictionForm';
 import type { PredictMatchHandler } from '../types/predictionActions';
-import TeamDisplay from './TeamDisplay';
-import TimeBadge from './TimeBadge';
+import TeamDisplay from '../../../components/ui/TeamDisplay';
+import TimeBadge from '../../../components/ui/TimeBadge';
 import WinnerButton from './WinnerButton';
 import { deriveTimeStyle, formatKickoffTime } from '../utils/matchCardUtils';
 

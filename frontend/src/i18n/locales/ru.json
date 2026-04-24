@@ -44,6 +44,7 @@
     "standings": "Таблица"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Ничья",
     "saving": "Сохранение...",
     "saved": "Сохранено",
@@ -64,6 +65,25 @@
   "standings": {
     "group": "Группа {{letter}}",
     "pts": "очк"
+  },
+  "upcomingMatches": {
+    "title": "Предстоящие матчи",
+    "loading": "Загрузка предстоящих матчей...",
+    "error": "Не удалось загрузить предстоящие матчи.",
+    "empty": "Предстоящих матчей нет.",
+    "predict": "Прогноз · {{groupName}}",
+    "predicted": "✓ Прогноз сделан · {{groupName}}",
+    "filters": {
+      "all": "Все",
+      "competition": "Лига",
+      "group": "Группа",
+      "dateRange": "Дата",
+      "today": "Сегодня",
+      "nextDays_one": "Следующий {{count}} день",
+      "nextDays_few": "Следующие {{count}} дня",
+      "nextDays_many": "Следующих {{count}} дней",
+      "nextDays_other": "Следующие {{count}} дня"
+    }
   },
   "groups": {
     "myGroups": "Мои группы",

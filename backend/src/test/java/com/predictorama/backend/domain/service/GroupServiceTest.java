@@ -400,6 +400,11 @@ class GroupServiceTest {
         public List<Tournament> findAll() {
             return new ArrayList<>(store.values());
         }
+
+        @Override
+        public List<Tournament> findAllById(Set<UUID> ids) {
+            return List.of();
+        }
     }
 
     static class InMemoryGroupTournamentRepository implements GroupTournamentRepositoryPort {
