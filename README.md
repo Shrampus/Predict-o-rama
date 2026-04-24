@@ -44,7 +44,7 @@ Copy `frontend/.env.example` to `frontend/.env.local` to override defaults local
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `VITE_API_BASE_URL` | empty (relative paths) | Prefix for backend API calls. Leave empty when the frontend is served from the same origin as the backend API path, or when a reverse proxy (Vite dev proxy, nginx, etc.) forwards `/api` to the backend. Set to a full origin (e.g. `https://api.example.com`) when the UI is deployed on a different origin than the backend. |
+| `VITE_API_BASE_URL` | empty (relative paths) | Prefix for backend API calls. Leave empty when the frontend is served from the same origin as the backend API path, or when a reverse proxy (Vite dev proxy, nginx, etc.) forwards `/api` (including `/api/v1`) to the backend. Set to a full origin (e.g. `https://api.example.com`) when the UI is deployed on a different origin than the backend. |
 
 ## Tailwind CSS (Frontend Styling)
 
@@ -132,6 +132,8 @@ docker compose down
 
 # API (selected endpoints)
 
+Versioning note: the backend supports both unversioned `/api/...` routes and versioned `/api/v1/...` routes for backward compatibility.
+
 ## Health
 
 ```
@@ -159,14 +161,15 @@ Login establishes an HTTP session; prediction endpoints require that session.
 
 | Method | Path | Notes |
 |--------|------|--------|
-| `POST` | `/api/auth/login` | Body: `{ "email": "…", "password": "…" }` — sets session |
-| `GET` | `/api/auth/me` | Current user, or `401` if not logged in |
-| `POST` | `/api/auth/logout` | Invalidates session |
+| `POST` | `/api/auth/login` or `/api/v1/auth/login` | Body: `{ "email": "…", "password": "…" }` — returns auth token |
+| `POST` | `/api/auth/google` or `/api/v1/auth/google` | Body: `{ "idToken": "…" }` — Google sign-in |
+| `GET` | `/api/auth/me` or `/api/v1/auth/me` | Current user, or `401` if not logged in |
+| `POST` | `/api/auth/complete-profile` or `/api/v1/auth/complete-profile` | Body: `{ "username": "…" }` — completes onboarding and returns refreshed auth token |
 
 Example (save cookies to a jar, then reuse). Dev profile seeds users such as `bob@test.com` with password `password123` (see `007-seed-test-users.yaml` / `docs/plans/13-temp-simple-login.md`).
 
 ```bash
-curl -c cookies.txt -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"bob@test.com\",\"password\":\"password123\"}"
 ```
@@ -177,8 +180,8 @@ Both calls require an authenticated session (send the session cookie, e.g. `-b c
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
-| `POST` | `/api/predictions` | Create or update a prediction for `(user, group, match)`. |
+| `GET` | `/api/predictions?competition={code}&groupId={uuid}` or `/api/v1/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
+| `POST` | `/api/predictions` or `/api/v1/predictions` | Create or update a prediction for `(user, group, match)`. |
 
 **`competition`** must be a football-data competition code the app allows (e.g. `CL`, `PL`, `WC`; see `CompetitionCatalog` in the backend).
 
