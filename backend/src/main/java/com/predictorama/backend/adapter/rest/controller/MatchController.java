@@ -1,11 +1,9 @@
 package com.predictorama.backend.adapter.rest.controller;
 
-import com.predictorama.backend.adapter.rest.SessionService;
 import com.predictorama.backend.adapter.rest.dto.UpcomingMatchDto;
 import com.predictorama.backend.adapter.rest.mapper.UpcomingMatchRestMapper;
 import com.predictorama.backend.domain.service.UpcomingMatchQueryService;
 import com.predictorama.backend.domain.service.UserUpcomingMatchQueryService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +22,12 @@ public class MatchController {
 
     private static final Logger log = LoggerFactory.getLogger(MatchController.class);
 
+    private final UpcomingMatchQueryService upcomingMatchQueryService;
+    private final UserUpcomingMatchQueryService userUpcomingMatchQueryService;
+
     private UUID currentUserId() {
         return UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     }
-
-    private final UpcomingMatchQueryService upcomingMatchQueryService;
-    private final UserUpcomingMatchQueryService userUpcomingMatchQueryService;
-    private final SessionService sessionService;
 
     @GetMapping("/upcoming")
     public List<UpcomingMatchDto> getUpcomingMatches() {
@@ -41,7 +38,7 @@ public class MatchController {
     }
 
     @GetMapping("/upcoming/my")
-    public List<UpcomingMatchDto> getMyUpcomingMatches(HttpSession session) {
+    public List<UpcomingMatchDto> getMyUpcomingMatches() {
         var userId = currentUserId();
         log.info("GET /api/matches/upcoming/my - userId={}", userId);
         return userUpcomingMatchQueryService.getUpcomingMatches(userId).stream()
