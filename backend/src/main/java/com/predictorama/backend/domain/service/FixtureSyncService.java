@@ -1,11 +1,13 @@
 package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.config.FixtureSyncProperties;
+import com.predictorama.backend.domain.entity.Match;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +23,7 @@ public class FixtureSyncService {
     private final FixtureSyncProperties fixtureSyncProperties;
     private final CompetitionCatalog competitionCatalog;
     private final PredictionFixtureImportService predictionFixtureImportService;
+    private final PredictionScoringService predictionScoringService;
 
     private int currentCompetitionIndex = 0;
 
@@ -42,16 +45,49 @@ public class FixtureSyncService {
         try {
             log.info("Starting scheduled fixture sync for competition={}", competition);
 
-            int importedCount = predictionFixtureImportService.importUpcomingMatches(competition).size();
+            LocalDate dateFrom = LocalDate.now().minusDays(fixtureSyncProperties.getLookbackDays());
+            LocalDate dateTo = LocalDate.now().plusDays(fixtureSyncProperties.getFutureDays());
+
+            FixtureSyncResult result = syncCompetition(competition, dateFrom, dateTo);
 
             log.info(
-                    "Finished scheduled fixture sync for competition={} importedCount={}",
-                    competition,
-                    importedCount
+                    "Finished scheduled fixture sync for competition={} importedCount={} scoredCount={} dateFrom={} dateTo={}",
+                    result.competition(),
+                    result.importedCount(),
+                    result.scoredCount(),
+                    result.dateFrom(),
+                    result.dateTo()
             );
         } catch (Exception e) {
             log.error("Scheduled fixture sync failed for competition={}", competition, e);
         }
+    }
+
+    public FixtureSyncResult syncCompetition(String competition, LocalDate dateFrom, LocalDate dateTo) {
+        String normalizedCompetition = normalizeCompetitionCode(competition);
+
+        if (normalizedCompetition == null || !competitionCatalog.isSupportedCompetition(normalizedCompetition)) {
+            throw new IllegalArgumentException("Unsupported competition code: " + competition);
+        }
+
+        if (dateFrom == null || dateTo == null) {
+            throw new IllegalArgumentException("dateFrom and dateTo are required");
+        }
+
+        if (dateFrom.isAfter(dateTo)) {
+            throw new IllegalArgumentException("dateFrom must be on or before dateTo");
+        }
+
+        List<Match> importedMatches = predictionFixtureImportService.importMatches(normalizedCompetition, dateFrom, dateTo);
+        int scoredCount = scoreCompletedMatches(importedMatches, normalizedCompetition);
+
+        return new FixtureSyncResult(
+                normalizedCompetition,
+                dateFrom,
+                dateTo,
+                importedMatches.size(),
+                scoredCount
+        );
     }
 
     public List<String> getOrderedConfiguredCompetitions() {
@@ -114,5 +150,38 @@ public class FixtureSyncService {
         }
 
         return trimmedCompetition.toUpperCase(Locale.ROOT);
+    }
+
+    private int scoreCompletedMatches(List<Match> importedMatches, String competition) {
+        int scoredCount = 0;
+
+        for (Match match : importedMatches) {
+            if (match.getMatchStatus() != Match.MatchStatus.COMPLETED) {
+                continue;
+            }
+
+            try {
+                predictionScoringService.distributePredictionScores(match.getId());
+                scoredCount++;
+            } catch (IllegalStateException e) {
+                log.warn(
+                        "Skipping prediction scoring for competition={} matchId={} externalId={} reason={}",
+                        competition,
+                        match.getId(),
+                        match.getExternalId(),
+                        e.getMessage()
+                );
+            } catch (Exception e) {
+                log.error(
+                        "Failed to score completed match for competition={} matchId={} externalId={}",
+                        competition,
+                        match.getId(),
+                        match.getExternalId(),
+                        e
+                );
+            }
+        }
+
+        return scoredCount;
     }
 }

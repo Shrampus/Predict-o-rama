@@ -131,7 +131,7 @@ public class GroupController {
                                 tournament.getId(),
                                 competitionCatalog.toCompetitionCode(tournament.getName()),
                                 tournament.getName(),
-                                tournament.getDescription(),
+                                tournament.getSeasonLabel(),
                                 tournament.getSport()
                         ))
                         .toList()

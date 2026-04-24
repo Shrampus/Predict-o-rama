@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FootballDataTeamResponse {
+public class FootballDataSeasonResponse {
     private Integer id;
-    private String name;
-    private String crest;
+    private String startDate;
+    private String endDate;
 }

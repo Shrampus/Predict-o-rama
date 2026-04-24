@@ -22,6 +22,11 @@ public class Match {
     private Team awayTeam;
     private MatchStatus matchStatus;
     private Instant kickoffTime;
+    private String seasonIdentifier;
+    private String seasonLabel;
+    private String roundIdentifier;
+    private String groupIdentifier;
+    private Integer matchdayIdentifier;
     private List<Score> scores;
     private Winner winner;
     private String externalId;
