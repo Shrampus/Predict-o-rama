@@ -31,7 +31,6 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> {
                     PublicRoutes.ENTRIES.forEach(r -> auth.requestMatchers(r.method(), r.path()).permitAll());
-                    auth.requestMatchers("/api/v1/auth/google", "/api/v1/auth/login").permitAll();
                     if (swaggerEnabled) {
                         auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
                     }

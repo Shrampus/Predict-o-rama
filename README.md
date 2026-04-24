@@ -76,7 +76,7 @@ After the backend starts, open:
 * Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 * OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
-For protected endpoints, use the Swagger UI `Authorize` button with a bearer JWT returned by `POST /api/auth/login` or `POST /api/auth/google`.
+For protected endpoints, use the Swagger UI `Authorize` button with a bearer JWT returned by `POST /api/v1/auth/login` or `POST /api/v1/auth/google`.
 
 Swagger is **enabled by default**. To disable it (e.g. in production), set the environment variable:
 
@@ -149,7 +149,7 @@ docker compose down
 
 # API (selected endpoints)
 
-Versioning note: the backend supports both unversioned `/api/...` routes and versioned `/api/v1/...` routes for backward compatibility.
+Versioning note: the backend API routes are versioned under `/api/v1/...`.
 
 ## Health
 
@@ -184,10 +184,10 @@ Authorization: Bearer <token>
 
 | Method | Path | Notes |
 |--------|------|--------|
-| `POST` | `/api/auth/login` or `/api/v1/auth/login` | Body: `{ "email": "…", "password": "…" }` — returns auth token |
-| `POST` | `/api/auth/google` or `/api/v1/auth/google` | Body: `{ "idToken": "…" }` — Google sign-in |
-| `GET` | `/api/auth/me` or `/api/v1/auth/me` | Current user, or `401` if not logged in |
-| `POST` | `/api/auth/complete-profile` or `/api/v1/auth/complete-profile` | Body: `{ "username": "…" }` — completes onboarding and returns refreshed auth token |
+| `POST` | `/api/v1/auth/login` | Body: `{ "email": "…", "password": "…" }` — returns auth token |
+| `POST` | `/api/v1/auth/google` | Body: `{ "idToken": "…" }` — Google sign-in |
+| `GET` | `/api/v1/auth/me` | Current user, or `401` if not logged in |
+| `POST` | `/api/v1/auth/complete-profile` | Body: `{ "username": "…" }` — completes onboarding and returns refreshed auth token |
 
 Example login request. Dev profile seeds users such as `bob@test.com` with password `password123` (see `007-seed-test-users.yaml` / `docs/plans/13-temp-simple-login.md`).
 
@@ -197,7 +197,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   -d "{\"email\":\"bob@test.com\",\"password\":\"password123\"}"
 ```
 
-Copy the returned `authToken` and send it as a bearer token on protected requests.
+Copy the returned `token` and send it as a bearer token on protected requests.
 
 ## Predictions
 
@@ -206,14 +206,14 @@ Both calls require authentication. Send the JWT as a bearer token.
 Example:
 
 ```bash
-curl -X GET "http://localhost:8080/api/predictions?competition=PL&groupId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" \
+curl -X GET "http://localhost:8080/api/v1/predictions?competition=PL&groupId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" \
   -H "Authorization: Bearer YOUR_JWT_HERE"
 ```
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/predictions?competition={code}&groupId={uuid}` or `/api/v1/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
-| `POST` | `/api/predictions` or `/api/v1/predictions` | Create or update a prediction for `(user, group, match)`. |
+| `GET` | `/api/v1/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
+| `POST` | `/api/v1/predictions` | Create or update a prediction for `(user, group, match)`. |
 
 **`competition`** must be a football-data competition code the app allows (e.g. `CL`, `PL`, `WC`; see `CompetitionCatalog` in the backend).
 

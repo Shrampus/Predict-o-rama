@@ -1,7 +1,7 @@
 import { apiFetch } from '../lib/apiClient';
-import { getApiUrl } from './apiConfig';
+import { API_PREFIX, getApiUrl } from './apiConfig';
 
-const BASE = '/api/auth';
+const BASE = `${API_PREFIX}/auth`;
 
 export interface CurrentUser {
   id: string;

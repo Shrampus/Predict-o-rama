@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/groups", "/api/v1/groups"})
+@RequestMapping("/api/v1/groups")
 @RequiredArgsConstructor
 public class GroupController {
 
@@ -60,7 +60,7 @@ public class GroupController {
                 })
                 .orElseGet(() -> {
                     log.warn("Join failed - invite code not found: {}", request.getInviteCode());
-                    return ResponseEntity.<GroupMemberResponseDto>notFound().build();
+                    return ResponseEntity.notFound().build();
                 });
     }
 
