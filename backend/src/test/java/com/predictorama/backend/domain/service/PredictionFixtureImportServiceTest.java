@@ -230,6 +230,16 @@ class PredictionFixtureImportServiceTest {
         }
 
         @Override
+        public List<Match> getFinishedMatches(String competition) {
+            return matchesToReturn;
+        }
+
+        @Override
+        public List<Match> getFinishedMatches(String competition, int season) {
+            return matchesToReturn;
+        }
+
+        @Override
         public Optional<CompetitionSeasonMetadata> getCurrentSeasonMetadata(String competition) {
             currentSeasonRequestCount++;
             return currentSeasonMetadata;

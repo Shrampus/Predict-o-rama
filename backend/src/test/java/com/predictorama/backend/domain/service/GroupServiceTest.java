@@ -230,7 +230,7 @@ class GroupServiceTest {
         return Tournament.builder()
                 .id(id)
                 .name(name)
-                .description(name)
+                .seasonLabel(name)
                 .sport(Tournament.Sport.FOOTBALL)
                 .build();
     }
