@@ -21,6 +21,7 @@ services:
     environment:
       - ALLOWED_ORIGINS=http://localhost
       - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_LIQUIBASE_CONTEXTS=dev
       - DB_URL=jdbc:postgresql://db:5432/predictorama
       - DB_USERNAME=predictorama
       - DB_PASSWORD=predictorama
