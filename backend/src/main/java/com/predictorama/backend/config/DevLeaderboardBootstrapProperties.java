@@ -3,7 +3,6 @@ package com.predictorama.backend.config;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -12,7 +11,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @Component
-@Profile("dev")
 @ConfigurationProperties(prefix = "dev-leaderboard-bootstrap")
 public class DevLeaderboardBootstrapProperties {
 

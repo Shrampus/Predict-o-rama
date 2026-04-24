@@ -15,7 +15,6 @@ import com.predictorama.backend.domain.service.PredictionScoringService;
 import com.predictorama.backend.domain.service.PredictionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Component
-@Profile("dev")
 @RequiredArgsConstructor
 public class DevLeaderboardBootstrap {
 
