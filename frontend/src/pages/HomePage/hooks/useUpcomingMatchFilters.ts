@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { UpcomingMatch } from '../types';
 
-export type DayRange = 7 | 14 | 28;
+export type DayRange = 'today' | 7 | 14 | 28;
 
 export interface GroupOption {
     groupId: string;
@@ -46,14 +46,24 @@ export function useUpcomingMatchFilters(matches: UpcomingMatch[]): UseUpcomingMa
     }, [matches]);
 
     const filteredMatches = useMemo(() => {
-        const cutoff = selectedDays
-            ? new Date(Date.now() + selectedDays * 24 * 60 * 60 * 1000)
-            : null;
+        let cutoff: Date | null = null;
+        let todayStart: Date | null = null;
+
+        if (selectedDays === 'today') {
+            todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            cutoff = new Date();
+            cutoff.setHours(23, 59, 59, 999);
+        } else if (selectedDays) {
+            cutoff = new Date(Date.now() + selectedDays * 24 * 60 * 60 * 1000);
+        }
 
         return matches.filter(match => {
             if (selectedTournament && match.tournamentName !== selectedTournament) return false;
             if (selectedGroupId && !match.groups.some(g => g.groupId === selectedGroupId)) return false;
-            if (cutoff && new Date(match.kickoffTime) > cutoff) return false;
+            const kickoff = new Date(match.kickoffTime);
+            if (todayStart && kickoff < todayStart) return false;
+            if (cutoff && kickoff > cutoff) return false;
             return true;
         });
     }, [matches, selectedTournament, selectedGroupId, selectedDays]);

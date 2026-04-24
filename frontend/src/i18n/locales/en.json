@@ -42,6 +42,7 @@
     "standings": "Standings"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
@@ -75,6 +76,7 @@
       "competition": "League",
       "group": "Group",
       "dateRange": "Date",
+      "today": "Today",
       "nextDays": "Next {{count}} days"
     }
   },

@@ -12,7 +12,7 @@ type UpcomingMatchFiltersProps = {
     onDaysChange: (d: DayRange | null) => void;
 };
 
-const DAY_RANGES: DayRange[] = [7, 14, 28];
+const DAY_RANGES: DayRange[] = ['today', 7, 14, 28];
 
 function FilterPill({
     label,
@@ -108,7 +108,7 @@ function UpcomingMatchFilters({
                 {DAY_RANGES.map(days => (
                     <FilterPill
                         key={days}
-                        label={t('upcomingMatches.filters.nextDays', { count: days })}
+                        label={days === 'today' ? t('upcomingMatches.filters.today') : t('upcomingMatches.filters.nextDays', { count: days })}
                         isActive={selectedDays === days}
                         onClick={() => onDaysChange(days)}
                     />

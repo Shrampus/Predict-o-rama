@@ -1,3 +1,4 @@
+import { apiFetch } from '../lib/apiClient';
 import type { UpcomingMatch } from '../pages/HomePage/types';
 
 interface UpcomingMatchResponse {
@@ -25,13 +26,13 @@ function mapResponse(data: UpcomingMatchResponse[]): UpcomingMatch[] {
 }
 
 async function getUpcomingMatches(): Promise<UpcomingMatch[]> {
-    const res = await fetch('/api/matches/upcoming');
+    const res = await apiFetch('/api/matches/upcoming');
     if (!res.ok) throw new Error('Failed to fetch upcoming matches');
     return mapResponse(await res.json());
 }
 
 async function getMyUpcomingMatches(): Promise<UpcomingMatch[]> {
-    const res = await fetch('/api/matches/upcoming/my');
+    const res = await apiFetch('/api/matches/upcoming/my');
     if (!res.ok) throw new Error('Failed to fetch upcoming matches');
     return mapResponse(await res.json());
 }

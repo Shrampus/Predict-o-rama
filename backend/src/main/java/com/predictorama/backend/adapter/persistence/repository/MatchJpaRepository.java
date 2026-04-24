@@ -17,7 +17,7 @@ public interface MatchJpaRepository extends JpaRepository<MatchEntity, UUID> {
 
     List<MatchEntity> findByTournamentIdAndKickoffTimeBetween(UUID tournamentId, Instant from, Instant to);
 
-    List<MatchEntity> findByKickoffTimeBetween(Instant from, Instant to);
+    List<MatchEntity> findByKickoffTimeBetweenOrderByKickoffTimeAsc(Instant from, Instant to);
 
     Optional<MatchEntity> findByExternalId(String externalId);
 }

@@ -26,6 +26,12 @@ public class MatchResultSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(MatchResultSyncService.class);
 
+    public void syncAllCompetitions() {
+        for (String competition : competitionCatalog.getSupportedCompetitions()) {
+            syncCompetition(competition);
+        }
+    }
+
     private Match saveOrUpdateMatch(Match externalMatch, Tournament tournament) {
         Team savedHomeTeam = teamSyncService.saveOrGetTeam(externalMatch.getHomeTeam());
         Team savedAwayTeam = teamSyncService.saveOrGetTeam(externalMatch.getAwayTeam());
@@ -105,7 +111,8 @@ public class MatchResultSyncService {
         }
 
         if (isBlank(match.getHomeTeam().getExternalId())) {
-            log.warn("Skipping finished match externalId={} because homeTeam.externalId is missing", match.getExternalId());
+            log.warn("Skipping finished match externalId={} because homeTeam.externalId is missing",
+                    match.getExternalId());
             return false;
         }
 
@@ -115,7 +122,8 @@ public class MatchResultSyncService {
         }
 
         if (isBlank(match.getAwayTeam().getExternalId())) {
-            log.warn("Skipping finished match externalId={} because awayTeam.externalId is missing", match.getExternalId());
+            log.warn("Skipping finished match externalId={} because awayTeam.externalId is missing",
+                    match.getExternalId());
             return false;
         }
 
@@ -124,12 +132,6 @@ public class MatchResultSyncService {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
-    }
-
-    public void syncAllCompetitions() {
-        for (String competition : competitionCatalog.getSupportedCompetitions()) {
-            syncCompetition(competition);
-        }
     }
 
     private void syncCompetition(String competition) {
@@ -157,8 +159,7 @@ public class MatchResultSyncService {
                         "Failed to sync finished match externalId={} competition={}",
                         match.getExternalId(),
                         competition,
-                        e
-                );
+                        e);
             }
         }
     }

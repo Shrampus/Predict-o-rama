@@ -42,6 +42,7 @@
     "standings": "Таблица"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Ничья",
     "saving": "Сохранение...",
     "saved": "Сохранено",
@@ -75,6 +76,7 @@
       "competition": "Лига",
       "group": "Группа",
       "dateRange": "Дата",
+      "today": "Сегодня",
       "nextDays_one": "Следующий {{count}} день",
       "nextDays_few": "Следующие {{count}} дня",
       "nextDays_many": "Следующих {{count}} дней",
