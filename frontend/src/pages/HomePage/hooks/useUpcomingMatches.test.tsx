@@ -2,6 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { UpcomingMatch } from '../types';
+import type { AuthContextValue } from '../../../context/authContextDef';
 import { matchesApi } from '../../../services/matchesApi';
 import { useAuth } from '../../../context/useAuth';
 import { useUpcomingMatches } from './useUpcomingMatches';
@@ -31,6 +32,19 @@ function makeUpcomingMatch(overrides: Partial<UpcomingMatch> = {}): UpcomingMatc
   };
 }
 
+function makeAuthContextValue(overrides: Partial<AuthContextValue> = {}): AuthContextValue {
+  return {
+    currentUser: null,
+    loading: false,
+    needsOnboarding: false,
+    login: vi.fn().mockResolvedValue({ needsOnboarding: false }),
+    googleLogin: vi.fn().mockResolvedValue({ needsOnboarding: false }),
+    completeProfile: vi.fn().mockResolvedValue(undefined),
+    logout: vi.fn(),
+    ...overrides,
+  };
+}
+
 describe('useUpcomingMatches', () => {
   const getUpcomingMatchesMock = vi.mocked(matchesApi.getUpcomingMatches);
   const getMyUpcomingMatchesMock = vi.mocked(matchesApi.getMyUpcomingMatches);
@@ -43,7 +57,7 @@ describe('useUpcomingMatches', () => {
   it('loads generic upcoming matches when unauthenticated', async () => {
     const matches = [makeUpcomingMatch()];
     getUpcomingMatchesMock.mockResolvedValue(matches);
-    useAuthMock.mockReturnValue({ currentUser: null, loading: false });
+    useAuthMock.mockReturnValue(makeAuthContextValue());
 
     const { result } = renderHook(() => useUpcomingMatches());
 
@@ -62,15 +76,14 @@ describe('useUpcomingMatches', () => {
   it('loads my upcoming matches when authenticated', async () => {
     const matches = [makeUpcomingMatch({ matchId: 'my-match-1' })];
     getMyUpcomingMatchesMock.mockResolvedValue(matches);
-    useAuthMock.mockReturnValue({
+    useAuthMock.mockReturnValue(makeAuthContextValue({
       currentUser: {
         id: 'user-1',
         username: 'alice',
         email: 'alice@example.com',
         systemRole: 'USER',
       },
-      loading: false,
-    });
+    }));
 
     const { result } = renderHook(() => useUpcomingMatches());
 
@@ -85,7 +98,7 @@ describe('useUpcomingMatches', () => {
 
   it('sets error state when request fails', async () => {
     getUpcomingMatchesMock.mockRejectedValue(new Error('boom'));
-    useAuthMock.mockReturnValue({ currentUser: null, loading: false });
+    useAuthMock.mockReturnValue(makeAuthContextValue());
 
     const { result } = renderHook(() => useUpcomingMatches());
 
@@ -95,10 +108,11 @@ describe('useUpcomingMatches', () => {
 
     expect(result.current.hasError).toBe(true);
     expect(result.current.upcomingMatches).toEqual([]);
+    expect(getMyUpcomingMatchesMock).not.toHaveBeenCalled();
   });
 
   it('does not call APIs while auth state is loading', () => {
-    useAuthMock.mockReturnValue({ currentUser: null, loading: true });
+    useAuthMock.mockReturnValue(makeAuthContextValue({ loading: true }));
 
     const { result } = renderHook(() => useUpcomingMatches());
 
