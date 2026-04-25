@@ -1,8 +1,10 @@
 {
   "nav": {
+    "appName": "Predict-o-rama",
     "home": "Главная",
     "tournaments": "Турниры",
     "groups": "Группы",
+    "login": "Войти",
     "signOut": "Выйти"
   },
   "login": {
@@ -132,6 +134,7 @@
       "failedToLoadGroupDetails": "Не удалось загрузить детали группы.",
       "failedToLoadMembers": "Не удалось загрузить участников.",
       "failedToLoadTournaments": "Не удалось загрузить турниры.",
+      "failedToLoadLeaderboards": "Не удалось загрузить таблицы лидеров.",
       "failedToLoadTournamentOptions": "Не удалось загрузить варианты турниров."
     },
     "roles": {
@@ -167,6 +170,13 @@
       "loadingOptions": "Загрузка вариантов турниров...",
       "emptyOptions": "Больше нет турниров для привязки.",
       "adminOnlyAction": "Действие только для админов: добавлять турниры могут только администраторы группы."
+    },
+    "leaderboardsSection": {
+      "title": "Таблицы лидеров",
+      "loadingLeaderboards": "Загрузка таблиц лидеров...",
+      "emptyLeaderboards": "Привяжите турнир, чтобы увидеть здесь очки группы.",
+      "scoredPredictions": "{{scored}}/{{total}} оцененных прогнозов",
+      "points": "очк"
     }
   }
 }

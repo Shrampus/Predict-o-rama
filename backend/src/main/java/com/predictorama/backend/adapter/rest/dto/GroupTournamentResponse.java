@@ -12,6 +12,6 @@ public class GroupTournamentResponse {
     private UUID id;
     private String competitionCode;
     private String name;
-    private String description;
+    private String seasonLabel;
     private Tournament.Sport sport;
 }

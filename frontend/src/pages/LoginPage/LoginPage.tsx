@@ -1,20 +1,26 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../app/routePaths';
 import { useAuth } from '../../context/useAuth';
 
-const TEST_USERS = [
+type TestUser = {
+  email: string;
+  password: string;
+  role: 'ADMIN' | 'USER';
+};
+
+const TEST_USERS: TestUser[] = [
   { email: 'alice@test.com', password: '***', role: 'ADMIN' },
   { email: 'bob@test.com', password: '***', role: 'USER' },
   { email: 'carol@test.com', password: '***', role: 'USER' },
   { email: 'dave@test.com', password: '***', role: 'USER' },
-]
+];
 
 export default function LoginPage() {
-  const { login, googleLogin } = useAuth();
+  const { currentUser, login, googleLogin, needsOnboarding } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -55,10 +61,14 @@ export default function LoginPage() {
     setError('');
   }
 
+  if (currentUser) {
+    return <Navigate to={needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home} replace />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="mb-6 text-center text-2xl font-semibold">Predict-o-rama</h1>
+    <div className="mx-auto w-full max-w-md px-4 py-10">
+      <div className="w-full">
+        <h1 className="mb-6 text-center text-2xl font-semibold">{t('nav.appName')}</h1>
 
         <form onSubmit={handleSubmit} className="mb-4 space-y-4">
           <div>
@@ -108,7 +118,7 @@ export default function LoginPage() {
 
         <div className="mb-6 flex justify-center">
           <GoogleLogin
-            onSuccess={response => {
+            onSuccess={(response: { credential?: string }) => {
               if (response.credential) handleGoogleSuccess(response.credential);
             }}
             onError={() => setError(t('login.googleError'))}

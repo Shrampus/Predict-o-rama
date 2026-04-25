@@ -2,9 +2,12 @@ package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.entity.GroupMember;
+import com.predictorama.backend.domain.entity.Match;
+import com.predictorama.backend.domain.entity.Prediction;
 import com.predictorama.backend.domain.entity.Role;
 import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.entity.aggregate.GroupDetailsView;
+import com.predictorama.backend.domain.entity.aggregate.GroupLeaderboardView;
 import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
 import com.predictorama.backend.domain.entity.aggregate.UserGroups;
 import com.predictorama.backend.domain.exception.AlreadyMemberException;
@@ -18,14 +21,19 @@ import com.predictorama.backend.domain.exception.UserNotFoundException;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class GroupService {
@@ -35,6 +43,8 @@ public class GroupService {
     private final UserRepositoryPort userRepository;
     private final TournamentRepositoryPort tournamentRepository;
     private final GroupTournamentRepositoryPort groupTournamentRepository;
+    private final MatchRepositoryPort matchRepository;
+    private final PredictionRepositoryPort predictionRepository;
 
     @Transactional
     public Group createGroup(UUID ownerId, String name, String description) {
@@ -144,6 +154,19 @@ public class GroupService {
                 .toList();
     }
 
+    public List<GroupLeaderboardView> getGroupLeaderboards(UUID userId, UUID groupId) {
+        requireActiveMembership(userId, groupId);
+
+        List<GroupMemberView> activeMembers = groupMemberRepository.findByGroupIdWithUsernames(groupId).stream()
+                .filter(memberView -> memberView.member().getStatus() == GroupMember.MemberStatus.ACTIVE)
+                .toList();
+        List<Prediction> groupPredictions = predictionRepository.findByGroupId(groupId);
+
+        return getGroupTournaments(userId, groupId).stream()
+                .map(tournament -> buildLeaderboard(tournament, activeMembers, groupPredictions))
+                .toList();
+    }
+
     @Transactional
     public void addTournamentToGroup(UUID adminUserId, UUID groupId, UUID tournamentId) {
         requireAdminMembership(adminUserId, groupId);
@@ -173,6 +196,54 @@ public class GroupService {
                         .map(group -> new UserGroups(group, membership))
                         .orElseThrow(() -> new IllegalStateException("Group not found for membership: " + membership.getId())))
                 .toList();
+    }
+
+    private GroupLeaderboardView buildLeaderboard(
+            Tournament tournament,
+            List<GroupMemberView> activeMembers,
+            List<Prediction> groupPredictions
+    ) {
+        Map<UUID, Match> tournamentMatchesById = matchRepository.findByTournamentId(tournament.getId()).stream()
+                .collect(Collectors.toMap(Match::getId, Function.identity()));
+
+        Map<UUID, List<Prediction>> predictionsByUserId = groupPredictions.stream()
+                .filter(prediction -> tournamentMatchesById.containsKey(prediction.getMatchId()))
+                .collect(Collectors.groupingBy(Prediction::getUserId));
+
+        List<GroupLeaderboardView.Entry> entries = activeMembers.stream()
+                .map(memberView -> toLeaderboardEntry(
+                        memberView,
+                        predictionsByUserId.getOrDefault(memberView.member().getUserId(), List.of())
+                ))
+                .sorted((left, right) -> {
+                    int scoreComparison = Integer.compare(right.totalScore(), left.totalScore());
+                    if (scoreComparison != 0) {
+                        return scoreComparison;
+                    }
+                    return left.username().compareToIgnoreCase(right.username());
+                })
+                .toList();
+
+        return new GroupLeaderboardView(tournament, entries);
+    }
+
+    private GroupLeaderboardView.Entry toLeaderboardEntry(GroupMemberView memberView, List<Prediction> predictions) {
+        int totalScore = predictions.stream()
+                .map(Prediction::getResult)
+                .filter(result -> result != null)
+                .mapToInt(Integer::intValue)
+                .sum();
+        int scoredPredictions = (int) predictions.stream()
+                .filter(prediction -> prediction.getResult() != null)
+                .count();
+
+        return new GroupLeaderboardView.Entry(
+                memberView.member().getUserId(),
+                memberView.username(),
+                totalScore,
+                scoredPredictions,
+                predictions.size()
+        );
     }
 
     private GroupMember requireActiveMembership(UUID userId, UUID groupId) {

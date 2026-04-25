@@ -17,7 +17,7 @@ public class FixtureSyncScheduler {
 
     @Scheduled(
             initialDelayString = "#{@fixtureSyncProperties.initialDelay.toMillis()}",
-            fixedDelayString = "#{@fixtureSyncProperties.fixedDelay.toMillis()}"
+            fixedRateString = "#{@fixtureSyncProperties.fixedDelay.toMillis()}"
     )
     public void syncNextCompetition() {
         if (!fixtureSyncProperties.isEnabled()) {

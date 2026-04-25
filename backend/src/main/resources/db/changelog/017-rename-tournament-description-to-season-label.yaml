@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 017-rename-tournament-description-to-season-label
+      author: hlp
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - columnExists:
+            tableName: tournaments
+            columnName: description
+        - not:
+            - columnExists:
+                tableName: tournaments
+                columnName: season_label
+      changes:
+        - renameColumn:
+            tableName: tournaments
+            oldColumnName: description
+            newColumnName: season_label
+            columnDataType: varchar(100)
