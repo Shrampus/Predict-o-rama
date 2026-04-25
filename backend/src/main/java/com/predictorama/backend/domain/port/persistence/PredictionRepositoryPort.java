@@ -23,4 +23,8 @@ public interface PredictionRepositoryPort {
     List<Prediction> findByGroupId(UUID groupId);
 
     List<Prediction> findByMatchId(UUID matchId);
+
+    List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, List<UUID> matchIds);
+
+    void updateResult(UUID predictionId, int result);
 }

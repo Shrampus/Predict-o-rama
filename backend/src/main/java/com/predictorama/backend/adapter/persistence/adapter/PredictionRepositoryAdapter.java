@@ -96,6 +96,19 @@ public class PredictionRepositoryAdapter implements PredictionRepositoryPort {
                 .toList();
     }
 
+    @Override
+    public List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, List<UUID> matchIds){
+        return jpaRepository.findByGroupIdAndMatchIdIn(groupId, matchIds).stream()
+                .map(this::toDomainWithScores)
+                .toList();
+    }
+
+
+    @Override
+    public void updateResult(UUID predictionId, int result){
+        jpaRepository.updateResult(predictionId, result);
+    }
+
     private Prediction toDomainWithScores(PredictionEntity entity) {
         return PredictionMapper.toDomain(entity, loadScores(entity.getId()));
     }

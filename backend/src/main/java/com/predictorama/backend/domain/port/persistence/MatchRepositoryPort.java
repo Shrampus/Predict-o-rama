@@ -1,6 +1,8 @@
 package com.predictorama.backend.domain.port.persistence;
 
 import com.predictorama.backend.domain.entity.Match;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
@@ -22,4 +24,6 @@ public interface MatchRepositoryPort {
     List<Match> findByKickoffTimeBetween(Instant from, Instant to);
 
     Optional<Match> findByExternalId(String externalId);
+
+    List<Match> findAllFinishedByTournamentId(UUID tournamentId);
 }

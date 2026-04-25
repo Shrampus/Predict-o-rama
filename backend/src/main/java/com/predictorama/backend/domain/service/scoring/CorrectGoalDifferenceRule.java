@@ -4,15 +4,16 @@ import com.predictorama.backend.domain.entity.Prediction;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Winner;
 
-public class CorrectWinnerRule implements ScoringRule {
+public class CorrectGoalDifferenceRule implements ScoringRule {
 
     @Override
     public boolean matches(Prediction prediction, Score actualScore, Winner actualWinner) {
-        Winner predictedWinner = prediction.getPredictedWinner();
-        if (predictedWinner == null) {
+        Score predictedScore = prediction.primaryPredictedScore().orElse(null);
+        if (predictedScore == null) {
             return false;
         }
-        if (predictedWinner.equals(actualWinner)) {
+        if ((predictedScore.getHomeScore() - predictedScore.getAwayScore()) ==
+            (actualScore.getHomeScore() - actualScore.getAwayScore())) {
             return true;
         }
         return false;
@@ -20,6 +21,6 @@ public class CorrectWinnerRule implements ScoringRule {
 
     @Override
     public String name() {
-        return "CORRECT_WINNER";
+        return "CORRECT_GOAL_DIFFERENCE";
     }
 }

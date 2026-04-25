@@ -13,6 +13,7 @@ import com.predictorama.backend.domain.service.AuthService;
 import com.predictorama.backend.domain.service.GroupService;
 import com.predictorama.backend.domain.service.TournamentService;
 import com.predictorama.backend.domain.service.UserService;
+import com.predictorama.backend.domain.service.scoring.CorrectGoalDifferenceRule;
 import com.predictorama.backend.domain.service.scoring.CorrectWinnerRule;
 import com.predictorama.backend.domain.service.scoring.ExactScoreRule;
 import org.springframework.context.annotation.Bean;
@@ -70,5 +71,10 @@ public class DomainConfig {
     @Bean
     public ExactScoreRule exactScoreRule() {
         return new ExactScoreRule();
+    }
+
+    @Bean
+    public CorrectGoalDifferenceRule correctGoalDifferenceRule() {
+        return new CorrectGoalDifferenceRule();
     }
 }

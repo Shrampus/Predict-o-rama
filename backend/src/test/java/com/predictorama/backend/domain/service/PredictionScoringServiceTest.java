@@ -1,13 +1,11 @@
 package com.predictorama.backend.domain.service;
 
-import com.predictorama.backend.domain.entity.Group;
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Prediction;
 import com.predictorama.backend.domain.entity.Ruleset;
 import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Team;
 import com.predictorama.backend.domain.entity.Winner;
-import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.RulesetRepositoryPort;
@@ -18,11 +16,11 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,124 +30,69 @@ class PredictionScoringServiceTest {
     private PredictionScoringService scoringService;
     private InMemoryPredictionRepository predictionRepository;
     private InMemoryMatchRepository matchRepository;
-    private InMemoryGroupRepository groupRepository;
     private InMemoryRulesetRepository rulesetRepository;
 
     @BeforeEach
     void setUp() {
         predictionRepository = new InMemoryPredictionRepository();
         matchRepository = new InMemoryMatchRepository();
-        groupRepository = new InMemoryGroupRepository();
         rulesetRepository = new InMemoryRulesetRepository();
         scoringService = new PredictionScoringService(
                 List.of(new ExactScoreRule(), new CorrectWinnerRule()),
                 predictionRepository,
                 matchRepository,
-                groupRepository,
                 rulesetRepository
         );
     }
 
     @Test
     void distributePredictionScores_calculatesPointsForEachPrediction() {
-        UUID defaultRulesetId = UUID.randomUUID();
         UUID groupId = UUID.randomUUID();
+        UUID tournamentId = UUID.randomUUID();
         UUID matchId = UUID.randomUUID();
         UUID exactPredictionId = UUID.randomUUID();
         UUID winnerOnlyPredictionId = UUID.randomUUID();
         UUID missedPredictionId = UUID.randomUUID();
 
-        rulesetRepository.save(Ruleset.builder()
-                .id(defaultRulesetId)
-                .name("Default")
-                .ruleNames(Set.of("EXACT_SCORE", "CORRECT_WINNER"))
-                .build());
-        groupRepository.save(Group.builder()
-                .id(groupId)
-                .ownerId(UUID.randomUUID())
-                .inviteCode(UUID.randomUUID())
-                .rulesetId(defaultRulesetId)
-                .name("Legends")
-                .build());
-        matchRepository.save(match(matchId, score(2, 1), Winner.HOME));
-        predictionRepository.save(prediction(
-                exactPredictionId,
-                UUID.randomUUID(),
-                groupId,
-                matchId,
-                score(2, 1),
-                Winner.HOME
-        ));
-        predictionRepository.save(prediction(
-                winnerOnlyPredictionId,
-                UUID.randomUUID(),
-                groupId,
-                matchId,
-                score(1, 0),
-                Winner.HOME
-        ));
-        predictionRepository.save(prediction(
-                missedPredictionId,
-                UUID.randomUUID(),
-                groupId,
-                matchId,
-                score(1, 2),
-                Winner.AWAY
-        ));
+        rulesetRepository.seed(groupId, tournamentId,
+                Ruleset.builder().id(UUID.randomUUID()).rulePoints(Map.of("EXACT_SCORE", 3, "CORRECT_WINNER", 1)).build());
+        matchRepository.save(match(matchId, tournamentId, score(2, 1), Winner.HOME));
+        predictionRepository.save(prediction(exactPredictionId, UUID.randomUUID(), groupId, matchId, score(2, 1), Winner.HOME));
+        predictionRepository.save(prediction(winnerOnlyPredictionId, UUID.randomUUID(), groupId, matchId, score(1, 0), Winner.HOME));
+        predictionRepository.save(prediction(missedPredictionId, UUID.randomUUID(), groupId, matchId, score(1, 2), Winner.AWAY));
 
         scoringService.distributePredictionScores(matchId);
 
         assertThat(predictionRepository.findById(exactPredictionId)).get()
-                .extracting(Prediction::getResult)
-                .isEqualTo(4);
+                .extracting(Prediction::getResult).isEqualTo(4);
         assertThat(predictionRepository.findById(winnerOnlyPredictionId)).get()
-                .extracting(Prediction::getResult)
-                .isEqualTo(1);
+                .extracting(Prediction::getResult).isEqualTo(1);
         assertThat(predictionRepository.findById(missedPredictionId)).get()
-                .extracting(Prediction::getResult)
-                .isEqualTo(0);
+                .extracting(Prediction::getResult).isEqualTo(0);
     }
 
     @Test
     void distributePredictionScores_respectsGroupRulesetWhenScoringPredictions() {
-        UUID exactScoreOnlyRulesetId = UUID.randomUUID();
         UUID groupId = UUID.randomUUID();
+        UUID tournamentId = UUID.randomUUID();
         UUID matchId = UUID.randomUUID();
         UUID exactPredictionId = UUID.randomUUID();
 
-        rulesetRepository.save(Ruleset.builder()
-                .id(exactScoreOnlyRulesetId)
-                .name("Exact only")
-                .ruleNames(Set.of("EXACT_SCORE"))
-                .build());
-        groupRepository.save(Group.builder()
-                .id(groupId)
-                .ownerId(UUID.randomUUID())
-                .inviteCode(UUID.randomUUID())
-                .rulesetId(exactScoreOnlyRulesetId)
-                .name("Exact gang")
-                .build());
-        matchRepository.save(match(matchId, score(2, 1), Winner.HOME));
-        predictionRepository.save(prediction(
-                exactPredictionId,
-                UUID.randomUUID(),
-                groupId,
-                matchId,
-                score(2, 1),
-                Winner.HOME
-        ));
+        rulesetRepository.seed(groupId, tournamentId,
+                Ruleset.builder().id(UUID.randomUUID()).rulePoints(Map.of("EXACT_SCORE", 3)).build());
+        matchRepository.save(match(matchId, tournamentId, score(2, 1), Winner.HOME));
+        predictionRepository.save(prediction(exactPredictionId, UUID.randomUUID(), groupId, matchId, score(2, 1), Winner.HOME));
 
         scoringService.distributePredictionScores(matchId);
 
         assertThat(predictionRepository.findById(exactPredictionId)).get()
-                .extracting(Prediction::getResult)
-                .isEqualTo(3);
+                .extracting(Prediction::getResult).isEqualTo(3);
     }
 
-    private Match match(UUID id, Score fullTimeScore, Winner winner) {
+    private Match match(UUID id, UUID tournamentId, Score fullTimeScore, Winner winner) {
         return Match.builder()
                 .id(id)
-                .tournamentId(UUID.randomUUID())
+                .tournamentId(tournamentId)
                 .name("Match")
                 .homeTeam(Team.builder().id(UUID.randomUUID()).name("Home").build())
                 .awayTeam(Team.builder().id(UUID.randomUUID()).name("Away").build())
@@ -160,14 +103,7 @@ class PredictionScoringServiceTest {
                 .build();
     }
 
-    private Prediction prediction(
-            UUID id,
-            UUID userId,
-            UUID groupId,
-            UUID matchId,
-            Score predictedScore,
-            Winner predictedWinner
-    ) {
+    private Prediction prediction(UUID id, UUID userId, UUID groupId, UUID matchId, Score predictedScore, Winner predictedWinner) {
         return Prediction.builder()
                 .id(id)
                 .userId(userId)
@@ -197,6 +133,23 @@ class PredictionScoringServiceTest {
         }
 
         @Override
+        public void updateResult(UUID predictionId, int result) {
+            Prediction existing = store.get(predictionId);
+            if (existing != null) {
+                store.put(predictionId, Prediction.builder()
+                        .id(existing.getId())
+                        .userId(existing.getUserId())
+                        .matchId(existing.getMatchId())
+                        .groupId(existing.getGroupId())
+                        .predictedScores(existing.getPredictedScores())
+                        .predictedWinner(existing.getPredictedWinner())
+                        .submittedAt(existing.getSubmittedAt())
+                        .result(result)
+                        .build());
+            }
+        }
+
+        @Override
         public Optional<Prediction> findById(UUID id) {
             return Optional.ofNullable(store.get(id));
         }
@@ -204,46 +157,43 @@ class PredictionScoringServiceTest {
         @Override
         public Optional<Prediction> findByUserIdAndMatchIdAndGroupId(UUID userId, UUID matchId, UUID groupId) {
             return store.values().stream()
-                    .filter(prediction -> prediction.getUserId().equals(userId))
-                    .filter(prediction -> prediction.getMatchId().equals(matchId))
-                    .filter(prediction -> prediction.getGroupId().equals(groupId))
+                    .filter(p -> p.getUserId().equals(userId) && p.getMatchId().equals(matchId) && p.getGroupId().equals(groupId))
                     .findFirst();
         }
 
         @Override
         public List<Prediction> findByMatchIdAndGroupId(UUID matchId, UUID groupId) {
             return store.values().stream()
-                    .filter(prediction -> prediction.getMatchId().equals(matchId))
-                    .filter(prediction -> prediction.getGroupId().equals(groupId))
+                    .filter(p -> p.getMatchId().equals(matchId) && p.getGroupId().equals(groupId))
                     .toList();
         }
 
         @Override
         public List<Prediction> findByUserIdAndGroupId(UUID userId, UUID groupId) {
             return store.values().stream()
-                    .filter(prediction -> prediction.getUserId().equals(userId))
-                    .filter(prediction -> prediction.getGroupId().equals(groupId))
+                    .filter(p -> p.getUserId().equals(userId) && p.getGroupId().equals(groupId))
                     .toList();
         }
 
         @Override
         public List<Prediction> findByUserId(UUID userId) {
-            return store.values().stream()
-                    .filter(prediction -> prediction.getUserId().equals(userId))
-                    .toList();
+            return store.values().stream().filter(p -> p.getUserId().equals(userId)).toList();
         }
 
         @Override
         public List<Prediction> findByGroupId(UUID groupId) {
-            return store.values().stream()
-                    .filter(prediction -> prediction.getGroupId().equals(groupId))
-                    .toList();
+            return store.values().stream().filter(p -> p.getGroupId().equals(groupId)).toList();
         }
 
         @Override
         public List<Prediction> findByMatchId(UUID matchId) {
+            return store.values().stream().filter(p -> p.getMatchId().equals(matchId)).toList();
+        }
+
+        @Override
+        public List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, Collection<UUID> matchIds) {
             return store.values().stream()
-                    .filter(prediction -> prediction.getMatchId().equals(matchId))
+                    .filter(p -> p.getGroupId().equals(groupId) && matchIds.contains(p.getMatchId()))
                     .toList();
         }
     }
@@ -264,29 +214,25 @@ class PredictionScoringServiceTest {
 
         @Override
         public List<Match> findByTournamentId(UUID tournamentId) {
-            return store.values().stream()
-                    .filter(match -> match.getTournamentId().equals(tournamentId))
-                    .toList();
+            return store.values().stream().filter(m -> m.getTournamentId().equals(tournamentId)).toList();
         }
 
         @Override
         public List<Match> findByTournamentIdAndMatchStatus(UUID tournamentId, Match.MatchStatus matchStatus) {
-            return findByTournamentId(tournamentId).stream()
-                    .filter(match -> match.getMatchStatus() == matchStatus)
-                    .toList();
+            return findByTournamentId(tournamentId).stream().filter(m -> m.getMatchStatus() == matchStatus).toList();
         }
 
         @Override
         public List<Match> findByTournamentIdAndKickoffTimeBetween(UUID tournamentId, Instant from, Instant to) {
             return findByTournamentId(tournamentId).stream()
-                    .filter(match -> !match.getKickoffTime().isBefore(from) && !match.getKickoffTime().isAfter(to))
+                    .filter(m -> !m.getKickoffTime().isBefore(from) && !m.getKickoffTime().isAfter(to))
                     .toList();
         }
 
         @Override
         public List<Match> findByKickoffTimeBetween(Instant from, Instant to) {
             return store.values().stream()
-                    .filter(match -> !match.getKickoffTime().isBefore(from) && !match.getKickoffTime().isAfter(to))
+                    .filter(m -> !m.getKickoffTime().isBefore(from) && !m.getKickoffTime().isAfter(to))
                     .toList();
         }
 
@@ -294,61 +240,34 @@ class PredictionScoringServiceTest {
         public Optional<Match> findByExternalId(String externalId) {
             return Optional.empty();
         }
-    }
-
-    static class InMemoryGroupRepository implements GroupRepositoryPort {
-        private final Map<UUID, Group> store = new HashMap<>();
 
         @Override
-        public Group save(Group group) {
-            store.put(group.getId(), group);
-            return group;
-        }
-
-        @Override
-        public Optional<Group> findById(UUID id) {
-            return Optional.ofNullable(store.get(id));
-        }
-
-        @Override
-        public Optional<Group> findByInviteCode(UUID inviteCode) {
-            return store.values().stream()
-                    .filter(group -> group.getInviteCode().equals(inviteCode))
-                    .findFirst();
-        }
-
-        @Override
-        public List<Group> findByOwnerId(UUID ownerId) {
-            return store.values().stream()
-                    .filter(group -> group.getOwnerId().equals(ownerId))
-                    .toList();
+        public List<Match> findAllFinishedByTournamentId(UUID tournamentId) {
+            return findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED);
         }
     }
 
     static class InMemoryRulesetRepository implements RulesetRepositoryPort {
-        private final Map<UUID, Ruleset> store = new HashMap<>();
+        private final Map<String, Ruleset> store = new HashMap<>();
+
+        void seed(UUID groupId, UUID tournamentId, Ruleset ruleset) {
+            store.put(key(groupId, tournamentId), ruleset);
+        }
 
         @Override
-        public Ruleset save(Ruleset ruleset) {
-            store.put(ruleset.getId(), ruleset);
+        public Optional<Ruleset> findByGroupIdAndTournamentId(UUID groupId, UUID tournamentId) {
+            return Optional.ofNullable(store.get(key(groupId, tournamentId)));
+        }
+
+        @Override
+        public Ruleset upsertForGroupTournament(UUID groupId, UUID tournamentId, Map<String, Integer> rulePoints) {
+            Ruleset ruleset = Ruleset.builder().id(UUID.randomUUID()).rulePoints(rulePoints).build();
+            store.put(key(groupId, tournamentId), ruleset);
             return ruleset;
         }
 
-        @Override
-        public Optional<Ruleset> findById(UUID id) {
-            return Optional.ofNullable(store.get(id));
-        }
-
-        @Override
-        public Optional<Ruleset> findByName(String name) {
-            return store.values().stream()
-                    .filter(ruleset -> ruleset.getName().equals(name))
-                    .findFirst();
-        }
-
-        @Override
-        public List<Ruleset> findAll() {
-            return new ArrayList<>(store.values());
+        private String key(UUID groupId, UUID tournamentId) {
+            return groupId + "|" + tournamentId;
         }
     }
 }

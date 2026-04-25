@@ -88,6 +88,11 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
         return jpaRepository.findByExternalId(externalId).map(this::toMatch);
     }
 
+    @Override
+    public List<Match> findAllFinishedByTournamentId(UUID tournamentId){
+        return toMatches(jpaRepository.findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED));
+    }
+
     private Match toMatch(MatchEntity entity) {
         return toMatches(List.of(entity)).get(0);
     }
