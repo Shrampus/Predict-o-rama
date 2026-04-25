@@ -1,5 +1,8 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.PREDICTIONS;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.CreatePredictionRequest;
 import com.predictorama.backend.adapter.rest.dto.PredictionResponse;
 import com.predictorama.backend.adapter.rest.dto.TournamentPredictionsResponse;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/predictions")
+@RequestMapping(V1 + PREDICTIONS)
 @RequiredArgsConstructor
 public class PredictionController {
 

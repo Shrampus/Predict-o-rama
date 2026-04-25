@@ -1,5 +1,8 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.MATCHES;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.UpcomingMatchDto;
 import com.predictorama.backend.adapter.rest.mapper.UpcomingMatchRestMapper;
 import com.predictorama.backend.config.AuthUtils;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/matches")
+@RequestMapping(V1 + MATCHES)
 @RequiredArgsConstructor
 public class MatchController {
 
