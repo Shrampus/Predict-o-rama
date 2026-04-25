@@ -17,7 +17,8 @@ public final class PublicRoutes {
             new Route(HttpMethod.GET, "/"),
             new Route(HttpMethod.GET, "/health"),
             new Route(HttpMethod.POST, "/api/auth/google"),
-            new Route(HttpMethod.POST, "/api/auth/login")
+            new Route(HttpMethod.POST, "/api/auth/login"),
+            new Route(HttpMethod.GET, "/api/matches/upcoming")
     );
 
     private PublicRoutes() {}
