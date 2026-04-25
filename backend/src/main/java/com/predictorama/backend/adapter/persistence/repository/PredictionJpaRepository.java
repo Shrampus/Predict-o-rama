@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ public interface PredictionJpaRepository extends JpaRepository<PredictionEntity,
 
     List<PredictionEntity> findByGroupIdAndMatchIdIn(UUID groupId, List<UUID> matchIds);
 
+    @Transactional
     @Modifying
     @Query("UPDATE PredictionEntity p SET p.result = :result WHERE p.id = :id")
     void updateResult(@Param("id") UUID id, @Param("result") int result);

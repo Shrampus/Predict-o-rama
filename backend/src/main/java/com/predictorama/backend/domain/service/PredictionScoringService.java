@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -17,15 +18,26 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class PredictionScoringService {
 
     private static final Logger log = LoggerFactory.getLogger(PredictionScoringService.class);
-    private final List<ScoringRule> scoringRules;
+    private final Map<String, ScoringRule> ruleByName;
     private final PredictionRepositoryPort predictionRepositoryPort;
     private final MatchRepositoryPort matchRepositoryPort;
     private final RulesetRepositoryPort rulesetRepositoryPort;
 
+    public PredictionScoringService(List<ScoringRule> scoringRules,
+                                    PredictionRepositoryPort predictionRepositoryPort,
+                                    MatchRepositoryPort matchRepositoryPort,
+                                    RulesetRepositoryPort rulesetRepositoryPort) {
+        this.ruleByName = scoringRules.stream()
+                .collect(Collectors.toMap(ScoringRule::name, r -> r));
+        this.predictionRepositoryPort = predictionRepositoryPort;
+        this.matchRepositoryPort = matchRepositoryPort;
+        this.rulesetRepositoryPort = rulesetRepositoryPort;
+    }
+
+    @Transactional
     public void distributePredictionScores(UUID matchId) {
         var matchRepoPort = matchRepositoryPort.findById(matchId);
         if (matchRepoPort.isEmpty()) {
@@ -60,6 +72,7 @@ public class PredictionScoringService {
 
 
     @Async
+    @Transactional
     public void recalculatePredictionScores(UUID groupId, UUID tournamentId, Ruleset ruleset) {
         List<Match> finishedMatches = matchRepositoryPort.findAllFinishedByTournamentId(tournamentId);
 
@@ -92,10 +105,6 @@ public class PredictionScoringService {
     }
 
     private void calculatePredictionResult(Prediction prediction, Score actualScore, Winner actualWinner, Map<String, Integer> activeRules){
-
-        Map<String, ScoringRule> ruleByName = scoringRules.stream()
-                .collect(Collectors.toMap(ScoringRule::name, r -> r));
-
         int totalScore = activeRules.entrySet().stream()
                 .filter(entry -> ruleByName.containsKey(entry.getKey()))
                 .filter(entry -> ruleByName.get(entry.getKey()).matches(prediction, actualScore, actualWinner))

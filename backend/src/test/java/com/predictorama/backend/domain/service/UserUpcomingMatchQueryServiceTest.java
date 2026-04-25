@@ -209,6 +209,11 @@ class UserUpcomingMatchQueryServiceTest {
 
         @Override
         public Optional<Match> findByExternalId(String externalId) { return Optional.empty(); }
+
+        @Override
+        public List<Match> findAllFinishedByTournamentId(UUID tournamentId) {
+            return findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED);
+        }
     }
 
     static class InMemoryGroupRepository implements GroupRepositoryPort {
@@ -336,5 +341,11 @@ class UserUpcomingMatchQueryServiceTest {
 
         @Override
         public List<Prediction> findByMatchId(UUID matchId) { return List.of(); }
+
+        @Override
+        public List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, List<UUID> matchIds) { return List.of(); }
+
+        @Override
+        public void updateResult(UUID predictionId, int result) {}
     }
 }

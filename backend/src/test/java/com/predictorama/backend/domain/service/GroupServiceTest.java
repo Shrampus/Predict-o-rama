@@ -14,6 +14,7 @@ import com.predictorama.backend.domain.entity.aggregate.GroupLeaderboardView;
 import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
 import com.predictorama.backend.domain.exception.GroupNotFoundException;
 import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
+import com.predictorama.backend.domain.service.AccessService;
 import com.predictorama.backend.domain.port.persistence.GroupMemberRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.GroupRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
@@ -40,6 +41,7 @@ class GroupServiceTest {
     private InMemoryGroupTournamentRepository groupTournamentRepository;
     private InMemoryMatchRepository matchRepository;
     private InMemoryPredictionRepository predictionRepository;
+    private AccessService accessService;
 
     @BeforeEach
     void setUp() {
@@ -50,6 +52,7 @@ class GroupServiceTest {
         groupTournamentRepository = new InMemoryGroupTournamentRepository();
         matchRepository = new InMemoryMatchRepository();
         predictionRepository = new InMemoryPredictionRepository();
+        accessService = new AccessService(groupRepository, groupMemberRepository);
         groupService = new GroupService(
                 groupRepository,
                 groupMemberRepository,
@@ -57,7 +60,9 @@ class GroupServiceTest {
                 tournamentRepository,
                 groupTournamentRepository,
                 matchRepository,
-                predictionRepository
+                predictionRepository,
+                accessService,
+                null
         );
     }
 
@@ -484,6 +489,11 @@ class GroupServiceTest {
         public Optional<Match> findByExternalId(String externalId) {
             return Optional.empty();
         }
+
+        @Override
+        public List<Match> findAllFinishedByTournamentId(UUID tournamentId) {
+            return findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED);
+        }
     }
 
     static class InMemoryPredictionRepository implements PredictionRepositoryPort {
@@ -544,6 +554,17 @@ class GroupServiceTest {
             return store.values().stream()
                     .filter(prediction -> prediction.getMatchId().equals(matchId))
                     .toList();
+        }
+
+        @Override
+        public List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, List<UUID> matchIds) {
+            return store.values().stream()
+                    .filter(p -> p.getGroupId().equals(groupId) && matchIds.contains(p.getMatchId()))
+                    .toList();
+        }
+
+        @Override
+        public void updateResult(UUID predictionId, int result) {
         }
     }
 }

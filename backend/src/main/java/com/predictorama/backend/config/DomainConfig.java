@@ -9,8 +9,10 @@ import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
+import com.predictorama.backend.domain.service.AccessService;
 import com.predictorama.backend.domain.service.AuthService;
 import com.predictorama.backend.domain.service.GroupService;
+import com.predictorama.backend.domain.service.RulesetService;
 import com.predictorama.backend.domain.service.TournamentService;
 import com.predictorama.backend.domain.service.UserService;
 import com.predictorama.backend.domain.service.scoring.CorrectGoalDifferenceRule;
@@ -40,7 +42,9 @@ public class DomainConfig {
             TournamentRepositoryPort tournamentRepository,
             GroupTournamentRepositoryPort groupTournamentRepository,
             MatchRepositoryPort matchRepository,
-            PredictionRepositoryPort predictionRepository
+            PredictionRepositoryPort predictionRepository,
+            AccessService accessService,
+            RulesetService rulesetService
     ) {
         return new GroupService(
                 groupRepository,
@@ -49,7 +53,9 @@ public class DomainConfig {
                 tournamentRepository,
                 groupTournamentRepository,
                 matchRepository,
-                predictionRepository
+                predictionRepository,
+                accessService,
+                rulesetService
         );
     }
 

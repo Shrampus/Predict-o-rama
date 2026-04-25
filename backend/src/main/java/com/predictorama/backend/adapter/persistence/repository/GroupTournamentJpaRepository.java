@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ public interface GroupTournamentJpaRepository extends JpaRepository<GroupTournam
     @Query("select gt.rulesetId from GroupTournamentEntity gt where gt.groupId = :groupId and gt.tournamentId = :tournamentId")
     Optional<UUID> findRulesetIdByGroupIdAndTournamentId(@Param("groupId") UUID groupId, @Param("tournamentId") UUID tournamentId);
 
+    @Transactional
     @Modifying
     @Query("UPDATE GroupTournamentEntity g SET g.rulesetId = :rulesetId WHERE g.groupId = :groupId AND g.tournamentId = :tournamentId")
     void updateRulesetId(@Param("groupId") UUID groupId, @Param("tournamentId") UUID tournamentId, @Param("rulesetId") UUID rulesetId);

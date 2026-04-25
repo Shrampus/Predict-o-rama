@@ -105,5 +105,10 @@ class UpcomingMatchQueryServiceTest {
 
         @Override
         public Optional<Match> findByExternalId(String externalId) { return Optional.empty(); }
+
+        @Override
+        public List<Match> findAllFinishedByTournamentId(UUID tournamentId) {
+            return findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED);
+        }
     }
 }

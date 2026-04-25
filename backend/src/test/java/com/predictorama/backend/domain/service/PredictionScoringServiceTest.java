@@ -191,7 +191,7 @@ class PredictionScoringServiceTest {
         }
 
         @Override
-        public List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, Collection<UUID> matchIds) {
+        public List<Prediction> findByGroupIdAndMatchIdIn(UUID groupId, List<UUID> matchIds) {
             return store.values().stream()
                     .filter(p -> p.getGroupId().equals(groupId) && matchIds.contains(p.getMatchId()))
                     .toList();
