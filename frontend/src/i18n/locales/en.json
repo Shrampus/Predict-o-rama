@@ -44,6 +44,7 @@
     "standings": "Standings"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
@@ -64,6 +65,22 @@
   "standings": {
     "group": "Group {{letter}}",
     "pts": "pts"
+  },
+  "upcomingMatches": {
+    "title": "Upcoming Matches",
+    "loading": "Loading upcoming matches...",
+    "error": "Failed to load upcoming matches.",
+    "empty": "No upcoming matches.",
+    "predict": "Predict · {{groupName}}",
+    "predicted": "✓ Predicted · {{groupName}}",
+    "filters": {
+      "all": "All",
+      "competition": "League",
+      "group": "Group",
+      "dateRange": "Date",
+      "today": "Today",
+      "nextDays": "Next {{count}} days"
+    }
   },
   "groups": {
     "myGroups": "My Groups",

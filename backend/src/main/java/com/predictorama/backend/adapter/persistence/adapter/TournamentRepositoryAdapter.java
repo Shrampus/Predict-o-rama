@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -43,5 +44,10 @@ public class TournamentRepositoryAdapter implements TournamentRepositoryPort {
     @Override
     public List<Tournament> findAll() {
         return jpaRepository.findAll().stream().map(TournamentMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<Tournament> findAllById(Set<UUID> ids) {
+        return jpaRepository.findAllById(ids).stream().map(TournamentMapper::toDomain).toList();
     }
 }
