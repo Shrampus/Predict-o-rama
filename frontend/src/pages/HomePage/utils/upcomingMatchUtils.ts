@@ -1,14 +1,15 @@
 import type { UpcomingMatch } from '../types';
 
-export function groupMatchesByTournament(
+export function groupMatchesByDate(
     matches: UpcomingMatch[]
-): Map<string, { tournamentName: string; matches: UpcomingMatch[] }> {
-    const grouped = new Map<string, { tournamentName: string; matches: UpcomingMatch[] }>();
+): Map<string, { label: string; matches: UpcomingMatch[] }> {
+    const grouped = new Map<string, { label: string; matches: UpcomingMatch[] }>();
     for (const match of matches) {
-        if (match.groups.length === 0) continue;
-        const key = match.tournamentName ?? '';
+        const date = new Date(match.kickoffTime);
+        const key = date.toISOString().slice(0, 10);
+        const label = date.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
         if (!grouped.has(key)) {
-            grouped.set(key, { tournamentName: match.tournamentName ?? '', matches: [] });
+            grouped.set(key, { label, matches: [] });
         }
         grouped.get(key)!.matches.push(match);
     }
