@@ -40,7 +40,7 @@ export function TournamentRulesetSection({
                   handleToggle(rule.name);
                 }}
                 disabled={!isAdmin || isSaving}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600/20 disabled:opacity-50"
+                className="h-4 w-4 rounded border-slate-300 accent-slate-700 disabled:opacity-50"
               />
               <label
                 htmlFor={`rule-${tournamentId}-${rule.name}`}
@@ -48,16 +48,20 @@ export function TournamentRulesetSection({
               >
                 {t(`groups.ruleset.rules.${rule.name}`)}
               </label>
-              <input
-                type="number"
-                value={rule.points}
-                min={1}
-                onChange={(e) => handlePointsChange(rule.name, e.target.value)}
-                onBlur={() => handlePointsBlur(rule.name)}
-                disabled={!isAdmin || !rule.enabled || isSaving}
-                className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 disabled:bg-slate-100 disabled:text-slate-400"
-              />
-              <span className="text-xs text-slate-500 w-5">{t('groups.ruleset.points')}</span>
+              {rule.enabled && (
+                <>
+                  <input
+                    type="number"
+                    value={rule.points}
+                    min={1}
+                    onChange={(e) => handlePointsChange(rule.name, e.target.value)}
+                    onBlur={() => handlePointsBlur(rule.name)}
+                    disabled={!isAdmin || isSaving}
+                    className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 disabled:bg-slate-100 disabled:text-slate-400"
+                  />
+                  <span className="text-xs text-slate-500 w-5">{t('groups.ruleset.points')}</span>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -72,7 +76,7 @@ export function TournamentRulesetSection({
             type="button"
             onClick={() => void handleSave()}
             disabled={isSaving || rules.length === 0 || !isDirty}
-            className={`rounded-lg text-white px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${isDirty ? 'bg-green-700 hover:bg-green-800 disabled:hover:bg-green-700' : 'bg-green-500 disabled:hover:bg-green-500'}`}
+            className={`rounded-lg text-white px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${isDirty ? 'bg-green-700 hover:bg-green-800 disabled:hover:bg-green-700' : 'bg-green-600 disabled:hover:bg-green-600'}`}
           >
             {isSaving ? t('groups.ruleset.saving') : isDirty ? t('groups.ruleset.saveButton') : t('groups.ruleset.saved')}
           </button>

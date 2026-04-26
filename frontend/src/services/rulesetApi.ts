@@ -1,5 +1,5 @@
 import { apiFetch } from '../lib/apiClient';
-import { getApiUrl } from './apiConfig';
+import { API_PREFIX, getApiUrl } from './apiConfig';
 
 export interface RulesetResponse {
   id: string;
@@ -13,7 +13,7 @@ export interface RulesetUpdateRequest {
 
 export async function getRuleset(groupId: string, tournamentId: string): Promise<RulesetResponse> {
   const response = await apiFetch(
-    getApiUrl(`/api/groups/${groupId}/tournaments/${tournamentId}/ruleset`),
+    getApiUrl(`${API_PREFIX}/groups/${groupId}/tournaments/${tournamentId}/ruleset`),
   );
 
   if (response.status === 401) throw new Error('You must be logged in to view the ruleset.');
@@ -29,7 +29,7 @@ export async function saveRuleset(
   request: RulesetUpdateRequest,
 ): Promise<RulesetResponse> {
   const response = await apiFetch(
-    getApiUrl(`/api/groups/${groupId}/tournaments/${tournamentId}/ruleset`),
+    getApiUrl(`${API_PREFIX}/groups/${groupId}/tournaments/${tournamentId}/ruleset`),
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
