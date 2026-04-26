@@ -24,6 +24,9 @@ public class TournamentMatchPredictionDto {
 
     private Instant kickoffTime;
     private String matchStatus;
+    private String roundIdentifier;
+    private String groupIdentifier;
+    private Integer matchdayIdentifier;
 
     private UUID predictionId;
     private Integer predictedHomeScore;

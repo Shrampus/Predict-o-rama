@@ -10,6 +10,9 @@ export type TournamentMatchPrediction = {
   awayTeamImage: string;
   kickoffTime: string;
   matchStatus: string;
+  roundIdentifier: string | null;
+  groupIdentifier: string | null;
+  matchdayIdentifier: number | null;
   predictionId: string | null;
   predictedHomeScore: number | null;
   predictedAwayScore: number | null;
@@ -22,6 +25,7 @@ export type TournamentMatchPrediction = {
 
 export type TournamentPredictionsResponse = {
   tournamentName: string;
+  seasonIdentifier?: string;
   seasonLabel?: string;
   phaseLabel?: string;
   matches: TournamentMatchPrediction[];

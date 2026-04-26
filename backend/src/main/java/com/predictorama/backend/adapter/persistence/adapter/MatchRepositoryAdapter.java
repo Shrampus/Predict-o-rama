@@ -80,7 +80,7 @@ public class MatchRepositoryAdapter implements MatchRepositoryPort {
 
     @Override
     public List<Match> findByKickoffTimeBetween(Instant from, Instant to) {
-        return toMatches(jpaRepository.findByKickoffTimeBetween(from, to));
+        return toMatches(jpaRepository.findByKickoffTimeBetweenOrderByKickoffTimeAsc(from, to));
     }
 
     @Override

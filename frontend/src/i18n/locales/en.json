@@ -1,8 +1,10 @@
 {
   "nav": {
+    "appName": "Predict-o-rama",
     "home": "Home",
     "tournaments": "Tournaments",
     "groups": "Groups",
+    "login": "Login",
     "signOut": "Sign out"
   },
   "login": {
@@ -42,6 +44,7 @@
     "standings": "Standings"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
@@ -62,6 +65,22 @@
   "standings": {
     "group": "Group {{letter}}",
     "pts": "pts"
+  },
+  "upcomingMatches": {
+    "title": "Upcoming Matches",
+    "loading": "Loading upcoming matches...",
+    "error": "Failed to load upcoming matches.",
+    "empty": "No upcoming matches.",
+    "predict": "Predict · {{groupName}}",
+    "predicted": "✓ Predicted · {{groupName}}",
+    "filters": {
+      "all": "All",
+      "competition": "League",
+      "group": "Group",
+      "dateRange": "Date",
+      "today": "Today",
+      "nextDays": "Next {{count}} days"
+    }
   },
   "groups": {
     "myGroups": "My Groups",
@@ -110,6 +129,7 @@
       "failedToLoadGroupDetails": "Failed to load group details.",
       "failedToLoadMembers": "Failed to load members.",
       "failedToLoadTournaments": "Failed to load tournaments.",
+      "failedToLoadLeaderboards": "Failed to load leaderboards.",
       "failedToLoadTournamentOptions": "Failed to load tournament options."
     },
     "roles": {
@@ -145,6 +165,13 @@
       "loadingOptions": "Loading tournament options...",
       "emptyOptions": "No additional tournaments available to link.",
       "adminOnlyAction": "Admin-only action: adding tournaments is only available to group admins."
+    },
+    "leaderboardsSection": {
+      "title": "Leaderboards",
+      "loadingLeaderboards": "Loading leaderboards...",
+      "emptyLeaderboards": "Link a tournament to see group scores here.",
+      "scoredPredictions": "{{scored}}/{{total}} scored predictions",
+      "points": "pts"
     }
   },
   "predictionResults": {

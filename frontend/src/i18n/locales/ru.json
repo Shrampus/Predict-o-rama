@@ -1,8 +1,10 @@
 {
   "nav": {
+    "appName": "Predict-o-rama",
     "home": "Главная",
     "tournaments": "Турниры",
     "groups": "Группы",
+    "login": "Войти",
     "signOut": "Выйти"
   },
   "login": {
@@ -42,6 +44,7 @@
     "standings": "Таблица"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Ничья",
     "saving": "Сохранение...",
     "saved": "Сохранено",
@@ -62,6 +65,25 @@
   "standings": {
     "group": "Группа {{letter}}",
     "pts": "очк"
+  },
+  "upcomingMatches": {
+    "title": "Предстоящие матчи",
+    "loading": "Загрузка предстоящих матчей...",
+    "error": "Не удалось загрузить предстоящие матчи.",
+    "empty": "Предстоящих матчей нет.",
+    "predict": "Прогноз · {{groupName}}",
+    "predicted": "✓ Прогноз сделан · {{groupName}}",
+    "filters": {
+      "all": "Все",
+      "competition": "Лига",
+      "group": "Группа",
+      "dateRange": "Дата",
+      "today": "Сегодня",
+      "nextDays_one": "Следующий {{count}} день",
+      "nextDays_few": "Следующие {{count}} дня",
+      "nextDays_many": "Следующих {{count}} дней",
+      "nextDays_other": "Следующие {{count}} дня"
+    }
   },
   "groups": {
     "myGroups": "Мои группы",
@@ -112,6 +134,7 @@
       "failedToLoadGroupDetails": "Не удалось загрузить детали группы.",
       "failedToLoadMembers": "Не удалось загрузить участников.",
       "failedToLoadTournaments": "Не удалось загрузить турниры.",
+      "failedToLoadLeaderboards": "Не удалось загрузить таблицы лидеров.",
       "failedToLoadTournamentOptions": "Не удалось загрузить варианты турниров."
     },
     "roles": {
@@ -147,6 +170,13 @@
       "loadingOptions": "Загрузка вариантов турниров...",
       "emptyOptions": "Больше нет турниров для привязки.",
       "adminOnlyAction": "Действие только для админов: добавлять турниры могут только администраторы группы."
+    },
+    "leaderboardsSection": {
+      "title": "Таблицы лидеров",
+      "loadingLeaderboards": "Загрузка таблиц лидеров...",
+      "emptyLeaderboards": "Привяжите турнир, чтобы увидеть здесь очки группы.",
+      "scoredPredictions": "{{scored}}/{{total}} оцененных прогнозов",
+      "points": "очк"
     }
   },
   "predictionResults": {

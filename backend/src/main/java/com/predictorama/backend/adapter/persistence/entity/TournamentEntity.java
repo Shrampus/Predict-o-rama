@@ -21,8 +21,11 @@ public class TournamentEntity extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(length = 500)
-    private String description;
+    @Column(name = "season_label", length = 100)
+    private String seasonLabel;
+
+    @Column(name = "season_identifier", length = 100)
+    private String seasonIdentifier;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,88 +1,9 @@
-import { useTranslation } from 'react-i18next';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-
-import { ROUTE_PATHS } from '../../app/routePaths';
-import { useAuth } from '../../context/useAuth';
-
-const LANGUAGES = [
-  { code: 'en', label: 'EN' },
-  { code: 'et', label: 'ET' },
-  { code: 'ru', label: 'RU' },
-];
+import { Outlet } from 'react-router-dom';
 
 export function MainLayout() {
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-
-  async function handleLogout() {
-    await logout();
-    navigate(ROUTE_PATHS.login);
-  }
-
   return (
-    <div>
-      <header>
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <h1 className="text-lg font-semibold">
-            <NavLink to={ROUTE_PATHS.home} end className="hover:opacity-80 transition-opacity">
-              Predict-o-rama
-            </NavLink>
-          </h1>
-
-          <nav aria-label="Primary" className="flex items-center gap-2">
-            <NavLink
-              to={ROUTE_PATHS.home}
-              end
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
-              }
-            >
-              {t('nav.home')}
-            </NavLink>
-
-            <NavLink
-              to={ROUTE_PATHS.groups}
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-default'}`
-              }
-            >
-              {t('nav.groups')}
-            </NavLink>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            {/* Language switcher — clicking a button saves the choice to localStorage */}
-            <div className="flex items-center gap-1">
-              {LANGUAGES.map(lang => (
-                <button
-                  key={lang.code}
-                  onClick={() => i18n.changeLanguage(lang.code)}
-                  className={`px-2 py-1 text-xs font-bold rounded transition-colors ${
-                    i18n.language === lang.code
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-500 hover:text-gray-800'
-                  }`}
-                >
-                  {lang.label}
-                </button>
-              ))}
-            </div>
-
-            <span className="text-sm text-gray-600">{currentUser?.username}</span>
-            <button
-              onClick={handleLogout}
-              className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100"
-            >
-              {t('nav.signOut')}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main>
-        <Outlet />
-      </main>
+    <div className="mx-auto max-w-5xl px-4 py-6">
+      <Outlet />
     </div>
   );
 }

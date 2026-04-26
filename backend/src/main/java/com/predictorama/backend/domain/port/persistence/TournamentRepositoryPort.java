@@ -4,6 +4,7 @@ import com.predictorama.backend.domain.entity.Tournament;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TournamentRepositoryPort {
@@ -14,4 +15,5 @@ public interface TournamentRepositoryPort {
     Optional<Tournament> findByNameIgnoreCase(String name);
 
     List<Tournament> findAll();
+    List<Tournament> findAllById(Set<UUID> ids);
 }

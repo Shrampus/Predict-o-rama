@@ -26,10 +26,21 @@ public class FixtureSyncProperties {
     private Duration initialDelay = Duration.ofSeconds(15);
 
     /**
-     * Delay between scheduled sync executions.
+     * Start-to-start interval between scheduled sync executions.
      * In this design, each execution syncs exactly one competition.
      */
     private Duration fixedDelay = Duration.ofMinutes(1);
+
+    /**
+     * Days before today to include in the scheduled sync window so recently completed
+     * matches can be refreshed without a separate API shape.
+     */
+    private int lookbackDays = 2;
+
+    /**
+     * Days after today to include in the scheduled sync window.
+     */
+    private int futureDays = 28;
 
     /**
      * Configured competition codes eligible for scheduled sync.

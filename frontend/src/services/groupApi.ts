@@ -52,8 +52,23 @@ export interface GroupTournamentResponse {
   id: string;
   competitionCode: string | null;
   name: string;
-  description: string;
+  seasonLabel: string | null;
   sport: string;
+}
+
+export interface GroupLeaderboardEntryResponse {
+  userId: string;
+  name: string;
+  totalScore: number;
+  scoredPredictions: number;
+  totalPredictions: number;
+}
+
+export interface GroupLeaderboardResponse {
+  tournamentId: string;
+  competitionCode: string | null;
+  tournamentName: string;
+  entries: GroupLeaderboardEntryResponse[];
 }
 
 export interface AddGroupTournamentRequest {
@@ -64,7 +79,7 @@ export interface TournamentOption {
   id: string;
   competitionCode: string | null;
   name: string;
-  description: string;
+  seasonLabel: string | null;
   sport: string;
 }
 
@@ -289,6 +304,29 @@ export async function getGroupTournaments(groupId: string): Promise<GroupTournam
 
   if (!response.ok) {
     throw new Error(`Failed to fetch group tournaments (${response.status})`);
+  }
+
+  return response.json();
+}
+
+/** Fetch per-tournament leaderboards for a group. */
+export async function getGroupLeaderboards(groupId: string): Promise<GroupLeaderboardResponse[]> {
+  const response = await apiFetch(getApiUrl(`/api/groups/${groupId}/leaderboards`));
+
+  if (response.status === 401) {
+    throw new Error('You must be logged in to view group leaderboards.');
+  }
+
+  if (response.status === 403) {
+    throw new Error('You are not allowed to view this group.');
+  }
+
+  if (response.status === 404) {
+    throw new Error('Group not found.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch group leaderboards (${response.status})`);
   }
 
   return response.json();

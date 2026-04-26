@@ -13,7 +13,7 @@ import type { TournamentMatchPrediction } from '../../services/predictionsApi';
 
 type TournamentRouteState = {
     tournamentName?: string;
-    tournamentDescription?: string;
+    seasonLabel?: string | null;
     tournamentPhase?: string;
 };
 
@@ -25,7 +25,9 @@ function isTournamentRouteState(value: unknown): value is TournamentRouteState {
     const routeState = value as Record<string, unknown>;
     return (
         (routeState.tournamentName === undefined || typeof routeState.tournamentName === 'string') &&
-        (routeState.tournamentDescription === undefined || typeof routeState.tournamentDescription === 'string') &&
+        (routeState.seasonLabel === undefined ||
+            routeState.seasonLabel === null ||
+            typeof routeState.seasonLabel === 'string') &&
         (routeState.tournamentPhase === undefined || typeof routeState.tournamentPhase === 'string')
     );
 }
@@ -58,7 +60,7 @@ function TournamentPage() {
     const liveMatchCount = matches.filter((match) => match.matchStatus === 'LIVE').length;
     const seasonLabel =
         responseSeasonLabel.trim() ||
-        routeState?.tournamentDescription?.trim() ||
+        routeState?.seasonLabel?.trim() ||
         routeState?.tournamentName?.trim() ||
         tournamentName;
     const phaseLabel =

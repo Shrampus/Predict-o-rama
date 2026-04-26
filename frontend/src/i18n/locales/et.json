@@ -1,8 +1,10 @@
 {
   "nav": {
+    "appName": "Predict-o-rama",
     "home": "Avaleht",
     "tournaments": "Turniirid",
     "groups": "Grupid",
+    "login": "Logi sisse",
     "signOut": "Logi välja"
   },
   "login": {
@@ -42,6 +44,7 @@
     "standings": "Tabeliseis"
   },
   "matchCard": {
+    "vs": "vs",
     "draw": "Viik",
     "saving": "Salvestamine...",
     "saved": "✓ Salvestatud",
@@ -62,6 +65,22 @@
   "standings": {
     "group": "Grupp {{letter}}",
     "pts": "pts"
+  },
+  "upcomingMatches": {
+    "title": "Eelseisvad mängud",
+    "loading": "Laadin eelseisvaid mänge...",
+    "error": "Eelseisvate mängude laadimine ebaõnnestus.",
+    "empty": "Eelseisvaid mänge pole.",
+    "predict": "Ennusta · {{groupName}}",
+    "predicted": "✓ Ennustatud · {{groupName}}",
+    "filters": {
+      "all": "Kõik",
+      "competition": "Liiga",
+      "group": "Grupp",
+      "dateRange": "Kuupäev",
+      "today": "Täna",
+      "nextDays": "Järgmised {{count}} päeva"
+    }
   },
   "groups": {
     "myGroups": "Minu grupid",
@@ -110,6 +129,7 @@
       "failedToLoadGroupDetails": "Grupi detailide laadimine ebaõnnestus.",
       "failedToLoadMembers": "Liikmete laadimine ebaõnnestus.",
       "failedToLoadTournaments": "Turniiride laadimine ebaõnnestus.",
+      "failedToLoadLeaderboards": "Edetabelite laadimine ebaõnnestus.",
       "failedToLoadTournamentOptions": "Turniiri valikute laadimine ebaõnnestus."
     },
     "roles": {
@@ -145,6 +165,13 @@
       "loadingOptions": "Turniiri valikute laadimine...",
       "emptyOptions": "Seostamiseks pole rohkem turniire saadaval.",
       "adminOnlyAction": "Ainult adminitele: turniiride lisamine on saadaval ainult grupi adminitele."
+    },
+    "leaderboardsSection": {
+      "title": "Edetabelid",
+      "loadingLeaderboards": "Edetabelite laadimine...",
+      "emptyLeaderboards": "Seo turniir, et näha siin grupi punkte.",
+      "scoredPredictions": "{{scored}}/{{total}} punktidega ennustust",
+      "points": "pts"
     }
   },
   "predictionResults": {

@@ -42,6 +42,15 @@ public class MatchEntity extends BaseEntity {
     @Column(name = "kickoff_time")
     private Instant kickoffTime;
 
+    @Column(name = "round_identifier", length = 100)
+    private String roundIdentifier;
+
+    @Column(name = "group_identifier", length = 100)
+    private String groupIdentifier;
+
+    @Column(name = "matchday_identifier")
+    private Integer matchdayIdentifier;
+
     // Nullable — only set once match is COMPLETED
     @Enumerated(EnumType.STRING)
     @Column

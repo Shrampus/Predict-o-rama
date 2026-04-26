@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-add-season-identifier-to-tournaments
+      author: codex
+      changes:
+        - addColumn:
+            tableName: tournaments
+            columns:
+              - column:
+                  name: season_identifier
+                  type: varchar(100)
+
+  - changeSet:
+      id: 015-add-round-identifier-to-matches
+      author: codex
+      changes:
+        - addColumn:
+            tableName: matches
+            columns:
+              - column:
+                  name: round_identifier
+                  type: varchar(100)
