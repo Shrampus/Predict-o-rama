@@ -1,6 +1,7 @@
 package com.predictorama.backend.config;
 
 import static com.predictorama.backend.config.ApiPaths.AUTH;
+import static com.predictorama.backend.config.ApiPaths.GROUPS;
 import static com.predictorama.backend.config.ApiPaths.MATCHES;
 import static com.predictorama.backend.config.ApiPaths.V1;
 
@@ -22,7 +23,8 @@ public final class PublicRoutes {
             new Route(HttpMethod.GET, "/health"),
             new Route(HttpMethod.POST, V1 + AUTH + "/google"),
             new Route(HttpMethod.POST, V1 + AUTH + "/login"),
-            new Route(HttpMethod.GET, V1 + MATCHES + "/upcoming")
+            new Route(HttpMethod.GET, V1 + MATCHES + "/upcoming"),
+            new Route(HttpMethod.GET, V1 + GROUPS + "/invite/*")
     );
 
     private PublicRoutes() {}

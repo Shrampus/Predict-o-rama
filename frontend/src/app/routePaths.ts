@@ -5,4 +5,5 @@ export const ROUTE_PATHS = {
   onboarding: '/onboarding',
   groupDetails: '/groups/:groupId',
   groupTournamentDetails: '/groups/:groupId/tournaments/:tournament',
+  invite: '/invite/:inviteCode',
 } as const;
