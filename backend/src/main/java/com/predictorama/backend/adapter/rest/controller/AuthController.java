@@ -1,7 +1,11 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.AUTH;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.UserRestMapper;
+import com.predictorama.backend.config.AuthUtils;
 import com.predictorama.backend.config.JwtService;
 import com.predictorama.backend.domain.entity.User;
 import com.predictorama.backend.domain.service.AuthResult;
@@ -10,14 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(V1 + AUTH)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -35,7 +36,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> me() {
-        UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        var userId = AuthUtils.currentUserId();
         var user = authService.getById(userId);
         return ResponseEntity.ok(UserRestMapper.toResponse(user));
     }
@@ -48,7 +49,7 @@ public class AuthController {
 
     @PostMapping("/complete-profile")
     public ResponseEntity<AuthResponseDto> completeProfile(@RequestBody CompleteProfileRequestDto request) {
-        UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        var userId = AuthUtils.currentUserId();
         User user = authService.completeProfile(userId, request.username());
         String newAuthToken = jwtService.generateToken(userId, false);
 

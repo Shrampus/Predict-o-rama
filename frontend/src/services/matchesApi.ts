@@ -1,4 +1,5 @@
 import { apiFetch } from '../lib/apiClient';
+import { API_PREFIX, getApiUrl } from './apiConfig';
 import type { UpcomingMatch } from '../pages/HomePage/types';
 
 interface UpcomingMatchResponse {
@@ -12,7 +13,7 @@ interface UpcomingMatchResponse {
     groups: { groupId: string; groupName: string; competitionId: string; hasPrediction: boolean }[];
 }
 
-function mapResponse(data: UpcomingMatchResponse[]): UpcomingMatch[] {
+function mapUpcomingMatchesResponse(data: UpcomingMatchResponse[]): UpcomingMatch[] {
     return data.map(m => ({
         matchId: m.matchId,
         homeTeamName: m.homeTeamName,
@@ -26,15 +27,15 @@ function mapResponse(data: UpcomingMatchResponse[]): UpcomingMatch[] {
 }
 
 async function getUpcomingMatches(): Promise<UpcomingMatch[]> {
-    const res = await apiFetch('/api/matches/upcoming');
+    const res = await apiFetch(getApiUrl(`${API_PREFIX}/matches/upcoming`));
     if (!res.ok) throw new Error('Failed to fetch upcoming matches');
-    return mapResponse(await res.json());
+    return mapUpcomingMatchesResponse(await res.json());
 }
 
 async function getMyUpcomingMatches(): Promise<UpcomingMatch[]> {
-    const res = await apiFetch('/api/matches/upcoming/my');
+    const res = await apiFetch(getApiUrl(`${API_PREFIX}/matches/upcoming/my`));
     if (!res.ok) throw new Error('Failed to fetch upcoming matches');
-    return mapResponse(await res.json());
+    return mapUpcomingMatchesResponse(await res.json());
 }
 
 export const matchesApi = { getUpcomingMatches, getMyUpcomingMatches };

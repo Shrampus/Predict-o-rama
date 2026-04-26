@@ -1,8 +1,12 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.GROUPS;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.GroupMemberMapper;
 import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
+import com.predictorama.backend.config.AuthUtils;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
@@ -13,14 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/groups")
+@RequestMapping(V1 + GROUPS)
 @RequiredArgsConstructor
 public class GroupController {
 
@@ -30,10 +33,6 @@ public class GroupController {
     private final UserRepositoryPort userRepository;
     private final CompetitionCatalog competitionCatalog;
 
-    private UUID currentUserId() {
-        return UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-    }
-
     private String resolveMemberName(UUID userId) {
         return userRepository.findById(userId)
                 .map(user -> user.getUsername())
@@ -42,7 +41,7 @@ public class GroupController {
 
     @PostMapping
     public ResponseEntity<GroupResponseDto> createGroup(@RequestBody CreateGroupRequestDto request, HttpServletRequest httpRequest) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         log.info("POST {} - userId={}, name={}", httpRequest.getRequestURI(), userId, request.getName());
         GroupResponseDto response = GroupMapper.toResponse(groupService.createGroup(userId, request.getName(), request.getDescription()));
         log.info("Group created - id={}", response.getId());
@@ -51,7 +50,7 @@ public class GroupController {
 
     @PostMapping("/join")
     public ResponseEntity<GroupMemberResponseDto> joinGroup(@RequestBody JoinGroupRequestDto request, HttpServletRequest httpRequest) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         log.info("POST {} - userId={}, inviteCode={}", httpRequest.getRequestURI(), userId, request.getInviteCode());
         return groupService.joinGroup(userId, request.getInviteCode())
                 .map(member -> {
@@ -66,7 +65,7 @@ public class GroupController {
 
     @DeleteMapping("/{groupId}/leave")
     public ResponseEntity<Void> leaveGroup(@PathVariable UUID groupId, HttpServletRequest httpRequest) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         log.info("DELETE {} - groupId={}, userId={}", httpRequest.getRequestURI(), groupId, userId);
         groupService.leaveGroup(userId, groupId);
         return ResponseEntity.noContent().build();
@@ -74,7 +73,7 @@ public class GroupController {
 
     @GetMapping("/my")
     public ResponseEntity<List<UserGroupsResponseDto>> getMyGroups(HttpServletRequest httpRequest) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         log.info("GET {} - userId={}", httpRequest.getRequestURI(), userId);
         List<UserGroupsResponseDto> response = groupService.getUserGroups(userId).stream()
                 .map(GroupMapper::toUserGroupsResponse)
@@ -84,7 +83,7 @@ public class GroupController {
 
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDetailsResponse> getGroupDetails(@PathVariable UUID groupId) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         var details = groupService.getGroupDetails(userId, groupId);
         return ResponseEntity.ok(new GroupDetailsResponse(
                 details.getGroup().getId(),
@@ -96,7 +95,7 @@ public class GroupController {
 
     @GetMapping("/{groupId}/members")
     public ResponseEntity<List<GroupMemberResponseDto>> getGroupMembers(@PathVariable UUID groupId) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         return ResponseEntity.ok(groupService.getGroupMembers(userId, groupId).stream()
                 .map(memberView -> GroupMemberMapper.toResponse(memberView.member(), memberView.username()))
                 .toList());
@@ -107,7 +106,7 @@ public class GroupController {
             @PathVariable UUID groupId,
             @Valid @RequestBody AddGroupMemberRequest request
     ) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         var member = groupService.addMemberByEmail(userId, groupId, request.getEmail().trim());
         GroupMemberResponseDto response = GroupMemberMapper.toResponse(member, resolveMemberName(member.getUserId()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -118,14 +117,14 @@ public class GroupController {
             @PathVariable UUID groupId,
             @PathVariable UUID memberUserId
     ) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         groupService.removeMember(userId, groupId, memberUserId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{groupId}/tournaments")
     public ResponseEntity<List<GroupTournamentResponse>> getGroupTournaments(@PathVariable UUID groupId) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         return ResponseEntity.ok(
                 groupService.getGroupTournaments(userId, groupId).stream()
                         .map(tournament -> new GroupTournamentResponse(
@@ -141,7 +140,7 @@ public class GroupController {
 
     @GetMapping("/{groupId}/leaderboards")
     public ResponseEntity<List<GroupLeaderboardResponse>> getGroupLeaderboards(@PathVariable UUID groupId) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         return ResponseEntity.ok(
                 groupService.getGroupLeaderboards(userId, groupId).stream()
                         .map(leaderboard -> new GroupLeaderboardResponse(
@@ -167,7 +166,7 @@ public class GroupController {
             @PathVariable UUID groupId,
             @Valid @RequestBody AddGroupTournamentRequest request
     ) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         groupService.addTournamentToGroup(userId, groupId, request.getTournamentId());
         return ResponseEntity.status(HttpStatus.CREATED).<Void>build();
     }
@@ -177,7 +176,7 @@ public class GroupController {
             @PathVariable UUID groupId,
             @PathVariable UUID tournamentId
     ) {
-        UUID userId = currentUserId();
+        var userId = AuthUtils.currentUserId();
         groupService.removeTournamentFromGroup(userId, groupId, tournamentId);
         return ResponseEntity.noContent().build();
     }

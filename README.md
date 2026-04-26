@@ -279,6 +279,15 @@ curl -X GET "http://localhost:8080/api/v1/predictions?competition=PL&groupId=aaa
 
 When the user has already predicted a match, `predictionId` and the `predicted*` fields are set.
 
+## Matches
+
+Both calls require authentication. Send the JWT as a bearer token.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/matches/upcoming` | Upcoming matches with tournament and group availability metadata. |
+| `GET` | `/api/v1/matches/upcoming/my` | Upcoming matches scoped to groups where the current user participates. |
+
 ---
 
 # Production (VPS)

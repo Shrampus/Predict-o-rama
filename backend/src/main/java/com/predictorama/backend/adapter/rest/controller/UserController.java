@@ -1,5 +1,8 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.USERS;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.CreateUserRequestDto;
 import com.predictorama.backend.adapter.rest.dto.UserResponseDto;
 import com.predictorama.backend.adapter.rest.mapper.UserRestMapper;
@@ -13,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping(V1 + USERS)
 @RequiredArgsConstructor
 public class UserController {
 

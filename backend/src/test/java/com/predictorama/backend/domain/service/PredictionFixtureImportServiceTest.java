@@ -326,9 +326,7 @@ class PredictionFixtureImportServiceTest {
 
         @Override
         public List<Tournament> findAllById(Set<UUID> ids) {
-            return store.values().stream()
-                    .filter(tournament -> ids.contains(tournament.getId()))
-                    .toList();
+            return store.values().stream().filter(t -> ids.contains(t.getId())).toList();
         }
     }
 
