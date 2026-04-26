@@ -23,6 +23,9 @@ function UpcomingMatchCard({ match }: UpcomingMatchCardProps) {
             />
 
             <div className="flex flex-col items-center gap-3 bg-slate-50 rounded-2xl p-4 min-w-40">
+                {match.tournamentName && (
+                    <span className="text-xs text-slate-400 font-semibold uppercase tracking-wide">{match.tournamentName}</span>
+                )}
                 <span className="text-slate-400 font-bold">{t('matchCard.vs')}</span>
                 <div className="flex flex-col gap-2 w-full">
                     {match.groups.map((group) => (
