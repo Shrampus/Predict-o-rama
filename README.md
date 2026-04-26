@@ -44,7 +44,7 @@ Copy `frontend/.env.example` to `frontend/.env.local` to override defaults local
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `VITE_API_BASE_URL` | empty (relative paths) | Prefix for backend API calls. Leave empty when the frontend is served from the same origin as the backend API path, or when a reverse proxy (Vite dev proxy, nginx, etc.) forwards `/api` to the backend. Set to a full origin (e.g. `https://api.example.com`) when the UI is deployed on a different origin than the backend. |
+| `VITE_API_BASE_URL` | empty (relative paths) | Prefix for backend API calls. Leave empty when the frontend is served from the same origin as the backend API path, or when a reverse proxy (Vite dev proxy, nginx, etc.) forwards `/api` (including `/api/v1`) to the backend. Set to a full origin (e.g. `https://api.example.com`) when the UI is deployed on a different origin than the backend. |
 
 ## Tailwind CSS (Frontend Styling)
 
@@ -76,7 +76,7 @@ After the backend starts, open:
 * Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 * OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
-For protected endpoints, use the Swagger UI `Authorize` button with a bearer JWT returned by `POST /api/auth/login` or `POST /api/auth/google`.
+For protected endpoints, use the Swagger UI `Authorize` button with a bearer JWT returned by `POST /api/v1/auth/login` or `POST /api/v1/auth/google`.
 
 Swagger is **enabled by default**. To disable it (e.g. in production), set the environment variable:
 
@@ -149,6 +149,8 @@ docker compose down
 
 # API (selected endpoints)
 
+Versioning note: the backend API routes are versioned under `/api/v1/...`.
+
 ## Health
 
 ```
@@ -182,19 +184,20 @@ Authorization: Bearer <token>
 
 | Method | Path | Notes |
 |--------|------|--------|
-| `POST` | `/api/auth/login` | Body: `{ "email": "…", "password": "…" }` — returns an `authToken` |
-| `POST` | `/api/auth/google` | Body: `{ "idToken": "…" }` — returns an `authToken` |
-| `GET` | `/api/auth/me` | Current user, or `401` if the token is missing or invalid |
+| `POST` | `/api/v1/auth/login` | Body: `{ "email": "…", "password": "…" }` — returns auth token |
+| `POST` | `/api/v1/auth/google` | Body: `{ "idToken": "…" }` — Google sign-in |
+| `GET` | `/api/v1/auth/me` | Current user, or `401` if not logged in |
+| `POST` | `/api/v1/auth/complete-profile` | Body: `{ "username": "…" }` — completes onboarding and returns refreshed auth token |
 
 Example login request. Dev profile seeds users such as `bob@test.com` with password `password123` (see `007-seed-test-users.yaml` / `docs/plans/13-temp-simple-login.md`).
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"bob@test.com\",\"password\":\"password123\"}"
 ```
 
-Copy the returned `authToken` and send it as a bearer token on protected requests.
+Copy the returned `token` and send it as a bearer token on protected requests.
 
 ## Predictions
 
@@ -203,14 +206,14 @@ Both calls require authentication. Send the JWT as a bearer token.
 Example:
 
 ```bash
-curl -X GET "http://localhost:8080/api/predictions?competition=PL&groupId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" \
+curl -X GET "http://localhost:8080/api/v1/predictions?competition=PL&groupId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" \
   -H "Authorization: Bearer YOUR_JWT_HERE"
 ```
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
-| `POST` | `/api/predictions` | Create or update a prediction for `(user, group, match)`. |
+| `GET` | `/api/v1/predictions?competition={code}&groupId={uuid}` | Upcoming matches for a competition plus the current user’s saved prediction per match (if any). |
+| `POST` | `/api/v1/predictions` | Create or update a prediction for `(user, group, match)`. |
 
 **`competition`** must be a football-data competition code the app allows (e.g. `CL`, `PL`, `WC`; see `CompetitionCatalog` in the backend).
 
@@ -253,6 +256,15 @@ curl -X GET "http://localhost:8080/api/predictions?competition=PL&groupId=aaaaaa
 ```
 
 When the user has already predicted a match, `predictionId` and the `predicted*` fields are set.
+
+## Matches
+
+Both calls require authentication. Send the JWT as a bearer token.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/matches/upcoming` | Upcoming matches with tournament and group availability metadata. |
+| `GET` | `/api/v1/matches/upcoming/my` | Upcoming matches scoped to groups where the current user participates. |
 
 ---
 

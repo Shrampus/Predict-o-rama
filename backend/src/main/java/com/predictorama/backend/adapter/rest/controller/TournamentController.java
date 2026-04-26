@@ -1,5 +1,8 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.TOURNAMENTS;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.GroupTournamentResponse;
 import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.TournamentService;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tournaments")
+@RequestMapping(V1 + TOURNAMENTS)
 @RequiredArgsConstructor
 public class TournamentController {
 
