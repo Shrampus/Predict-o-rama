@@ -1,5 +1,4 @@
-import { fireEvent, render,  } from '@testing-library/react';
-import { waitFor } from '@testing-library/dom';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TOKEN_KEY } from '../lib/apiClient';
