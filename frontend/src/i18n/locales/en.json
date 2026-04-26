@@ -24,6 +24,7 @@
     "usernameLabel": "Username",
     "usernamePlaceholder": "e.g. footballfan42",
     "usernameTaken": "Username is already taken. Please choose another.",
+    "error": "Something went wrong. Please try again.",
     "saving": "Saving…",
     "continue": "Continue"
   },
@@ -187,6 +188,8 @@
     "alreadyMember": "You are already a member of this group.",
     "goToGroups": "Go to My Groups",
     "joinError": "Failed to join the group. Please try again.",
-    "joining": "Joining..."
+    "joining": "Joining...",
+    "loadError": "Something went wrong",
+    "loadErrorDesc": "We couldn't load the group info. Please check your connection and try again."
   }
 }

@@ -20,8 +20,9 @@ export default function OnboardingPage() {
     try {
       await completeProfile(username);
       navigate(ROUTE_PATHS.home);
-    } catch {
-      setError(t('onboarding.usernameTaken'));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '';
+      setError(t(message === 'USERNAME_TAKEN' ? 'onboarding.usernameTaken' : 'onboarding.error'));
     } finally {
       setLoading(false);
     }

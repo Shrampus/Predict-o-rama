@@ -24,6 +24,7 @@
     "usernameLabel": "Kasutajanimi",
     "usernamePlaceholder": "nt. jalgpallifänn42",
     "usernameTaken": "Kasutajanimi on juba võetud. Palun vali teine.",
+    "error": "Midagi läks valesti. Palun proovi uuesti.",
     "saving": "Salvestamine…",
     "continue": "Jätka"
   },
@@ -187,6 +188,8 @@
     "alreadyMember": "Oled juba selle grupi liige.",
     "goToGroups": "Mine minu gruppidesse",
     "joinError": "Grupiga liitumine ebaõnnestus. Palun proovi uuesti.",
-    "joining": "Liitun..."
+    "joining": "Liitun...",
+    "loadError": "Midagi läks valesti",
+    "loadErrorDesc": "Grupi info laadimine ebaõnnestus. Palun kontrolli ühendust ja proovi uuesti."
   }
 }

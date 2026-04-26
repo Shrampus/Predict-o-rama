@@ -276,7 +276,6 @@ class GroupServiceTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().name()).isEqualTo("Legends");
-        assertThat(result.get().description()).isEqualTo("Best group");
         assertThat(result.get().tournamentNames()).isEmpty();
     }
 

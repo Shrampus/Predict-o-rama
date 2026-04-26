@@ -28,6 +28,17 @@ export default function InvitePage() {
     );
   }
 
+  if (pageState.status === 'load_error') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h1 className="mb-2 text-xl font-semibold text-gray-800">{t('invite.loadError')}</h1>
+          <p className="text-sm text-gray-500">{t('invite.loadErrorDesc')}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (pageState.status === 'already_member') {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -62,11 +73,6 @@ export default function InvitePage() {
             <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
               {preview.name}
             </h1>
-            {preview.description && (
-              <p className="mt-3 max-w-3xl text-sm text-green-100/95 sm:text-base">
-                {preview.description}
-              </p>
-            )}
           </div>
         </header>
 

@@ -53,7 +53,6 @@ public class GroupController {
         return groupService.getGroupPreview(inviteCode)
                 .map(preview -> ResponseEntity.ok(new GroupPreviewResponseDto(
                         preview.name(),
-                        preview.description(),
                         preview.adminName(),
                         preview.tournamentNames()
                 )))

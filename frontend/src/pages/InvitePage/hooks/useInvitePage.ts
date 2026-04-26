@@ -8,6 +8,7 @@ import { type GroupPreviewResponse, getGroupPreview, joinGroup } from '../../../
 type PageState =
   | { status: 'loading' }
   | { status: 'not_found' }
+  | { status: 'load_error' }
   | { status: 'loaded'; preview: GroupPreviewResponse }
   | { status: 'already_member' }
   | { status: 'joined' };
@@ -29,7 +30,10 @@ export function useInvitePage() {
     }
     getGroupPreview(inviteCode)
       .then(preview => setPageState({ status: 'loaded', preview }))
-      .catch(() => setPageState({ status: 'not_found' }));
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : '';
+        setPageState({ status: message === 'INVITE_NOT_FOUND' ? 'not_found' : 'load_error' });
+      });
   }, [inviteCode]);
 
   async function handleJoin() {

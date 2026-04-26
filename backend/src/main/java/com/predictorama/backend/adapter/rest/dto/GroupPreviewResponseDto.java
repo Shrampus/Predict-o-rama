@@ -9,7 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 public class GroupPreviewResponseDto {
     private String name;
-    private String description;
     private String adminName;
     private List<String> tournamentNames;
 }

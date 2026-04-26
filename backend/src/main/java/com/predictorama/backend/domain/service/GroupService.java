@@ -201,11 +201,11 @@ public class GroupService {
                     List<String> tournamentNames = tournamentRepository.findAllById(new HashSet<>(tournamentIds)).stream()
                             .map(Tournament::getName)
                             .toList();
-                    return new GroupPreviewView(group.getName(), group.getDescription(), adminName, tournamentNames);
+                    return new GroupPreviewView(group.getName(), adminName, tournamentNames);
                 });
     }
 
-    public record GroupPreviewView(String name, String description, String adminName, List<String> tournamentNames) {}
+    public record GroupPreviewView(String name, String adminName, List<String> tournamentNames) {}
 
     public List<UserGroups> getUserGroups(UUID userId) {
         return groupMemberRepository.findByUserId(userId).stream()

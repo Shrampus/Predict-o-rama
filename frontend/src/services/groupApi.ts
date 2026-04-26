@@ -77,7 +77,6 @@ export interface AddGroupTournamentRequest {
 
 export interface GroupPreviewResponse {
   name: string;
-  description: string;
   adminName: string;
   tournamentNames: string[];
 }

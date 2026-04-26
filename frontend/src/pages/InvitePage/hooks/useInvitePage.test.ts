@@ -27,7 +27,6 @@ const mockNavigate = vi.fn();
 function makePreview(overrides: Partial<GroupPreviewResponse> = {}): GroupPreviewResponse {
   return {
     name: 'Legends',
-    description: 'Best group',
     adminName: 'alice',
     tournamentNames: ['Champions League'],
     ...overrides,
@@ -59,7 +58,7 @@ describe('useInvitePage', () => {
     expect(result.current.pageState).toEqual({ status: 'loaded', preview });
   });
 
-  it('transitions to not_found when preview fetch fails', async () => {
+  it('transitions to not_found on INVITE_NOT_FOUND error', async () => {
     vi.mocked(useParams).mockReturnValue({ inviteCode: 'bad-code' });
     vi.mocked(getGroupPreview).mockRejectedValue(new Error('INVITE_NOT_FOUND'));
 
@@ -67,6 +66,17 @@ describe('useInvitePage', () => {
 
     await waitFor(() => {
       expect(result.current.pageState.status).toBe('not_found');
+    });
+  });
+
+  it('transitions to load_error on network or server failures', async () => {
+    vi.mocked(useParams).mockReturnValue({ inviteCode: 'abc123' });
+    vi.mocked(getGroupPreview).mockRejectedValue(new Error('Failed to fetch group preview (500)'));
+
+    const { result } = renderHook(() => useInvitePage());
+
+    await waitFor(() => {
+      expect(result.current.pageState.status).toBe('load_error');
     });
   });
 

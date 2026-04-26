@@ -46,6 +46,7 @@ export const authApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username }),
     }).then(res => {
+      if (res.status === 409) throw new Error('USERNAME_TAKEN');
       if (!res.ok) throw new Error('Failed to complete profile');
       return res.json();
     }),
