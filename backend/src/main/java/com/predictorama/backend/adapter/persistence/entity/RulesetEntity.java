@@ -23,7 +23,7 @@ public class RulesetEntity extends BaseEntity {
     @Id
     private UUID id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "ruleset_rules", joinColumns = @JoinColumn(name = "ruleset_id"))
     @MapKeyColumn(name = "rule_name")
     @Column(name = "points")
