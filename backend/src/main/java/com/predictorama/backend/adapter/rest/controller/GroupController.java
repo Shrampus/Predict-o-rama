@@ -173,8 +173,17 @@ public class GroupController {
     ) {
         UUID requestingUserId = currentUserId();
         groupService.getGroupDetails(requestingUserId, groupId);
-        return TournamentPredictionsRestMapper.toResponse(
+        TournamentPredictionsResponse response = TournamentPredictionsRestMapper.toResponse(
                 tournamentPredictionQueryService.getTournamentPredictions(competition, targetUserId, groupId, Instant.EPOCH)
+        );
+        return new TournamentPredictionsResponse(
+                response.getTournamentName(),
+                response.getSeasonIdentifier(),
+                response.getSeasonLabel(),
+                response.getPhaseLabel(),
+                response.getMatches().stream()
+                        .filter(m -> "COMPLETED".equals(m.getMatchStatus()))
+                        .toList()
         );
     }
 
