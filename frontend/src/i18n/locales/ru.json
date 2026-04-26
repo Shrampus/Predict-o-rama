@@ -45,6 +45,8 @@
   },
   "matchCard": {
     "vs": "vs",
+    "home": "Хозяева",
+    "away": "Гости",
     "draw": "Ничья",
     "saving": "Сохранение...",
     "saved": "Сохранено",
@@ -176,7 +178,8 @@
       "loadingLeaderboards": "Загрузка таблиц лидеров...",
       "emptyLeaderboards": "Привяжите турнир, чтобы увидеть здесь очки группы.",
       "scoredPredictions": "{{scored}}/{{total}} оцененных прогнозов",
-      "points": "очк"
+      "points": "очк",
+      "viewPredictions": "Прогнозы {{name}}"
     }
   },
   "predictionResults": {

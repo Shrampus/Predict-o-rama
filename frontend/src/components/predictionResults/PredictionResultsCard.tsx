@@ -36,8 +36,8 @@ function WinnerLabel({ winner }: { winner: 'HOME' | 'AWAY' | 'DRAW' | null }) {
   const { t } = useTranslation();
   if (!winner) return null;
   if (winner === 'DRAW') return <span className="text-slate-500 text-xs">{t('matchCard.draw')}</span>;
-  if (winner === 'HOME') return <span className="text-slate-500 text-xs">Home</span>;
-  return <span className="text-slate-500 text-xs">Away</span>;
+  if (winner === 'HOME') return <span className="text-slate-500 text-xs">{t('matchCard.home')}</span>;
+  return <span className="text-slate-500 text-xs">{t('matchCard.away')}</span>;
 }
 
 function PredictionResultsCard({ matches, tournamentName }: Props) {

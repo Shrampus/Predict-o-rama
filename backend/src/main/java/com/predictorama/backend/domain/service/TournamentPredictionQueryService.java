@@ -43,7 +43,6 @@ public class TournamentPredictionQueryService {
 
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
         List<Match> matches = getTournamentMatches(competition, tournament);
-        Tournament refreshedTournament = predictionFixtureImportService.getOrCreateTournament(competition);
         Map<UUID, Prediction> predictionsByMatchId =
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
@@ -54,8 +53,8 @@ public class TournamentPredictionQueryService {
 
         return new TournamentPredictionsView(
                 competitionCatalog.toTournamentName(competition),
-                refreshedTournament.getSeasonIdentifier(),
-                resolveSeasonLabel(competition, refreshedTournament),
+                tournament.getSeasonIdentifier(),
+                resolveSeasonLabel(competition, tournament),
                 competitionCatalog.toPhaseLabel(competition),
                 responseMatches
         );

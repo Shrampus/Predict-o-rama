@@ -5,6 +5,7 @@ import type { MyGroupsResponse } from '../../services/groupApi';
 import { GroupDetailsHeader } from './components/GroupDetailsHeader';
 import { GroupLeaderboardsSection } from './components/GroupLeaderboardsSection';
 import { GroupMembersSection } from './components/GroupMembersSection';
+import { GroupPredictionResultsSection } from './components/GroupPredictionResultsSection';
 import { GroupTournamentsSection } from './components/GroupTournamentsSection';
 import { useGroupDetails } from './hooks/useGroupDetails';
 
@@ -95,7 +96,14 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
         onRemoveTournament={(tournament) => void handleRemoveTournament(tournament)}
       />
 
+      <GroupPredictionResultsSection
+        groupId={groupId}
+        tournaments={tournaments}
+        isLoadingTournaments={isLoadingTournaments}
+      />
+
       <GroupLeaderboardsSection
+        groupId={groupId}
         leaderboards={leaderboards}
         isLoadingLeaderboards={isLoadingLeaderboards}
         leaderboardsError={leaderboardsError}

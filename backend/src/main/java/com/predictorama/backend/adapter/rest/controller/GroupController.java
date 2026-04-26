@@ -3,9 +3,11 @@ package com.predictorama.backend.adapter.rest.controller;
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.GroupMemberMapper;
 import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
+import com.predictorama.backend.adapter.rest.mapper.TournamentPredictionsRestMapper;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
+import com.predictorama.backend.domain.service.TournamentPredictionQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ public class GroupController {
     private final GroupService groupService;
     private final UserRepositoryPort userRepository;
     private final CompetitionCatalog competitionCatalog;
+    private final TournamentPredictionQueryService tournamentPredictionQueryService;
 
     private UUID currentUserId() {
         return UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -158,6 +161,19 @@ public class GroupController {
                                         .toList()
                         ))
                         .toList()
+        );
+    }
+
+    @GetMapping("/{groupId}/members/{targetUserId}/predictions")
+    public TournamentPredictionsResponse getMemberPredictions(
+            @PathVariable UUID groupId,
+            @PathVariable UUID targetUserId,
+            @RequestParam String competition
+    ) {
+        UUID requestingUserId = currentUserId();
+        groupService.getGroupDetails(requestingUserId, groupId);
+        return TournamentPredictionsRestMapper.toResponse(
+                tournamentPredictionQueryService.getTournamentPredictions(competition, targetUserId, groupId)
         );
     }
 

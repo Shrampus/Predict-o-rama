@@ -45,6 +45,8 @@
   },
   "matchCard": {
     "vs": "vs",
+    "home": "Home",
+    "away": "Away",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
@@ -171,7 +173,8 @@
       "loadingLeaderboards": "Loading leaderboards...",
       "emptyLeaderboards": "Link a tournament to see group scores here.",
       "scoredPredictions": "{{scored}}/{{total}} scored predictions",
-      "points": "pts"
+      "points": "pts",
+      "viewPredictions": "{{name}}'s predictions"
     }
   },
   "predictionResults": {

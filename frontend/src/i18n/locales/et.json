@@ -45,6 +45,8 @@
   },
   "matchCard": {
     "vs": "vs",
+    "home": "Kodu",
+    "away": "Külas",
     "draw": "Viik",
     "saving": "Salvestamine...",
     "saved": "✓ Salvestatud",
@@ -171,7 +173,8 @@
       "loadingLeaderboards": "Edetabelite laadimine...",
       "emptyLeaderboards": "Seo turniir, et näha siin grupi punkte.",
       "scoredPredictions": "{{scored}}/{{total}} punktidega ennustust",
-      "points": "pts"
+      "points": "pts",
+      "viewPredictions": "{{name}} ennustused"
     }
   },
   "predictionResults": {
