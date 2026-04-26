@@ -1,5 +1,6 @@
 package com.predictorama.backend.adapter.rest;
 
+import com.predictorama.backend.adapter.external.footballdata.FootballDataApiException;
 import com.predictorama.backend.adapter.rest.dto.ApiErrorResponse;
 import com.predictorama.backend.domain.exception.AlreadyMemberException;
 import com.predictorama.backend.domain.exception.GroupAccessDeniedException;
@@ -7,11 +8,14 @@ import com.predictorama.backend.domain.exception.GroupMemberNotFoundException;
 import com.predictorama.backend.domain.exception.GroupNotFoundException;
 import com.predictorama.backend.domain.exception.InvalidCredentialsException;
 import com.predictorama.backend.domain.exception.InvalidGoogleTokenException;
+import com.predictorama.backend.domain.exception.InvalidPredictionException;
 import com.predictorama.backend.domain.exception.TournamentAlreadyLinkedException;
 import com.predictorama.backend.domain.exception.UsernameTakenException;
 import com.predictorama.backend.domain.exception.TournamentNotLinkedException;
 import com.predictorama.backend.domain.exception.TournamentNotFoundException;
 import com.predictorama.backend.domain.exception.UserNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private ResponseEntity<ApiErrorResponse> error(HttpStatus status, String code, String message) {
         return ResponseEntity.status(status).body(new ApiErrorResponse(code, message));
@@ -82,5 +88,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         return error(HttpStatus.BAD_REQUEST, "INVALID_INPUT", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPredictionException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPrediction(InvalidPredictionException ex) {
+        return error(HttpStatus.BAD_REQUEST, "INVALID_PREDICTION", ex.getMessage());
+    }
+
+    @ExceptionHandler(FootballDataApiException.class)
+    public ResponseEntity<ApiErrorResponse> handleFootballDataApi(FootballDataApiException ex) {
+        return error(HttpStatus.BAD_GATEWAY, "FOOTBALL_DATA_API_ERROR", ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleUnexpected(Exception ex) {
+        log.error("Unexpected error", ex);
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An unexpected error occurred");
     }
 }
