@@ -11,7 +11,8 @@ function CopyInviteButton({ inviteCode }: CopyInviteButtonProps) {
   const { t } = useTranslation();
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(inviteCode);
+    const link = `${window.location.origin}/invite/${inviteCode}`;
+    await navigator.clipboard.writeText(link);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   }

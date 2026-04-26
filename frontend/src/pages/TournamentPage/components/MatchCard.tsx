@@ -99,6 +99,8 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
                         value={homeScore}
                         onChange={(e) => setHomeScore(e.target.value)}
                         onBlur={blurHomeScore}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
                         aria-label={t('matchCard.scoreInputAria', { team: match.homeTeamName })}
                         aria-invalid={Boolean(validationMessage)}
                         disabled={isSaving || isLocked}
@@ -117,6 +119,8 @@ function MatchCard({ match, onPredict, isSaving = false }: MatchCardProps) {
                         value={awayScore}
                         onChange={(e) => setAwayScore(e.target.value)}
                         onBlur={blurAwayScore}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        onKeyDown={(e) => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault(); }}
                         aria-label={t('matchCard.scoreInputAria', { team: match.awayTeamName })}
                         aria-invalid={Boolean(validationMessage)}
                         disabled={isSaving || isLocked}

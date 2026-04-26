@@ -1,50 +1,36 @@
 import { useState } from 'react'
-
-import { joinGroup } from '../../../services/groupApi'
-import type { GroupMemberResponse } from '../../../services/groupApi'
-
-interface JoinGroupBanner {
-  inviteCode: string
-}
+import { useNavigate } from 'react-router-dom'
 
 interface UseJoinGroupBannerReturn {
-  formData: JoinGroupBanner
-  isLoading: boolean
-  errorMessage: string
-  joinedMember: GroupMemberResponse | null
+  inviteCode: string
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleSubmit: (e: React.FormEvent) => void
 }
 
-export function useJoinGroupBanner(onSuccess:() => void): UseJoinGroupBannerReturn {
+function extractInviteCode(input: string): string {
+  try {
+    const url = new URL(input)
+    const match = url.pathname.match(/\/invite\/([^/]+)$/)
+    if (match) return match[1]
+  } catch {
+    // not a URL — use as-is
+  }
+  return input.trim()
+}
 
-  const [formData, setFormData] = useState<JoinGroupBanner>({
-    inviteCode: '',
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [joinedMember, setJoinedMember] = useState<GroupMemberResponse | null>(null)
+export function useJoinGroupBanner(): UseJoinGroupBannerReturn {
+  const [inviteCode, setInviteCode] = useState('')
+  const navigate = useNavigate()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setInviteCode(e.target.value)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setIsLoading(true)
-    setErrorMessage('')
-
-    try {
-      const result = await joinGroup({ inviteCode: formData.inviteCode })
-      setJoinedMember(result)
-      onSuccess()
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'An unexpected error occurred')
-    } finally {
-      setIsLoading(false)
-    }
+    const code = extractInviteCode(inviteCode)
+    if (code) navigate(`/invite/${code}`)
   }
 
-  return { formData, isLoading, errorMessage, joinedMember, handleChange, handleSubmit }
+  return { inviteCode, handleChange, handleSubmit }
 }

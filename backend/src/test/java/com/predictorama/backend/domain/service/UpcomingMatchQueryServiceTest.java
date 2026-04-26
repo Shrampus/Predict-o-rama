@@ -2,7 +2,9 @@ package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.domain.entity.Match;
 import com.predictorama.backend.domain.entity.Team;
+import com.predictorama.backend.domain.entity.Tournament;
 import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
+import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.service.result.UpcomingMatchResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +27,7 @@ class UpcomingMatchQueryServiceTest {
     @BeforeEach
     void setUp() {
         matchRepository = new InMemoryMatchRepository();
-        service = new UpcomingMatchQueryService(matchRepository);
+        service = new UpcomingMatchQueryService(matchRepository, new StubTournamentRepository());
     }
 
     @Test
@@ -110,5 +113,13 @@ class UpcomingMatchQueryServiceTest {
         public List<Match> findAllFinishedByTournamentId(UUID tournamentId) {
             return findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED);
         }
+    }
+
+    static class StubTournamentRepository implements TournamentRepositoryPort {
+        @Override public Tournament save(Tournament t) { return t; }
+        @Override public Optional<Tournament> findById(UUID id) { return Optional.empty(); }
+        @Override public Optional<Tournament> findByNameIgnoreCase(String name) { return Optional.empty(); }
+        @Override public List<Tournament> findAll() { return List.of(); }
+        @Override public List<Tournament> findAllById(Set<UUID> ids) { return List.of(); }
     }
 }

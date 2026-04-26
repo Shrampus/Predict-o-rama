@@ -48,6 +48,17 @@ public class GroupController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/invite/{inviteCode}")
+    public ResponseEntity<GroupPreviewResponseDto> getGroupPreview(@PathVariable UUID inviteCode) {
+        return groupService.getGroupPreview(inviteCode)
+                .map(preview -> ResponseEntity.ok(new GroupPreviewResponseDto(
+                        preview.name(),
+                        preview.adminName(),
+                        preview.tournamentNames()
+                )))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/join")
     public ResponseEntity<GroupMemberResponseDto> joinGroup(@RequestBody JoinGroupRequestDto request, HttpServletRequest httpRequest) {
         var userId = AuthUtils.currentUserId();

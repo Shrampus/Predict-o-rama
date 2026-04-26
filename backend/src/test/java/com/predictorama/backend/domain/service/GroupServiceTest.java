@@ -272,6 +272,66 @@ class GroupServiceTest {
                 .build();
     }
 
+    @Test
+    void getGroupPreview_withValidInviteCode_returnsPreviewWithGroupDetails() {
+        UUID ownerId = UUID.randomUUID();
+        Group group = groupService.createGroup(ownerId, "Legends", "Best group");
+
+        Optional<GroupService.GroupPreviewView> result = groupService.getGroupPreview(group.getInviteCode());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().name()).isEqualTo("Legends");
+        assertThat(result.get().tournamentNames()).isEmpty();
+    }
+
+    @Test
+    void getGroupPreview_withInvalidInviteCode_returnsEmpty() {
+        Optional<GroupService.GroupPreviewView> result = groupService.getGroupPreview(UUID.randomUUID());
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getGroupPreview_ownerExists_usesUsername() {
+        UUID ownerId = UUID.randomUUID();
+        User owner = User.builder().id(ownerId).username("alice").email("alice@example.com").build();
+        userRepository.save(owner);
+        Group group = groupService.createGroup(ownerId, "Legends", null);
+
+        Optional<GroupService.GroupPreviewView> result = groupService.getGroupPreview(group.getInviteCode());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().adminName()).isEqualTo("alice");
+    }
+
+    @Test
+    void getGroupPreview_ownerNotFound_fallsBackToOwnerIdString() {
+        UUID ownerId = UUID.randomUUID();
+        Group group = groupService.createGroup(ownerId, "Legends", null);
+
+        Optional<GroupService.GroupPreviewView> result = groupService.getGroupPreview(group.getInviteCode());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().adminName()).isEqualTo(ownerId.toString());
+    }
+
+    @Test
+    void getGroupPreview_includesTournamentNamesLinkedToGroup() {
+        UUID ownerId = UUID.randomUUID();
+        Group group = groupService.createGroup(ownerId, "Legends", null);
+        Tournament cl = tournament(UUID.randomUUID(), "Champions League");
+        Tournament pl = tournament(UUID.randomUUID(), "Premier League");
+        tournamentRepository.save(cl);
+        tournamentRepository.save(pl);
+        groupTournamentRepository.save(group.getId(), cl.getId());
+        groupTournamentRepository.save(group.getId(), pl.getId());
+
+        Optional<GroupService.GroupPreviewView> result = groupService.getGroupPreview(group.getInviteCode());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().tournamentNames()).containsExactlyInAnyOrder("Champions League", "Premier League");
+    }
+
     // --- In-memory stubs ---
 
     static class InMemoryGroupRepository implements GroupRepositoryPort {
@@ -344,14 +404,17 @@ class GroupServiceTest {
     }
 
     static class InMemoryUserRepository implements UserRepositoryPort {
+        private final Map<UUID, User> store = new HashMap<>();
+
         @Override
         public User save(User user) {
+            store.put(user.getId(), user);
             return user;
         }
 
         @Override
         public Optional<User> findById(UUID id) {
-            return Optional.empty();
+            return Optional.ofNullable(store.get(id));
         }
 
         @Override
@@ -408,7 +471,7 @@ class GroupServiceTest {
 
         @Override
         public List<Tournament> findAllById(Set<UUID> ids) {
-            return List.of();
+            return store.values().stream().filter(t -> ids.contains(t.getId())).toList();
         }
     }
 
