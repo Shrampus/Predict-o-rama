@@ -89,8 +89,9 @@
     "inviteCode": "Kutsekood:",
     "joinTitle": "Kas sul on kutsekood? Liitu siin:",
     "joinSuccess": "Grupiga liitumine õnnestus!",
-    "joinPlaceholder": "Sisesta kutsekood",
+    "joinPlaceholder": "Sisesta kutsekood või link",
     "joining": "Liitumine...",
+    "viewGroup": "Vaata gruppi",
     "joinGroup": "Liitu grupiga",
     "addNewGroup": "Lisa uus grupp",
     "groupName": "Grupi nimi",
@@ -173,5 +174,19 @@
       "scoredPredictions": "{{scored}}/{{total}} punktidega ennustust",
       "points": "pts"
     }
+  },
+  "invite": {
+    "loading": "Laen grupi infot...",
+    "invalidLink": "Vigane kutsumislink",
+    "invalidLinkDesc": "See kutsumislink ei ole kehtiv või on aegunud.",
+    "admin": "Loodud kasutaja poolt",
+    "tournaments": "Turniirid",
+    "noTournaments": "Turniire pole veel lisatud.",
+    "joinGroup": "Liitu grupiga",
+    "loginToJoin": "Logi sisse, et liituda",
+    "alreadyMember": "Oled juba selle grupi liige.",
+    "goToGroups": "Mine minu gruppidesse",
+    "joinError": "Grupiga liitumine ebaõnnestus. Palun proovi uuesti.",
+    "joining": "Liitun..."
   }
 }

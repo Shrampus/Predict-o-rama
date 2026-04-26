@@ -190,6 +190,22 @@ public class GroupService {
         groupTournamentRepository.delete(groupId, tournamentId);
     }
 
+    public Optional<GroupPreviewView> getGroupPreview(UUID inviteCode) {
+        return groupRepository.findByInviteCode(inviteCode)
+                .map(group -> {
+                    String adminName = userRepository.findById(group.getOwnerId())
+                            .map(user -> user.getUsername())
+                            .orElse(group.getOwnerId().toString());
+                    List<String> tournamentNames = groupTournamentRepository.findTournamentIdsByGroupId(group.getId()).stream()
+                            .flatMap(tournamentId -> tournamentRepository.findById(tournamentId).stream())
+                            .map(Tournament::getName)
+                            .toList();
+                    return new GroupPreviewView(group.getName(), group.getDescription(), adminName, tournamentNames);
+                });
+    }
+
+    public record GroupPreviewView(String name, String description, String adminName, List<String> tournamentNames) {}
+
     public List<UserGroups> getUserGroups(UUID userId) {
         return groupMemberRepository.findByUserId(userId).stream()
                 .map(membership -> groupRepository.findById(membership.getGroupId())

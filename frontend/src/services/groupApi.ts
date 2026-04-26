@@ -75,6 +75,13 @@ export interface AddGroupTournamentRequest {
   tournamentId: string;
 }
 
+export interface GroupPreviewResponse {
+  name: string;
+  description: string;
+  adminName: string;
+  tournamentNames: string[];
+}
+
 export interface TournamentOption {
   id: string;
   competitionCode: string | null;
@@ -91,6 +98,21 @@ type MyGroupsApiResponse = {
   description: string;
   groupMemberRole: 'ADMIN' | 'USER';
 };
+
+/** Fetch public group preview by invite code (no auth required). */
+export async function getGroupPreview(inviteCode: string): Promise<GroupPreviewResponse> {
+  const response = await fetch(getApiUrl(`${API_PREFIX}/groups/invite/${inviteCode}`));
+
+  if (response.status === 404) {
+    throw new Error('INVITE_NOT_FOUND');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch group preview (${response.status})`);
+  }
+
+  return response.json();
+}
 
 /** Create a new prediction group. */
 export async function createGroup(request: CreateGroupRequest): Promise<GroupResponse> {
