@@ -41,6 +41,7 @@ public class RulesetService {
 
     public RulesetResult updateRuleset(UUID adminUserId, UUID groupId, UUID tournamentId,
                                        Map<String, Integer> rulePoints) {
+
         accessService.requireAdminMembership(adminUserId, groupId);
         Ruleset saved = rulesetRepositoryPort.upsertForGroupTournament(groupId, tournamentId, rulePoints);
         predictionScoringService.recalculatePredictionScores(groupId, tournamentId, saved);

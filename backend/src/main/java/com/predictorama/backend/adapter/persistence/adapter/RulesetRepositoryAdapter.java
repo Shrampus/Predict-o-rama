@@ -25,6 +25,7 @@ public class RulesetRepositoryAdapter implements RulesetRepositoryPort {
     private final RulesetJpaRepository jpaRepository;
     private final GroupTournamentJpaRepository groupTournamentJpaRepository;
 
+    @Transactional
     @Override
     public Optional<Ruleset> findByGroupIdAndTournamentId(UUID groupId, UUID tournamentId) {
         return groupTournamentJpaRepository
@@ -49,7 +50,7 @@ public class RulesetRepositoryAdapter implements RulesetRepositoryPort {
                     .id(UUID.randomUUID())
                     .rulePoints(rulePoints)
                     .build();
-            jpaRepository.save(entity);
+            jpaRepository.saveAndFlush(entity);
             groupTournamentJpaRepository.updateRulesetId(groupId, tournamentId, entity.getId());
         }
 
