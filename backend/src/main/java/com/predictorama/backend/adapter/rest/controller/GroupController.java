@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -173,7 +174,7 @@ public class GroupController {
         UUID requestingUserId = currentUserId();
         groupService.getGroupDetails(requestingUserId, groupId);
         return TournamentPredictionsRestMapper.toResponse(
-                tournamentPredictionQueryService.getTournamentPredictions(competition, targetUserId, groupId)
+                tournamentPredictionQueryService.getTournamentPredictions(competition, targetUserId, groupId, Instant.EPOCH)
         );
     }
 

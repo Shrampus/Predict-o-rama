@@ -36,13 +36,22 @@ public class TournamentPredictionQueryService {
             UUID userId,
             UUID groupId
     ) {
+        return getTournamentPredictions(competition, userId, groupId, Instant.now().minus(14, ChronoUnit.DAYS));
+    }
+
+    public TournamentPredictionsView getTournamentPredictions(
+            String competition,
+            UUID userId,
+            UUID groupId,
+            Instant from
+    ) {
         if (!competitionCatalog.isSupportedCompetition(competition)) {
             log.warn("Rejected unsupported competition code={} on tournament predictions request", competition);
             throw new InvalidPredictionException("Unsupported competition code: " + competition);
         }
 
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
-        List<Match> matches = getTournamentMatches(competition, tournament);
+        List<Match> matches = getTournamentMatches(competition, tournament, from);
         Map<UUID, Prediction> predictionsByMatchId =
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
@@ -94,13 +103,12 @@ public class TournamentPredictionQueryService {
         return competitionCatalog.toSeasonLabel(competition);
     }
 
-    private List<Match> getTournamentMatches(String competition, Tournament tournament) {
-        Instant now = Instant.now();
-        Instant in28Days = now.plus(28, ChronoUnit.DAYS);
+    private List<Match> getTournamentMatches(String competition, Tournament tournament, Instant from) {
+        Instant in28Days = Instant.now().plus(28, ChronoUnit.DAYS);
 
         List<Match> matches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
-                Instant.EPOCH,
+                from,
                 in28Days
         );
 
