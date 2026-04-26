@@ -26,9 +26,9 @@ export function TournamentRulesetSection({
       </p>
 
       {isLoading && <p className="text-sm text-slate-500">{t('groups.ruleset.loading')}</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {!isLoading && error && rules.length === 0 && <p className="text-sm text-red-600">{error}</p>}
 
-      {!isLoading && !error && rules.length > 0 && (
+      {!isLoading && rules.length > 0 && (
         <div className="space-y-2">
           {rules.map((rule) => (
             <div key={rule.name} className="flex items-center gap-3">
@@ -67,16 +67,23 @@ export function TournamentRulesetSection({
         </div>
       )}
 
-      {isAdmin && !isLoading && !error && (
+      {isAdmin && !isLoading && rules.length > 0 && (
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
           <div className="min-h-[1.25rem]">
-            {successMessage && <p className="text-sm text-emerald-700">{successMessage}</p>}
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            {!error && successMessage && <p className="text-sm text-emerald-700">{successMessage}</p>}
           </div>
           <button
             type="button"
             onClick={() => void handleSave()}
-            disabled={isSaving || rules.length === 0 || !isDirty}
-            className={`rounded-lg text-white px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${isDirty ? 'bg-green-700 hover:bg-green-800 disabled:hover:bg-green-700' : 'bg-green-600 disabled:hover:bg-green-600'}`}
+            disabled={isSaving || rules.length === 0 || (!isDirty && !error) || !!error}
+            className={`rounded-lg text-white px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
+              error
+                ? 'bg-red-600 disabled:hover:bg-red-600'
+                : isDirty
+                  ? 'bg-green-700 hover:bg-green-800 disabled:hover:bg-green-700'
+                  : 'bg-green-600 disabled:hover:bg-green-600'
+            }`}
           >
             {isSaving ? t('groups.ruleset.saving') : isDirty ? t('groups.ruleset.saveButton') : t('groups.ruleset.saved')}
           </button>

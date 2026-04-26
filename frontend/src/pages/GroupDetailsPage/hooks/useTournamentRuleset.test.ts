@@ -95,6 +95,34 @@ describe('useTournamentRuleset', () => {
     expect(result.current.rules.find((r) => r.name === 'CORRECT_WINNER')?.enabled).toBe(false);
   });
 
+  it('handleToggle clears a previous save error', async () => {
+    vi.mocked(getRuleset).mockResolvedValue(makeResponse());
+
+    const { result } = renderHook(() => useTournamentRuleset('g1', 't1', vi.fn()));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.handlePointsChange('EXACT_SCORE', '0'));
+    await act(async () => { await result.current.handleSave(); });
+    expect(result.current.error).toBe('groups.ruleset.invalidPoints');
+
+    act(() => result.current.handleToggle('CORRECT_WINNER'));
+    expect(result.current.error).toBe('');
+  });
+
+  it('handlePointsChange clears a previous save error', async () => {
+    vi.mocked(getRuleset).mockResolvedValue(makeResponse());
+
+    const { result } = renderHook(() => useTournamentRuleset('g1', 't1', vi.fn()));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.handlePointsChange('EXACT_SCORE', '0'));
+    await act(async () => { await result.current.handleSave(); });
+    expect(result.current.error).toBe('groups.ruleset.invalidPoints');
+
+    act(() => result.current.handlePointsChange('EXACT_SCORE', '5'));
+    expect(result.current.error).toBe('');
+  });
+
   it('handlePointsChange accepts digit strings and ignores non-digits', async () => {
     vi.mocked(getRuleset).mockResolvedValue(makeResponse());
 
@@ -108,16 +136,31 @@ describe('useTournamentRuleset', () => {
     expect(result.current.rules.find((r) => r.name === 'EXACT_SCORE')?.points).toBe('7');
   });
 
-  it('handlePointsBlur clamps empty or zero value to 1', async () => {
+  it('handlePointsBlur normalizes leading zeros but does not clamp invalid values to 1', async () => {
     vi.mocked(getRuleset).mockResolvedValue(makeResponse());
 
     const { result } = renderHook(() => useTournamentRuleset('g1', 't1', vi.fn()));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    act(() => result.current.handlePointsChange('EXACT_SCORE', ''));
+    act(() => result.current.handlePointsChange('EXACT_SCORE', '0'));
     act(() => result.current.handlePointsBlur('EXACT_SCORE'));
+    expect(result.current.rules.find((r) => r.name === 'EXACT_SCORE')?.points).toBe('0');
+  });
 
-    expect(result.current.rules.find((r) => r.name === 'EXACT_SCORE')?.points).toBe('1');
+  it('handleSave shows invalidPoints error and does not call API when an enabled rule has points < 1', async () => {
+    vi.mocked(getRuleset).mockResolvedValue(makeResponse());
+
+    const { result } = renderHook(() => useTournamentRuleset('g1', 't1', vi.fn()));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.handlePointsChange('EXACT_SCORE', '0'));
+
+    await act(async () => {
+      await result.current.handleSave();
+    });
+
+    expect(result.current.error).toBe('groups.ruleset.invalidPoints');
+    expect(saveRuleset).not.toHaveBeenCalled();
   });
 
   it('isDirty is false initially and true after a change', async () => {

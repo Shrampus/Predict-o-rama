@@ -85,12 +85,15 @@ export function useTournamentRuleset(
   }, [groupId, tournamentId]);
 
   function handleToggle(name: string) {
+    setError('');
     setRules((current) => current.map((r) => (r.name === name ? { ...r, enabled: !r.enabled } : r)));
   }
 
   function handlePointsChange(name: string, value: string) {
-    if (!/^\d*$/.test(value)) return;
-    setRules((current) => current.map((r) => (r.name === name ? { ...r, points: value } : r)));
+    if (!/^\d*$/.test(value)) return
+    setError('')
+    setSuccessMessage('');
+    setRules((current) => current.map((r) => (r.name === name ? { ...r, points: value } : r)))
   }
 
   function handlePointsBlur(name: string) {
@@ -98,12 +101,19 @@ export function useTournamentRuleset(
       current.map((r) => {
         if (r.name !== name) return r;
         const n = parseInt(r.points, 10);
-        return { ...r, points: !isNaN(n) && n >= 1 ? String(n) : '1' };
+        return { ...r, points: isNaN(n) ? r.points : String(n) };
       }),
     );
   }
 
   async function handleSave() {
+    const hasInvalidPoints = rules
+      .filter((r) => r.enabled)
+      .some((r) => { const n = parseInt(r.points, 10); return isNaN(n) || n < 1; });
+    if (hasInvalidPoints) {
+      setError(t('groups.ruleset.invalidPoints'));
+      return;
+    }
     setIsSaving(true);
     setError('');
     setSuccessMessage('');
