@@ -176,7 +176,7 @@ public class GroupService {
         }
 
         groupTournamentRepository.save(groupId, tournamentId);
-        rulesetService.setDefaultResultsetForGroupTournament(groupId, tournamentId);
+        rulesetService.setDefaultRulesetForGroupTournament(groupId, tournamentId);
     }
 
     @Transactional

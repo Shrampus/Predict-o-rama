@@ -175,6 +175,8 @@
       "saved": "Saved",
       "saving": "Saving...",
       "saveSuccess": "Rules saved. Leaderboard updating…",
+      "loadFailed": "Failed to load rules.",
+      "saveFailed": "Failed to save rules.",
       "points": "pts",
       "readOnly": "Rules are set by the group admin.",
       "rules": {

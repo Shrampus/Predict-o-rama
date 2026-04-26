@@ -1,6 +1,8 @@
 package com.predictorama.backend.domain.service;
 
 import com.predictorama.backend.domain.entity.Ruleset;
+import com.predictorama.backend.domain.exception.TournamentNotLinkedException;
+import com.predictorama.backend.domain.port.persistence.GroupTournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.RulesetRepositoryPort;
 import com.predictorama.backend.domain.service.scoring.ScoringRule;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RulesetService {
     private final RulesetRepositoryPort rulesetRepositoryPort;
+    private final GroupTournamentRepositoryPort groupTournamentRepositoryPort;
     private final AccessService accessService;
     private final PredictionScoringService predictionScoringService;
 
@@ -27,15 +30,18 @@ public class RulesetService {
             "EXACT_SCORE", 3
     );
 
-    public void setDefaultResultsetForGroupTournament(UUID groupId, UUID tournamentId) {
+    public void setDefaultRulesetForGroupTournament(UUID groupId, UUID tournamentId) {
         rulesetRepositoryPort.upsertForGroupTournament(groupId, tournamentId, DEFAULT_RULE_POINTS);
     }
 
     public RulesetResult getRuleset(UUID userId, UUID groupId, UUID tournamentId) {
         accessService.requireActiveMembership(userId, groupId);
+        if (!groupTournamentRepositoryPort.existsByGroupIdAndTournamentId(groupId, tournamentId)) {
+            throw new TournamentNotLinkedException(groupId, tournamentId);
+        }
         Ruleset ruleset = rulesetRepositoryPort
                 .findByGroupIdAndTournamentId(groupId, tournamentId)
-                .orElseGet(() -> Ruleset.builder().id(UUID.randomUUID()).rulePoints(DEFAULT_RULE_POINTS).build());
+                .orElseGet(() -> Ruleset.builder().id(null).rulePoints(DEFAULT_RULE_POINTS).build());
         return new RulesetResult(ruleset, getDisabledRules(ruleset.getRulePoints().keySet()));
     }
 

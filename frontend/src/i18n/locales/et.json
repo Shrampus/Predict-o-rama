@@ -175,6 +175,8 @@
       "saved": "Salvestatud",
       "saving": "Salvestamine...",
       "saveSuccess": "Reeglid salvestatud. Edetabel uuendatakse…",
+      "loadFailed": "Reeglite laadimine ebaõnnestus.",
+      "saveFailed": "Reeglite salvestamine ebaõnnestus.",
       "points": "pts",
       "readOnly": "Reeglid on seatud grupi admini poolt.",
       "rules": {

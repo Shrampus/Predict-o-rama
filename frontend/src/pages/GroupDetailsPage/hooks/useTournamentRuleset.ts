@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { getRuleset, saveRuleset, type RulesetResponse } from '../../../services/rulesetApi';
 
@@ -48,6 +49,7 @@ export function useTournamentRuleset(
   tournamentId: string,
   onRulesSaved: () => void,
 ): UseTournamentRulesetReturn {
+  const { t } = useTranslation();
   const [rules, setRules] = useState<RuleConfig[]>([]);
   const [baselineRules, setBaselineRules] = useState<RuleConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +71,7 @@ export function useTournamentRuleset(
           setBaselineRules(loaded);
         }
       } catch (err) {
-        if (isMounted) setError(err instanceof Error ? err.message : 'Failed to load rules.');
+        if (isMounted) setError(err instanceof Error ? err.message : t('groups.ruleset.loadFailed'));
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -113,12 +115,12 @@ export function useTournamentRuleset(
       const savedRules = responseToRules(saved);
       setRules(savedRules);
       setBaselineRules(savedRules);
-      setSuccessMessage('Rules saved. Leaderboard updating…');
+      setSuccessMessage(t('groups.ruleset.saveSuccess'));
       setTimeout(() => {
         onRulesSaved();
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save rules.');
+      setError(err instanceof Error ? err.message : t('groups.ruleset.saveFailed'));
     } finally {
       setIsSaving(false);
     }
