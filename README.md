@@ -16,7 +16,7 @@ Predict-o-rama/
 
 Frontend:
 
-* Node.js (>=20.19 recommended; >=22.12 also supported)
+* Node.js **22.x** (recommended; used by CI and the frontend Docker build) or **20.19+** (minimum supported for local development)
 * npm
 
 Backend:
