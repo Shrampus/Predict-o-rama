@@ -28,6 +28,7 @@ import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -196,8 +197,8 @@ public class GroupService {
                     String adminName = userRepository.findById(group.getOwnerId())
                             .map(user -> user.getUsername())
                             .orElse(group.getOwnerId().toString());
-                    List<String> tournamentNames = groupTournamentRepository.findTournamentIdsByGroupId(group.getId()).stream()
-                            .flatMap(tournamentId -> tournamentRepository.findById(tournamentId).stream())
+                    List<UUID> tournamentIds = groupTournamentRepository.findTournamentIdsByGroupId(group.getId());
+                    List<String> tournamentNames = tournamentRepository.findAllById(new HashSet<>(tournamentIds)).stream()
                             .map(Tournament::getName)
                             .toList();
                     return new GroupPreviewView(group.getName(), group.getDescription(), adminName, tournamentNames);
