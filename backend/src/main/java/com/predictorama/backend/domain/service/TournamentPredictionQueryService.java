@@ -59,6 +59,7 @@ public class TournamentPredictionQueryService {
 
     private TournamentMatchPredictionView toView(Match match, Prediction prediction) {
         Score primaryPredictedScore = prediction != null ? prediction.primaryPredictedScore().orElse(null) : null;
+        Score actualScore = match.primaryScore().orElse(null);
 
         return TournamentMatchPredictionView.builder()
                 .matchId(match.getId())
@@ -73,6 +74,10 @@ public class TournamentPredictionQueryService {
                 .predictedHomeScore(primaryPredictedScore != null ? primaryPredictedScore.getHomeScore() : null)
                 .predictedAwayScore(primaryPredictedScore != null ? primaryPredictedScore.getAwayScore() : null)
                 .predictedWinner(prediction != null ? prediction.getPredictedWinner() : null)
+                .actualHomeScore(actualScore != null ? actualScore.getHomeScore() : null)
+                .actualAwayScore(actualScore != null ? actualScore.getAwayScore() : null)
+                .actualWinner(match.getWinner())
+                .predictionResult(prediction != null ? prediction.getResult() : null)
                 .build();
     }
 
@@ -85,11 +90,12 @@ public class TournamentPredictionQueryService {
 
     private List<Match> getTournamentMatches(String competition, Tournament tournament) {
         Instant now = Instant.now();
+        Instant twoWeeksAgo = now.minus(14, ChronoUnit.DAYS);
         Instant in28Days = now.plus(28, ChronoUnit.DAYS);
 
         List<Match> existingMatches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
-                now,
+                twoWeeksAgo,
                 in28Days
         );
 

@@ -146,5 +146,18 @@
       "emptyOptions": "Seostamiseks pole rohkem turniire saadaval.",
       "adminOnlyAction": "Ainult adminitele: turniiride lisamine on saadaval ainult grupi adminitele."
     }
+  },
+  "predictionResults": {
+    "title": "Minu tulemused",
+    "selectGroup": "Vali grupp",
+    "selectTournament": "Vali turniir",
+    "loading": "Tulemuste laadimine...",
+    "noGroups": "Sa ei ole veel ühegi grupi liige.",
+    "noTournaments": "Sellel grupil pole seotud turniire.",
+    "noResults": "Pole veel lõppenud mänge.",
+    "yourPrediction": "Sinu ennustus",
+    "actual": "Tulemus",
+    "points": "pts",
+    "pending": "–"
   }
 }

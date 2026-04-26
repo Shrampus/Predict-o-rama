@@ -146,5 +146,18 @@
       "emptyOptions": "No additional tournaments available to link.",
       "adminOnlyAction": "Admin-only action: adding tournaments is only available to group admins."
     }
+  },
+  "predictionResults": {
+    "title": "My Results",
+    "selectGroup": "Select a group",
+    "selectTournament": "Select a tournament",
+    "loading": "Loading results...",
+    "noGroups": "You are not a member of any groups yet.",
+    "noTournaments": "No tournaments linked to this group yet.",
+    "noResults": "No completed matches yet.",
+    "yourPrediction": "Your prediction",
+    "actual": "Result",
+    "points": "pts",
+    "pending": "–"
   }
 }

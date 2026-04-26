@@ -14,6 +14,10 @@ export type TournamentMatchPrediction = {
   predictedHomeScore: number | null;
   predictedAwayScore: number | null;
   predictedWinner: 'HOME' | 'AWAY' | 'DRAW' | null;
+  actualHomeScore: number | null;
+  actualAwayScore: number | null;
+  actualWinner: 'HOME' | 'AWAY' | 'DRAW' | null;
+  predictionResult: number | null;
 };
 
 export type TournamentPredictionsResponse = {
