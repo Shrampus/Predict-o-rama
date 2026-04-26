@@ -1,7 +1,7 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../app/routePaths';
 import { useAuth } from '../../context/useAuth';
@@ -22,7 +22,9 @@ const TEST_USERS: TestUser[] = [
 export default function LoginPage() {
   const { currentUser, login, googleLogin, needsOnboarding } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
+  const from = (location.state as { from?: string } | null)?.from ?? null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -34,7 +36,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { needsOnboarding } = await login(email, password);
-      navigate(needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home);
+      navigate(needsOnboarding ? ROUTE_PATHS.onboarding : (from ?? ROUTE_PATHS.home));
     } catch {
       setError(t('login.error'));
     } finally {
@@ -47,7 +49,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { needsOnboarding } = await googleLogin(idToken);
-      navigate(needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home);
+      navigate(needsOnboarding ? ROUTE_PATHS.onboarding : (from ?? ROUTE_PATHS.home));
     } catch {
       setError(t('login.googleError'));
     } finally {
@@ -62,7 +64,7 @@ export default function LoginPage() {
   }
 
   if (currentUser) {
-    return <Navigate to={needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home} replace />;
+    return <Navigate to={needsOnboarding ? ROUTE_PATHS.onboarding : (from ?? ROUTE_PATHS.home)} replace />;
   }
 
   return (

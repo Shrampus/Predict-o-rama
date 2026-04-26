@@ -1,5 +1,5 @@
 import { apiFetch } from '../lib/apiClient';
-import { getApiUrl } from './apiConfig';
+import { API_PREFIX, getApiUrl } from './apiConfig';
 
 export type TournamentMatchPrediction = {
   matchId: string;
@@ -60,7 +60,7 @@ export async function getPredictions(
 ): Promise<TournamentPredictionsResponse> {
   const response = await apiFetch(
     getApiUrl(
-      `/api/predictions?competition=${encodeURIComponent(competition)}&groupId=${groupId}`,
+      `${API_PREFIX}/predictions?competition=${encodeURIComponent(competition)}&groupId=${groupId}`,
     ),
   );
 
@@ -72,7 +72,7 @@ export async function getPredictions(
 }
 
 export async function savePrediction(payload: SavePredictionRequest): Promise<PredictionResponse> {
-  const response = await apiFetch(getApiUrl('/api/predictions'), {
+  const response = await apiFetch(getApiUrl(`${API_PREFIX}/predictions`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

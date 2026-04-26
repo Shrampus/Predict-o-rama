@@ -6,6 +6,7 @@ import { MainLayout } from '../../components/layout/MainLayout';
 import GroupDetailsPage from '../../pages/GroupDetailsPage/GroupDetailsPage';
 import GroupsPage from '../../pages/GroupPage/GroupsPage';
 import HomePage from '../../pages/HomePage/HomePage';
+import InvitePage from '../../pages/InvitePage/InvitePage';
 import LoginPage from '../../pages/LoginPage/LoginPage';
 import OnboardingPage from '../../pages/OnboardingPage/OnboardingPage';
 import TournamentPage from '../../pages/TournamentPage/TournamentPage';
@@ -17,6 +18,7 @@ export function AppRouter() {
       <Route element={<AppShell />}>
         <Route path={ROUTE_PATHS.home} element={<HomePage />} />
         <Route path={ROUTE_PATHS.login} element={<LoginPage />} />
+        <Route path={ROUTE_PATHS.invite} element={<InvitePage />} />
 
         <Route element={<RequireAuth />}>
           <Route path={ROUTE_PATHS.onboarding} element={<OnboardingPage />} />
