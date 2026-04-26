@@ -1,7 +1,11 @@
 package com.predictorama.backend.adapter.rest.controller;
 
+import static com.predictorama.backend.config.ApiPaths.AUTH;
+import static com.predictorama.backend.config.ApiPaths.V1;
+
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.UserRestMapper;
+import com.predictorama.backend.config.AuthUtils;
 import com.predictorama.backend.config.JwtService;
 import com.predictorama.backend.domain.entity.User;
 import com.predictorama.backend.domain.service.AuthResult;
@@ -10,13 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(V1 + AUTH)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -26,16 +28,15 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("/login")
-    public AuthResponseDto login(@RequestBody LoginRequestDto request) {
-        log.info("POST /api/auth/login - email={}", request.email());
-        AuthResult result = authService.login(request.email(), request.password());
-        String authToken = jwtService.generateToken(result.user().getId(), result.needsOnboarding());
-        return new AuthResponseDto(authToken, onboardingStatusMapper(result.needsOnboarding()), UserRestMapper.toResponse(result.user()));
+    public AuthResponseDto login(@RequestBody LoginRequestDto loginRequest, HttpServletRequest request) {
+        log.info("POST {} - email={}", request.getRequestURI(), loginRequest.email());
+        AuthResult result = authService.login(loginRequest.email(), loginRequest.password());
+        return toAuthResponse(result);
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> me() {
-        UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        var userId = AuthUtils.currentUserId();
         var user = authService.getById(userId);
         return ResponseEntity.ok(UserRestMapper.toResponse(user));
     }
@@ -43,20 +44,28 @@ public class AuthController {
     @PostMapping("/google")
     public AuthResponseDto googleLogin(@RequestBody GoogleLoginRequestDto request) {
         AuthResult result = authService.loginWithGoogle(request.idToken());
-        String authToken = jwtService.generateToken(result.user().getId(), result.needsOnboarding());
-        return new AuthResponseDto(authToken, onboardingStatusMapper(result.needsOnboarding()), UserRestMapper.toResponse(result.user()));
+        return toAuthResponse(result);
     }
 
     @PostMapping("/complete-profile")
     public ResponseEntity<AuthResponseDto> completeProfile(@RequestBody CompleteProfileRequestDto request) {
-        UUID userId = UUID.fromString((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        var userId = AuthUtils.currentUserId();
         User user = authService.completeProfile(userId, request.username());
         String newAuthToken = jwtService.generateToken(userId, false);
 
         return ResponseEntity.ok(new AuthResponseDto(newAuthToken, "OK", UserRestMapper.toResponse(user)));
     }
 
-    private String onboardingStatusMapper(boolean needsOnboarding){
+    private String onboardingStatusMapper(boolean needsOnboarding) {
         return needsOnboarding ? "NEEDS_ONBOARDING" : "OK";
+    }
+
+    private AuthResponseDto toAuthResponse(AuthResult result) {
+        String token = jwtService.generateToken(result.user().getId(), result.needsOnboarding());
+        return new AuthResponseDto(
+                token,
+                onboardingStatusMapper(result.needsOnboarding()),
+                UserRestMapper.toResponse(result.user())
+        );
     }
 }
