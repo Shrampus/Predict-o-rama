@@ -55,7 +55,9 @@ export function GroupLeaderboardsSection({
                 {leaderboard.entries.map((entry, index) => (
                   <li
                     key={entry.userId}
-                    className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-sm cursor-pointer hover:bg-slate-100 transition-colors"
+                    className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-sm cursor-pointer hover:bg-slate-100 focus:bg-slate-100 focus:outline-none transition-colors"
+                    role="button"
+                    tabIndex={leaderboard.competitionCode ? 0 : -1}
                     onClick={() =>
                       leaderboard.competitionCode &&
                       setSelectedUser({
@@ -65,6 +67,17 @@ export function GroupLeaderboardsSection({
                         tournamentName: leaderboard.tournamentName,
                       })
                     }
+                    onKeyDown={(e) => {
+                      if ((e.key === 'Enter' || e.key === ' ') && leaderboard.competitionCode) {
+                        e.preventDefault();
+                        setSelectedUser({
+                          userId: entry.userId,
+                          userName: entry.name,
+                          competitionCode: leaderboard.competitionCode,
+                          tournamentName: leaderboard.tournamentName,
+                        });
+                      }
+                    }}
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-600">
                       {index + 1}
