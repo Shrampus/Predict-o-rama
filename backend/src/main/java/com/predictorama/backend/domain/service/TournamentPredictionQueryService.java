@@ -96,12 +96,11 @@ public class TournamentPredictionQueryService {
 
     private List<Match> getTournamentMatches(String competition, Tournament tournament) {
         Instant now = Instant.now();
-        Instant twoWeeksAgo = now.minus(14, ChronoUnit.DAYS);
         Instant in28Days = now.plus(28, ChronoUnit.DAYS);
 
         List<Match> matches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
-                twoWeeksAgo,
+                Instant.EPOCH,
                 in28Days
         );
 
