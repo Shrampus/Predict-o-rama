@@ -8,17 +8,14 @@ import { useJoinGroupBanner } from './hooks/useJoinGroupBanner';
 function GroupsPage() {
   const myGroups = useGroups();
   const createForm = useCreateGroupForm(myGroups.refetch);
-  const joinBanner = useJoinGroupBanner(myGroups.refetch);
+  const joinBanner = useJoinGroupBanner();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       <div className="grid grid-cols-1 laptop:grid-cols-12 gap-8 items-start">
         <div className="laptop:col-span-4 space-y-6">
           <JoinGroupBanner
-            inviteCode={joinBanner.formData.inviteCode}
-            isLoading={joinBanner.isLoading}
-            errorMessage={joinBanner.errorMessage}
-            joinedMember={joinBanner.joinedMember}
+            inviteCode={joinBanner.inviteCode}
             handleChange={joinBanner.handleChange}
             handleSubmit={joinBanner.handleSubmit}
           />

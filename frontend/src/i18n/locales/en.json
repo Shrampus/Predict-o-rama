@@ -24,6 +24,7 @@
     "usernameLabel": "Username",
     "usernamePlaceholder": "e.g. footballfan42",
     "usernameTaken": "Username is already taken. Please choose another.",
+    "error": "Something went wrong. Please try again.",
     "saving": "Saving…",
     "continue": "Continue"
   },
@@ -91,8 +92,9 @@
     "inviteCode": "Invite code:",
     "joinTitle": "Have an invite code? Join here:",
     "joinSuccess": "Successfully joined the group!",
-    "joinPlaceholder": "Paste invite code",
+    "joinPlaceholder": "Paste invite code or link",
     "joining": "Joining...",
+    "viewGroup": "View Group",
     "joinGroup": "Join Group",
     "addNewGroup": "Add new group",
     "groupName": "Group name",
@@ -189,5 +191,21 @@
     "actual": "Result",
     "points": "pts",
     "pending": "–"
+  },
+  "invite": {
+    "loading": "Loading group info...",
+    "invalidLink": "Invalid invite link",
+    "invalidLinkDesc": "This invite link is not valid or has expired.",
+    "admin": "Created by",
+    "tournaments": "Tournaments",
+    "noTournaments": "No tournaments added yet.",
+    "joinGroup": "Join Group",
+    "loginToJoin": "Log in to Join",
+    "alreadyMember": "You are already a member of this group.",
+    "goToGroups": "Go to My Groups",
+    "joinError": "Failed to join the group. Please try again.",
+    "joining": "Joining...",
+    "loadError": "Something went wrong",
+    "loadErrorDesc": "We couldn't load the group info. Please check your connection and try again."
   }
 }
