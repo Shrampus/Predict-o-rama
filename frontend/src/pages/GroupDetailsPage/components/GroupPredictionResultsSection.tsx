@@ -6,11 +6,7 @@ import { getPredictions } from '../../../services/predictionsApi';
 import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
 import PredictionResultsCard from '../../../components/predictionResults/PredictionResultsCard';
 
-type TournamentResult = {
-  tournament: GroupTournamentResponse;
-  matches: TournamentMatchPrediction[] | null;
-  error: boolean;
-};
+type LoadedEntry = { matches: TournamentMatchPrediction[]; error: boolean };
 
 type Props = {
   groupId: string;
@@ -20,33 +16,24 @@ type Props = {
 
 export function GroupPredictionResultsSection({ groupId, tournaments, isLoadingTournaments }: Props) {
   const { t } = useTranslation();
-  const [results, setResults] = useState<TournamentResult[]>([]);
+  const [loadedData, setLoadedData] = useState<Record<string, LoadedEntry>>({});
 
   useEffect(() => {
     const playable = tournaments.filter((t) => t.competitionCode);
-    setResults(playable.map((tournament) => ({ tournament, matches: null, error: false })));
-
     playable.forEach((tournament) => {
+      const key = `${groupId}:${tournament.id}`;
       getPredictions(tournament.competitionCode!, groupId)
         .then((response) => {
           const completed = response.matches.filter((m) => m.matchStatus === 'COMPLETED');
-          setResults((prev) =>
-            prev.map((r) =>
-              r.tournament.id === tournament.id ? { ...r, matches: completed } : r,
-            ),
-          );
+          setLoadedData((prev) => ({ ...prev, [key]: { matches: completed, error: false } }));
         })
         .catch(() => {
-          setResults((prev) =>
-            prev.map((r) =>
-              r.tournament.id === tournament.id ? { ...r, matches: [], error: true } : r,
-            ),
-          );
+          setLoadedData((prev) => ({ ...prev, [key]: { matches: [], error: true } }));
         });
     });
   }, [groupId, tournaments]);
 
-  const playableCount = tournaments.filter((t) => t.competitionCode).length;
+  const playable = tournaments.filter((t) => t.competitionCode);
 
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
@@ -56,26 +43,29 @@ export function GroupPredictionResultsSection({ groupId, tournaments, isLoadingT
         <p className="text-sm text-slate-500">{t('predictionResults.loading')}</p>
       )}
 
-      {!isLoadingTournaments && playableCount === 0 && (
+      {!isLoadingTournaments && playable.length === 0 && (
         <p className="text-sm text-slate-500">{t('predictionResults.noTournaments')}</p>
       )}
 
-      {!isLoadingTournaments && results.map(({ tournament, matches, error }) => (
-        <div key={tournament.id}>
-          {error && (
-            <p className="text-sm text-red-500">{t('tournament.fetchError')}</p>
-          )}
-          {!error && matches === null && (
-            <div className="bg-slate-50 rounded-2xl p-6">
-              <h4 className="text-base font-black uppercase tracking-tight mb-2">{tournament.name}</h4>
-              <p className="text-sm text-slate-400">{t('predictionResults.loading')}</p>
-            </div>
-          )}
-          {!error && matches !== null && (
-            <PredictionResultsCard matches={matches} tournamentName={tournament.name} />
-          )}
-        </div>
-      ))}
+      {!isLoadingTournaments && playable.map((tournament) => {
+        const data = loadedData[`${groupId}:${tournament.id}`];
+        return (
+          <div key={tournament.id}>
+            {data?.error && (
+              <p className="text-sm text-red-500">{t('tournament.fetchError')}</p>
+            )}
+            {!data?.error && !data && (
+              <div className="bg-slate-50 rounded-2xl p-6">
+                <h4 className="text-base font-black uppercase tracking-tight mb-2">{tournament.name}</h4>
+                <p className="text-sm text-slate-400">{t('predictionResults.loading')}</p>
+              </div>
+            )}
+            {!data?.error && data && (
+              <PredictionResultsCard matches={data.matches} tournamentName={tournament.name} />
+            )}
+          </div>
+        );
+      })}
     </section>
   );
 }
