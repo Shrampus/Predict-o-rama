@@ -64,6 +64,36 @@ describe('useMatchPredictionForm', () => {
     expect(onPredict).toHaveBeenCalledWith('match-1', 2, 1, 'Home');
   });
 
+  it('does not call onPredict when isSaving is true', async () => {
+    const onPredict = vi.fn().mockResolvedValue({ ok: true });
+    const match = makeMatch({ kickoffTime: '2026-04-24T12:00:00.000Z', matchStatus: 'SCHEDULED' });
+    const { result, rerender } = renderHook(
+      (props: { isSaving: boolean }) =>
+        useMatchPredictionForm({
+          match,
+          isSaving: props.isSaving,
+          onPredict,
+          defaultSaveErrorMessage: 'failed',
+        }),
+      { initialProps: { isSaving: false } },
+    );
+
+    act(() => {
+      result.current.setHomeScore('2');
+      result.current.setAwayScore('1');
+      result.current.selectWinner('Home');
+    });
+
+    rerender({ isSaving: true });
+    expect(result.current.canSubmit).toBe(false);
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(onPredict).not.toHaveBeenCalled();
+  });
+
   it('is locked after kickoff even when status is scheduled', async () => {
     const onPredict = vi.fn().mockResolvedValue({ ok: true });
     const match = makeMatch({ kickoffTime: '2026-04-24T10:00:00.000Z', matchStatus: 'SCHEDULED' });
