@@ -7,171 +7,174 @@
 
 ## 1. Mis on Predict-o-rama? (~20 s)
 
-Predict-o-rama on jalgpalli ennustusmäng peredele ja sõpruskondadele. Kasutajad loovad gruppe, ennustavad päris turniiride matšide tulemusi (Premier League, Champions League, MM), ja saavad punkte vastavalt grupi reeglistikule. Matšiandmed sünkroonitakse automaatselt football-data.org API-st.
+Predict-o-rama on jalgpalli ennustusmäng peredele ja sõpruskondadele. Kasutajad loovad gruppe, ennustavad päris turniiride matšide tulemusi (Premier League, Champions League, MM) ja saavad punkte vastavalt grupi reeglistikule. Matšiandmed sünkroonitakse automaatselt football-data.org API-st.
 
 **Põhifunktsioonid:**
-- Kasutaja autentimine (e-mail/parool + Google OAuth)
-- Gruppide loomine ja kutselinkidega liitumine
-- Matšide ennustamine (skoor + võitja)
-- Automaatne tulemuste skoorimine konfigureeritava reeglistiku alusel
-- Edetabel grupi sees turniiri kohta
+- Kasutaja autentimine — e-mail/parool ja Google OAuth
+- Gruppide loomine ja kutselinkide kaudu liitumine
+- Matšide ennustamine (skoor + võitja) enne mängu algust
+- Automaatne tulemuste skoorimine matši lõppedes, konfigureeritava reeglistiku alusel
+- Edetabel grupi ja turniiri lõikes
+- Automaatne matšide, meeskondade ja turniiride importimine football-data.org API-st
 
 ---
 
-## 2. Arhitektuur (~40 s)
+## 2. Tehnoloogia stack (~25 s)
 
-Klassikaline kolmekihiline arhitektuur: React SPA → Spring Boot REST API → PostgreSQL. 
+| Kiht | Tehnoloogiad |
+|------|--------------|
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS 4, React Router 7, i18next, Vitest |
+| **Backend** | Spring Boot 4, Java 21, Spring Web MVC, Spring Data JPA, Spring Security, Lombok |
+| **Autentimine** | JWT (jjwt), Google OAuth (google-api-client), BCrypt |
+| **Andmebaas** | PostgreSQL 17, Liquibase (migratsioonid), Hibernate (`ddl-auto=validate`) |
+| **Välised teenused** | football-data.org (matšiandmed), Google Identity (sisselogimine) |
+| **API dokumentatsioon** | SpringDoc OpenAPI / Swagger UI |
+| **Infra / DevOps** | Docker Compose, GitHub Actions CI/CD, GHCR, VPS deploy üle SSH |
 
-Backend:
-- heksagonaalne arhitektuur - **portide ja adapterite** mustrit — domeeniloogika ei sõltu raamistikust, välistest integratsioonidest ega andmebaasist
-- domain kiht
-  - defineerib ära domeeniobjektid, serviced ja pordid
-- adapter kiht
-  - defineeritakse controllerid, dto, db entity-d, repository adapterid, external integrations adapterid
-  - integratsioonid:
-    - football.org API - automatiseeritud andmete import, mis tõmbab perioodiliselt (scheduled jobina) uusi matše ja tulemusi)
-    - Google - Google auth kasutades Google Client Id-d -> authenitificaton tulemusena väljastakse JWT
-  - REST API:
-    - versioneeritud api endpointid
-    - Spring security ja JWT securitycontext
-  - Persistance
-    - JPA repository -
-  - 
+Kõik kolm teenust (frontend, backend, PostgreSQL) on Docker-kontaineritena VPS-is. Caddy töötab reverse proxy-na — suunab päringu porti 80/443 vastavalt kas frontendi või backendi konteinerisse.
 
-Andmebaas:
-- JPA 
-- Andmebaasi migratsioonid kasutades Liquibase'i 
+GitHub Secrets hoiavad tundlikke andmeid (JWT secret, DB parool, API võtmed). CI/CD pipeline kirjutab need VPS-i `.env` faili iga deploy ajal.
 
-Frontend: 
-- React
-  **Olulised punktid:**
-- Frontend ja backend on Docker-kontainerid, ees Caddy/nginx reverse proxy
-- JWT Bearer token autentimisel — stateless, ei vaja sessioonisalvestust
-- Domain-kihis on liides (`port`), implementatsioon (`adapter`) on välimises kihis → kergesti testitav, raamistikust sõltumatu
-- Ajastatud `FixtureSyncScheduler` tõmbab perioodiliselt uusi matše ja tulemusi
+---
 
+## 3. Arhitektuur (~40 s)
+
+Backend järgib **heksagonaalset (portide ja adapterite) arhitektuuri** — domeeniloogika ei sõltu raamistikust, andmebaasist ega välistest integratsioonidest.
 
 ```mermaid
 flowchart LR
     User([Kasutaja brauseris])
 
-    subgraph Frontend["Frontend - React SPA"]
-        UI[React + TypeScript<br/>Vite + Tailwind]
+    subgraph FE["Frontend — React SPA"]
+        UI[React + TypeScript<br/>Vite · Tailwind CSS]
     end
 
-    subgraph Backend["Backend - Spring Boot"]
-        REST[REST kontrollerid<br/>/api/v1/*]
-        Domain[Domeeniteenused<br/>Prediction, Scoring, Group, Auth]
-        Ports[Pordid<br/>Repository / External]
+    subgraph BE["Backend — Spring Boot"]
+        direction TB
+        REST["REST kontrollerid<br/>/api/v1/*<br/>(adapter kiht)"]
+        Domain["Domeeniteenused<br/>Prediction · Scoring · Group · Auth<br/>(domain kiht)"]
+        Ports["Pordid — liidesed<br/>RepositoryPort · ExternalPort<br/>(domain kiht)"]
+        REST --> Domain --> Ports
     end
 
-    subgraph Adapters["Adapterid"]
-        JPA[JPA / Hibernate]
-        FD[football-data.org klient]
-        GOOG[Google OAuth klient]
+    subgraph Adapters["Adapterid (adapter kiht)"]
+        JPA[JPA / Hibernate<br/>persistence adapter]
+        FD[football-data.org<br/>HTTP klient]
+        GOOG[Google OAuth<br/>klient]
     end
 
     DB[(PostgreSQL 17<br/>Liquibase migratsioonid)]
-    External[football-data.org API]
+    ExtAPI[football-data.org API]
+    GoogleAuth[Google Identity API]
+    Scheduler["FixtureSyncScheduler<br/>(ajastatud töö)"]
 
     User -->|HTTPS| UI
-    UI -->|JSON + JWT Bearer| REST
-    REST --> Domain
-    Domain --> Ports
-    Ports --> JPA
-    Ports --> FD
-    Ports --> GOOG
+    UI -->|"JSON + JWT Bearer"| REST
+    Ports --> JPA & FD & GOOG
     JPA --> DB
-    FD -->|HTTP| External
-
-    Scheduler[Fixture sync<br/>scheduler] --> Domain
+    FD -->|HTTP| ExtAPI
+    GOOG -->|HTTPS| GoogleAuth
+    Scheduler -->|"perioodiline kutse"| Domain
 ```
 
+**Kihtide rollid:**
 
----
+| Kiht | Sisu |
+|------|------|
+| **REST adapter** | Kontrollerid, DTO-d, päringu/vastuse mapperid, `JwtAuthFilter`, `GlobalExceptionHandler` |
+| **Domain** | Äriloogika: teenused, domeeniobjektid, pordi liidesed. Ei sõltu Spring raamistikust ega JPA-st. |
+| **Persistence adapter** | JPA entity-d, Spring Data repository-d, mapperid domeeniobjektideks |
+| **External adapter** | football-data.org REST klient, Google OAuth token verifier |
+| **Scheduler** | `FixtureSyncScheduler` kutsub domeeniteenust perioodiliselt — uuendab matšide staatused ja tulemused |
 
-## 3. Tehnoloogia stack (~25 s)
+**Autentimine:** Spring Security + JWT Bearer token. Iga kaitstud päring läbib `JwtAuthFilter` → kasutaja ID lisatakse `SecurityContext`-i → kontrollerid loevad selle `AuthUtils.currentUserId()` kaudu.
 
-| Kiht | Tehnoloogiad |
-|------|--------------|
-| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS, React Router 7, i18next, Vitest |
-| **Backend** | Spring Boot 4, Java 21, Spring Web MVC, Spring Data JPA, Spring Security, Lombok |
-| **Auth** | JWT (jjwt), Google OAuth (google-api-client), BCrypt |
-| **Andmebaas** | PostgreSQL 17, Liquibase (migratsioonid), Hibernate (ainult validate) |
-| **Välised teenused** | football-data.org (matšid), Google Identity (sisselogimine) |
-| **Dokumentatsioon** | SpringDoc OpenAPI / Swagger UI |
-| **Infra / DevOps** | Docker Compose, GitHub Actions (CI/CD), GHCR, deploy üle SSH VPS-i |
+**Swagger UI** on vaikimisi sisse lülitatud: `https://predictorama.online/swagger-ui/index.html`
 
 ---
 
 ## 4. Andmebaasiskeem (~45 s)
 
-Põhientiteedid: **kasutaja → grupp → ennustus → matš → turniir**. Reeglistik (`ruleset`) seob grupi ja turniiri konkreetsete skooripunktidega. Iga match-skoor ja ennustuse-skoor on eraldi tabelites, et toetada lisaaegu ja penaltisid.
+Põhiseos: **kasutaja → grupp → ennustus → matš → turniir**. Grupi ja turniiri kombinatsioonile (`group_tournaments`) on seotud reeglistik (`ruleset`) — seega sama grupp võib erinevaid turniirisid hinnata erinevate reeglitega.
 
 ```mermaid
 erDiagram
-    USERS ||--o{ GROUPS : "owns"
-    USERS ||--o{ GROUP_MEMBERS : "joins"
-    GROUPS ||--o{ GROUP_MEMBERS : "has"
-    GROUPS }o--|| RULESETS : "uses"
-    GROUPS ||--o{ GROUP_TOURNAMENTS : "tracks"
-    TOURNAMENTS ||--o{ GROUP_TOURNAMENTS : "in"
-    TOURNAMENTS ||--o{ MATCHES : "contains"
-    TEAMS ||--o{ MATCHES : "home/away"
-    MATCHES ||--o{ MATCH_SCORES : "actual"
-    MATCHES ||--o{ PREDICTIONS : "predicted"
-    USERS ||--o{ PREDICTIONS : "submits"
-    GROUPS ||--o{ PREDICTIONS : "scope"
-    PREDICTIONS ||--o{ PREDICTION_SCORES : "values"
-    RULESETS ||--o{ RULESET_RULES : "defines"
+    USERS ||--o{ GROUPS : "owner_id → id"
+    USERS ||--o{ GROUP_MEMBERS : "user_id → id"
+    GROUPS ||--o{ GROUP_MEMBERS : "group_id → id"
+    GROUPS ||--o{ GROUP_TOURNAMENTS : "group_id → id"
+    TOURNAMENTS ||--o{ GROUP_TOURNAMENTS : "tournament_id → id"
+    RULESETS ||--o{ GROUP_TOURNAMENTS : "ruleset_id → id"
+    RULESETS ||--o{ RULESET_RULES : "ruleset_id → id"
+    TOURNAMENTS ||--o{ MATCHES : "tournament_id → id"
+    TEAMS ||--o{ MATCHES : "home_team_id → id"
+    TEAMS ||--o{ MATCHES : "away_team_id → id"
+    MATCHES ||--o{ MATCH_SCORES : "match_id → id"
+    USERS ||--o{ PREDICTIONS : "user_id → id"
+    MATCHES ||--o{ PREDICTIONS : "match_id → id"
+    GROUPS ||--o{ PREDICTIONS : "group_id → id"
+    PREDICTIONS ||--o{ PREDICTION_SCORES : "prediction_id → id"
 
     USERS {
         uuid id PK
-        string username UK
-        string email UK
-        string system_role
-        string password_hash
+        varchar username UK
+        varchar email UK
+        varchar system_role
+        varchar password_hash
     }
     GROUPS {
         uuid id PK
         uuid owner_id FK
         uuid invite_code UK
-        uuid ruleset_id FK
-        string name
+        varchar name
     }
     GROUP_MEMBERS {
         uuid id PK
         uuid user_id FK
         uuid group_id FK
-        string status
-        string member_role
+        varchar status
+        varchar member_role
+    }
+    GROUP_TOURNAMENTS {
+        uuid group_id FK "PK"
+        uuid tournament_id FK "PK"
+        uuid ruleset_id FK
+    }
+    RULESETS {
+        uuid id PK
+    }
+    RULESET_RULES {
+        uuid ruleset_id FK "PK"
+        varchar rule_name "PK"
+        int points
     }
     TOURNAMENTS {
         uuid id PK
-        string name
-        string sport
-        string season_label
+        varchar name
+        varchar sport
+        varchar season_label
+        varchar external_id
     }
     TEAMS {
         uuid id PK
-        string name
-        string image_url
-        string external_id
+        varchar name
+        varchar image_url
+        varchar external_id
     }
     MATCHES {
         uuid id PK
         uuid tournament_id FK
         uuid home_team_id FK
         uuid away_team_id FK
-        string match_status
-        string winner
-        string external_id
-        timestamp kickoff_time
+        varchar match_status
+        varchar winner
+        varchar external_id
+        timestamptz kickoff_time
     }
     MATCH_SCORES {
         uuid id PK
         uuid match_id FK
-        string score_type
+        varchar score_type
         int home_score
         int away_score
     }
@@ -180,121 +183,146 @@ erDiagram
         uuid user_id FK
         uuid match_id FK
         uuid group_id FK
-        string predicted_winner
+        varchar predicted_winner
         int result
-        timestamp submitted_at
+        timestamptz submitted_at
     }
     PREDICTION_SCORES {
         uuid id PK
         uuid prediction_id FK
-        string score_type
+        varchar score_type
         int home_score
         int away_score
     }
-    RULESETS {
-        uuid id PK
-        string name
-    }
-    RULESET_RULES {
-        uuid ruleset_id FK
-        string rule_name
-        int points
-    }
-    GROUP_TOURNAMENTS {
-        uuid group_id FK
-        uuid tournament_id FK
-    }
 ```
 
-**Tähelepanekud:**
-- `predictions` on unikaalne `(user_id, match_id, group_id)` peale — sama kasutaja võib sama matši kohta erinevates gruppides erineva ennustuse teha
-- Skoorid on normaliseeritud eraldi tabelitesse (`match_scores`, `prediction_scores`) → toetab `NORMAL_TIME`, `FULL_TIME`, `EXTRA_TIME`, `PENALTIES` lisamist ilma skeemimuudatuseta
-- Liquibase muudatuste fail on rangelt versioneeritud (`001-init.yaml` … `019-configurable-rulesets.yaml`)
+**Olulised disainiotsused:**
+- `predictions` on unikaalne `(user_id, match_id, group_id)` — sama kasutaja saab samas grupis iga matši kohta täpselt ühe ennustuse, kuid eri gruppides võib olla erinev ennustus
+- Skoorid on normaliseeritud eraldi tabelitesse (`match_scores`, `prediction_scores`) — võimaldab lisada `EXTRA_TIME`, `PENALTIES` ilma skeemi muutmata
+- **Reeglistik on seotud `group_tournaments` tasemel**, mitte grupi tasemel — grupp võib ühes turniiris kasutada üht reeglistikku ja teises teist
+- `ruleset_rules` tabel on lihtne võtme-väärtuse kaart: reegli nimi (`EXACT_SCORE`, `CORRECT_WINNER`, `CORRECT_GOAL_DIFFERENCE`) → punktid. Uue reegli lisamine ei nõua skeemi muutust.
 
 ---
 
 ## 5. Voodiagramm — ennustuse esitamine (~30 s)
 
-Tüüpiline kasutusvoog: kasutaja vaatab oma grupi turniiri, esitab ennustuse, backend valideerib ja salvestab.
+Tüüpiline kasutusvoog läbib kõik arhitektuuri kihid: REST → Domain teenus → Port → Adapter → DB.
 
 ```mermaid
 sequenceDiagram
     actor U as Kasutaja
     participant FE as React Frontend
-    participant API as Spring REST API
+    participant CTRL as PredictionController
+    participant QSVC as TournamentPredictionQueryService
     participant SVC as PredictionService
+    participant PORT as RepositoryPort
+    participant ADPT as JPA Adapter
     participant DB as PostgreSQL
 
     U->>FE: Avab turniirilehe
-    FE->>API: GET /api/v1/predictions?competition=PL&groupId=...
-    API->>DB: SELECT matches + user predictions
-    DB-->>API: matšid + olemasolevad ennustused
-    API-->>FE: JSON: matches[]
-    FE-->>U: Kuvab matšid + vormid
+    FE->>CTRL: GET /api/v1/predictions?competition=PL&groupId=...
+    note over CTRL: JwtAuthFilter valideerib<br/>JWT tokeni
+    CTRL->>QSVC: getTournamentPredictions(competition, userId, groupId)
+    QSVC->>PORT: MatchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(...)
+    PORT->>ADPT: JPA päring (JOIN FETCH meeskonnad + skoorid)
+    ADPT->>DB: SELECT matches + teams + scores
+    DB-->>ADPT: tulemused
+    ADPT-->>PORT: List&lt;Match&gt;
+    PORT-->>QSVC: matšid
+    QSVC->>SVC: getPredictionsByUserAndGroup(userId, groupId)
+    SVC->>PORT: PredictionRepositoryPort.findByUserIdAndGroupId(...)
+    PORT->>ADPT: JPA päring
+    ADPT->>DB: SELECT predictions + prediction_scores
+    DB-->>ADPT: tulemused
+    ADPT-->>PORT: List&lt;Prediction&gt;
+    PORT-->>SVC: ennustused
+    SVC-->>QSVC: Map&lt;matchId, Prediction&gt;
+    QSVC-->>CTRL: TournamentPredictionsView
+    CTRL-->>FE: JSON: { matches[] }
+    FE-->>U: Kuvab matšid + ennustusvormid
 
-    U->>FE: Sisestab skoori 2:1, võitja HOME
-    FE->>API: POST /api/v1/predictions { matchId, homeScore, awayScore, winner }
-    API->>API: JwtAuthFilter valideerib tokeni
-    API->>SVC: savePrediction(userId, groupId, matchId, ...)
+    U->>FE: Sisestab skoori 2:1, võitja HOME, klõpsab Salvesta
+    FE->>CTRL: POST /api/v1/predictions { matchId, groupId, homeScore, awayScore, winner }
+    note over CTRL: JwtAuthFilter valideerib JWT
+    CTRL->>SVC: savePrediction(userId, groupId, matchId, 2, 1, HOME)
     SVC->>SVC: validatePredictionInput()
-    SVC->>DB: findByUserIdAndMatchIdAndGroupId
-    DB-->>SVC: Optional<Prediction>
-    SVC->>DB: INSERT või UPDATE prediction
-    DB-->>SVC: salvestatud
-    SVC-->>API: Prediction
-    API-->>FE: 200 OK
+    SVC->>PORT: findByUserIdAndMatchIdAndGroupId(...)
+    PORT->>ADPT: JPA päring
+    ADPT->>DB: SELECT prediction WHERE user+match+group
+    DB-->>ADPT: Optional&lt;Prediction&gt;
+    ADPT-->>PORT: Optional&lt;Prediction&gt;
+    PORT-->>SVC: Optional.empty() (uus) või olemasolev
+    SVC->>PORT: PredictionRepositoryPort.save(prediction)
+    PORT->>ADPT: JPA upsert
+    ADPT->>DB: INSERT / UPDATE predictions + prediction_scores
+    DB-->>ADPT: salvestatud
+    ADPT-->>SVC: Prediction
+    SVC-->>CTRL: Prediction
+    CTRL-->>FE: 200 OK { predictionId, ... }
     FE-->>U: "Ennustus salvestatud"
 ```
 
 ---
 
-## 6. Tegevusdiagramm — automaatne skoorimine (~30 s)
+## 6. Tegevusdiagramm — automaatne skoorimine ja N+1 analüüs (~35 s)
 
-Kui matš lõppeb, käivitatakse skoorimisahel: tegelik tulemus võrreldakse iga ennustusega, ja vastavalt grupi reeglistikule arvutatakse punktid.
+Kui matš lõppeb, sünkroniseerib `FixtureSyncScheduler` tulemuse ning käivitab skoorimisahela.
 
 ```mermaid
 flowchart TD
     Start([FixtureSyncScheduler<br/>tõmbab matši tulemused]) --> Update[Uuendab MATCHES.status = FINISHED<br/>+ MATCH_SCORES]
-    Update --> Trigger[Käivitab<br/>PredictionScoringService.distributePredictionScores matchId]
+    Update --> Trigger[Käivitab PredictionScoringService<br/>.distributePredictionScores matchId]
 
-    Trigger --> FindMatch{Match leitud?}
-    FindMatch -->|Ei| Error1[Viskab erindi]
-    FindMatch -->|Jah| GetPreds[Loeb kõik ennustused<br/>selle matši kohta]
+    Trigger --> FindMatch["1 päring: matchRepository.findById(matchId)<br/>(laeb ka MATCH_SCORES)"]
+    FindMatch --> FindPreds["1 päring: predictionRepository.findByMatchId(matchId)"]
 
-    GetPreds --> GroupBy[Grupeerib ennustused<br/>group_id järgi]
+    FindPreds --> N1_warn1["⚠️ N+1 oht: iga Prediction kohta<br/>eraldi päring prediction_scores tabelisse<br/>(PredictionRepositoryAdapter.loadScores)"]
+    N1_warn1 --> GroupBy[Grupeerib ennustused group_id järgi<br/>mälus — lisapäringuid ei tule]
+
     GroupBy --> Loop{Iga grupi kohta}
 
-    Loop --> FindRuleset[Leiab ruleset<br/>group_id + tournament_id alusel]
+    Loop --> FindRuleset["⚠️ N+1 oht: 1 päring rulesetRepository<br/>.findByGroupIdAndTournamentId per grupp<br/>→ N gruppi = N päringut"]
     FindRuleset --> RulesetExists{Ruleset olemas?}
-    RulesetExists -->|Ei| Default[Kasutab DEFAULT_RULE_POINTS]
-    RulesetExists -->|Jah| Custom[Kasutab grupi reeglistikku]
+    RulesetExists -->|Ei| Default[Kasutab DEFAULT_RULE_POINTS<br/>logib hoiatuse]
+    RulesetExists -->|Jah| Custom[Kasutab grupi reeglistikku<br/>ruleset_rules tabelist]
 
     Default --> CalcLoop
-    Custom --> CalcLoop[Iga ennustuse kohta<br/>arvuta punktid]
+    Custom --> CalcLoop[Iga ennustuse kohta arvuta punktid<br/>mälus — lisapäringuid ei tule]
 
-    CalcLoop --> ApplyRules[Iga aktiivne reegel:<br/>ExactScoreRule<br/>CorrectWinnerRule<br/>CorrectGoalDifferenceRule]
-    ApplyRules --> Match{Reegel<br/>matchib?}
-    Match -->|Jah| AddPoints[Liidab reegli punktid]
-    Match -->|Ei| Skip[Skip]
-    AddPoints --> NextRule{Veel reegleid?}
-    Skip --> NextRule
-    NextRule -->|Jah| ApplyRules
-    NextRule -->|Ei| Save[UPDATE predictions.result = total]
+    CalcLoop --> ApplyRules["Iga aktiivne reegel kontrollib:<br/>ExactScoreRule → täpne skoor<br/>CorrectWinnerRule → õige võitja<br/>CorrectGoalDifferenceRule → õige vahe"]
+    ApplyRules --> SumPoints[Liidab kõik punktid kokku]
+    SumPoints --> Save["1 päring: UPDATE predictions.result = total"]
 
     Save --> NextPred{Veel ennustusi?}
     NextPred -->|Jah| CalcLoop
     NextPred -->|Ei| NextGroup{Veel gruppe?}
     NextGroup -->|Jah| Loop
-    NextGroup -->|Ei| Done([Skoorimine valmis<br/>edetabel uuendatud])
+    NextGroup -->|Ei| Done([Skoorimine valmis])
 ```
 
-**Disainivõit:** uue skoorimisreegli lisamine = uus klass, mis implementeerib `ScoringRule`-liidese. Spring DI korjab selle automaatselt üles, seda saab lisada igasse reeglistikku ilma teisi reegleid muutmata. **Open/Closed põhimõte praktikas.**
+### N+1 probleemide analüüs
+
+Diagramm tõstatab õigustatud küsimuse — ja koodis on mitu N+1 probleemi kinnitust leidnud:
+
+| Koht | Probleem | Mõju |
+|------|----------|------|
+| `PredictionRepositoryAdapter.loadScores()` | Iga `Prediction` laadimise järel eraldi päring `prediction_scores` tabelisse. Mõjutab **kõiki** meetodeid, mis kutsuvad `toDomainWithScores()` | M ennustust → M+1 päringut |
+| `PredictionScoringService.distributePredictionScores()` | `rulesetRepository.findByGroupIdAndTournamentId()` kutsutakse grupeerimistsüklis iga grupi kohta eraldi | N gruppi → N päringut |
+| `GroupService.getGroupTournaments()` | Tõmbab esmalt turniiride ID-d, seejärel `tournamentRepository.findById()` igaühe kohta eraldi | N turniiri → N+1 päringut |
+| `GroupService.getUserGroups()` | Tõmbab liikmelisused, seejärel `groupRepository.findById()` iga grupi kohta eraldi | N gruppi → N+1 päringut |
+| `UserUpcomingMatchQueryService.getUpcomingMatches()` | Sama muster: liikmelisused → per-grupp `findById()` | N gruppi → N+1 päringut |
+
+**Mis on hästi lahendatud:** `MatchRepositoryAdapter.toMatches()` laadib meeskonnad (`findAllById`) ja skoorid (`findByMatchIdIn`) ühe batch-päringuga — siin N+1 ei esine.
+
+**Lahendused:** batch-laadimiseks sobib `findAllById(ids)` / `findByIdIn(ids)` nende kohtade jaoks, kus ID-d on juba käes. `PredictionRepositoryAdapter.loadScores()` puhul lahendab selle `findByPredictionIdIn(ids)` + mälus grupeerimine — täpselt sama muster, mida `MatchRepositoryAdapter` juba kasutab.
+
+**Disainivõit (skoorimisreeglid):** uue reegli lisamine = uus klass, mis implementeerib `ScoringRule`-liidese. Spring DI korjab selle automaatselt üles — **Open/Closed põhimõte praktikas**.
 
 ---
 
 ## 7. Kokkuvõte (~10 s)
 
-- **Selge kihtide eraldatus** (hexagonal): domeeniloogikat saab katsetada ilma andmebaasita
-- **Konfigureeritav reeglistik** grupi tasemel — sama matš annab erinevatele gruppidele erinevad punktid
-- **Liquibase + ddl-auto=validate** garanteerib, et kood ja andmebaas on alati sünkroonis
-- **CI/CD** GitHub Actions kaudu pushib Docker-image'id GHCR-i ja deploib VPS-i automaatselt push-il `dev` haru peale
+- **Hexagonal arhitektuur** — domeeniloogika on raamistikust isoleeritud, kõiki teenuseid saab testida ilma andmebaasita
+- **Konfigureeritav reeglistik per (grupp × turniir)** — sama grupp, erinevad reeglid eri turniiridele
+- **Liquibase + `ddl-auto=validate`** — 19 versioneeritud migratsiooni, Hibernate valideerib skeemi käivitamisel
+- **CI/CD** — push `dev` harusse käivitab automaatse build → GHCR push → VPS deploy üle SSH
