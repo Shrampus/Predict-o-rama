@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UpcomingMatch } from "../types";
 import UpcomingMatchCard from './UpcomingMatchCard';
-import { groupMatchesByTournament } from '../utils/upcomingMatchUtils';
+import { groupMatchesByDate } from '../utils/upcomingMatchUtils';
 
 type UpcomingMatchListProps = {
     matches: UpcomingMatch[];
@@ -22,29 +22,17 @@ function UpcomingMatchList({ matches, isLoading, hasError }: UpcomingMatchListPr
         return <p className="text-slate-400 text-sm">{t('upcomingMatches.empty')}</p>;
     }
 
-    const hasGroups = matches.some(m => m.groups.length > 0);
-
-    if (!hasGroups) {
-        return (
-            <div className="space-y-4">
-                {matches.map((match) => (
-                    <UpcomingMatchCard key={match.matchId} match={match} />
-                ))}
-            </div>
-        );
-    }
-
-    const grouped = groupMatchesByTournament(matches);
+    const grouped = groupMatchesByDate(matches);
 
     return (
         <div className="space-y-8">
-            {[...grouped.values()].map(({ tournamentName, matches: tournamentMatches }) => (
-                <div key={tournamentName}>
+            {[...grouped.values()].map(({ label, matches: dayMatches }) => (
+                <div key={label}>
                     <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-400 mb-3">
-                        {tournamentName}
+                        {label}
                     </h3>
                     <div className="space-y-4">
-                        {tournamentMatches.map((match) => (
+                        {dayMatches.map((match) => (
                             <UpcomingMatchCard key={match.matchId} match={match} />
                         ))}
                     </div>
