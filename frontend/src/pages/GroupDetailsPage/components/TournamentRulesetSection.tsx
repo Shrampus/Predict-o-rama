@@ -16,7 +16,7 @@ export function TournamentRulesetSection({
   onRulesSaved,
 }: TournamentRulesetSectionProps) {
   const { t } = useTranslation();
-  const { rules, isLoading, isSaving, error, successMessage, handleToggle, handlePointsChange, handleSave } =
+  const { rules, isLoading, isSaving, isDirty, error, successMessage, handleToggle, handlePointsChange, handlePointsBlur, handleSave } =
     useTournamentRuleset(groupId, tournamentId, onRulesSaved);
 
   return (
@@ -40,7 +40,7 @@ export function TournamentRulesetSection({
                   handleToggle(rule.name);
                 }}
                 disabled={!isAdmin || isSaving}
-                className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-600/20 disabled:opacity-50"
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600/20 disabled:opacity-50"
               />
               <label
                 htmlFor={`rule-${tournamentId}-${rule.name}`}
@@ -52,10 +52,8 @@ export function TournamentRulesetSection({
                 type="number"
                 value={rule.points}
                 min={1}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  if (!isNaN(val) && val >= 1) handlePointsChange(rule.name, val);
-                }}
+                onChange={(e) => handlePointsChange(rule.name, e.target.value)}
+                onBlur={() => handlePointsBlur(rule.name)}
                 disabled={!isAdmin || !rule.enabled || isSaving}
                 className="w-14 border border-slate-300 rounded-lg px-2 py-1 text-sm text-center bg-white focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 disabled:bg-slate-100 disabled:text-slate-400"
               />
@@ -73,10 +71,10 @@ export function TournamentRulesetSection({
           <button
             type="button"
             onClick={() => void handleSave()}
-            disabled={isSaving || rules.length === 0}
-            className="rounded-lg bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 disabled:hover:bg-green-700"
+            disabled={isSaving || rules.length === 0 || !isDirty}
+            className={`rounded-lg text-white px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${isDirty ? 'bg-green-700 hover:bg-green-800 disabled:hover:bg-green-700' : 'bg-green-500 disabled:hover:bg-green-500'}`}
           >
-            {isSaving ? t('groups.ruleset.saving') : t('groups.ruleset.saveButton')}
+            {isSaving ? t('groups.ruleset.saving') : isDirty ? t('groups.ruleset.saveButton') : t('groups.ruleset.saved')}
           </button>
         </div>
       )}

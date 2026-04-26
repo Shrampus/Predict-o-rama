@@ -170,6 +170,7 @@
       "title": "Rules",
       "loading": "Loading rules...",
       "saveButton": "Save rules",
+      "saved": "Saved",
       "saving": "Saving...",
       "saveSuccess": "Rules saved. Leaderboard updating…",
       "points": "pts",
