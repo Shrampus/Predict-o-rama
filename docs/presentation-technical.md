@@ -16,17 +16,15 @@
 |------|----------------------------------------------------------------------------------|
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS 4, React Router 7, i18next, Vitest      |
 | **Backend** | Spring Boot 4, Java 21, Spring Web MVC, Spring Data JPA, Spring Security, Lombok |
-| **Autentimine** | JWT (jjwt), Google OAuth (google-api-client)                                     |
+| **Autentimine** | Google OAuth (google-api-client), JWT (jjwt)                         |
 | **Andmebaas** | PostgreSQL 17, Liquibase (migratsioonid), Hibernate                              |
 | **Välised teenused** | football-data.org (matšiandmed), Google Identity (sisselogimine)                 |
 | **API dokumentatsioon** | SpringDoc OpenAPI / Swagger UI                                                   |
-| **Infra / DevOps** | Docker Compose, GitHub Actions CI/CD, GHCR, VM deploy üle SSH                    |
+| **Infra / DevOps** | VM, Docker Compose, GitHub Actions CI/CD, GHCR, Github Secrets                   |
 
 ---
 
 ## 3. Arhitektuur
-
-Backend järgib **heksagonaalset (portide ja adapterite) arhitektuuri** — domeeniloogika ei sõltu raamistikust, andmebaasist ega välistest integratsioonidest.
 
 ```mermaid
 flowchart LR
@@ -64,6 +62,10 @@ flowchart LR
     Scheduler -->|"perioodiline kutse"| Domain
 ```
 
+## 4. Backend
+
+Backend järgib **heksagonaalset (portide ja adapterite) arhitektuuri** — domeeniloogika ei sõltu raamistikust, andmebaasist ega välistest integratsioonidest.
+
 **Kihtide rollid:**
 
 | Kiht | Sisu |
@@ -77,11 +79,82 @@ flowchart LR
 **Autentimine:** Spring Security + JWT Bearer token. Iga kaitstud päring läbib `JwtAuthFilter` → kasutaja ID lisatakse `SecurityContext`-i → kontrollerid loevad selle `AuthUtils.currentUserId()` kaudu.
 **Swagger UI** on vaikimisi sisse lülitatud: `https://predictorama.online/swagger-ui/index.html`
 
+
+```
+com.predictorama.backend/
+├── Application.java
+├── config/
+├── domain/                           # Zero framework dependencies
+│   ├── entity/                       # Pure domain objects (no JPA / Spring)
+│   ├── port/
+│   │   ├── persistence/              # Repository port interfaces
+│   │   └── external/                 # External service port interfaces
+│   ├── service/                      # All business logic lives here
+│   └── exception/
+│
+└── adapter/
+    ├── rest/                         # HTTP layer
+    │   ├── controller/               # PredictionController, GroupController, ...
+    │   ├── dto/                      # Request / Response DTOs
+    │   ├── mapper/                   # Domain → DTO mappers
+    │   └── GlobalExceptionHandler.java
+    ├── persistence/                  # JPA layer
+    │   ├── adapter/                  # XxRepositoryAdapter (implements ports)
+    │   ├── entity/                   # JPA entities (extend BaseEntity)
+    │   ├── mapper/                   # Entity ↔ Domain mappers
+    │   └── repository/               # Spring Data JPA interfaces
+    ├── external/
+    │   ├── footballdata/             # football-data.org HTTP client + response DTOs
+    │   └── google/                   # Google OAuth token validator
+    └── scheduler/                    # FixtureSyncScheduler — periodic fixture sync
+```
+
+
 ---
 
-## 4. Andmebaasiskeem (~45 s)
+## 5. Frontend
+Frontend on ehitatud leheküljekesksele modulaarsele arhitektuurile — iga lehekülg elab oma kaustas src/pages/<PageName>/, millel on oma components/ ja hooks/ alamkaustad lokaalse koodi jaoks.
 
-Põhiseos: **kasutaja → grupp → ennustus → matš → turniir**. Grupi ja turniiri kombinatsioonile (`group_tournaments`) on seotud reeglistik (`ruleset`) — seega sama grupp võib erinevaid turniirisid hinnata erinevate reeglitega.
+Kihid on rangelt lahutatud: 
+- komponendid vastutavad ainult UI renderdamise eest, 
+- hookid haldavad seisundit, efekte ja andmevoogu, ning 
+- teenused (src/services/) tegelevad kõigi HTTP/API päringutega.
+    
+Mitmekeelsus on läbiv arhitektuuriline nõue: iga kasutajale nähtav tekst läbib i18next t()-funktsiooni ja võtmed peavad olema kõigis kolmes lokaalifailis (en, et, ru)
+samaaegselt.
+
+
+```
+frontend/src/
+├── main.tsx                          # Entry point
+├── App.tsx                           # Root component + providers
+
+├── app/
+│   ├── routePaths.ts                 # Centralised route path constants
+│   └── router/AppRouter.tsx          # Route definitions
+├── components/                       # Shared across multiple pages
+├── context/
+├── services/                         # All HTTP — hooks call these, components never do
+│
+├── i18n/locales/                     # en.json · et.json · ru.json (must stay in sync)
+│
+└── pages/                            # One folder per page — the core structural unit
+    ├── HomePage/
+    │   ├── HomePage.tsx              # Thin composition root
+    │   ├── components/               # UI pieces used only by this page
+    │   └── hooks/                    # useUpcomingMatches, useUpcomingMatchFilters
+    ├── GroupPage/
+    │   ├── GroupsPage.tsx
+    │   ├── components/               # CreateGroupForm, MyGroupsList, ...
+    │   └── hooks/                    # useGroups, useCreateGroupForm, ...
+    ├── ...
+    └── ...
+```
+
+---
+
+## 6. Andmebaasiskeem
+
 
 ```mermaid
 erDiagram
