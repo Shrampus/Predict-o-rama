@@ -6,8 +6,15 @@ import com.predictorama.backend.domain.exception.InvalidPredictionException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -39,6 +46,24 @@ class GlobalExceptionHandlerTest {
         assertThat(body).isNotNull();
         assertThat(body.getCode()).isEqualTo("INVALID_PREDICTION");
         assertThat(body.getMessage()).isEqualTo(message);
+    }
+
+    @Test
+    void handleValidation_returnsBadRequestWithJoinedConstraintMessages() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getAllErrors()).thenReturn(List.of(
+                new ObjectError("dto", "All point values must be positive integers")
+        ));
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleValidation(ex);
+        ApiErrorResponse body = response.getBody();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(body).isNotNull();
+        assertThat(body.getCode()).isEqualTo("INVALID_INPUT");
+        assertThat(body.getMessage()).isEqualTo("All point values must be positive integers");
     }
 
     @Test

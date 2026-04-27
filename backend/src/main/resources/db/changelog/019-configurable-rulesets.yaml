@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-configurable-rulesets
+      author: hlp
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: groups
+            constraintName: fk_groups_ruleset
+        - dropColumn:
+            tableName: groups
+            columnName: ruleset_id
+
+        - dropColumn:
+            tableName: rulesets
+            columnName: name
+
+        - addColumn:
+            tableName: ruleset_rules
+            columns:
+              - column:
+                  name: points
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: ruleset_rules
+            columnNames: ruleset_id, rule_name
+            constraintName: pk_ruleset_rules
+
+        - addColumn:
+            tableName: group_tournaments
+            columns:
+              - column:
+                  name: ruleset_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_group_tournaments_ruleset
+                    references: rulesets(id)

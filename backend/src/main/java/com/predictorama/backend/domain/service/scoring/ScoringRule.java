@@ -5,6 +5,6 @@ import com.predictorama.backend.domain.entity.Score;
 import com.predictorama.backend.domain.entity.Winner;
 
 public interface ScoringRule {
-    int evaluate(Prediction prediction, Score actualScore, Winner actualWinner);
+    boolean matches(Prediction prediction, Score actualScore, Winner actualWinner);
     String name();
 }

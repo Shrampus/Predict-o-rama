@@ -296,6 +296,11 @@ class PredictionFixtureImportServiceTest {
                     .filter(match -> externalId.equals(match.getExternalId()))
                     .findFirst();
         }
+
+        @Override
+        public List<Match> findAllFinishedByTournamentId(UUID tournamentId) {
+            return findByTournamentIdAndMatchStatus(tournamentId, Match.MatchStatus.COMPLETED);
+        }
     }
 
     private static final class InMemoryTournamentRepository implements TournamentRepositoryPort {

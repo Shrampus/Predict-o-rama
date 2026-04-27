@@ -1,9 +1,11 @@
 import type { FormEvent } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '../../../app/routePaths';
 import type { GroupTournamentResponse, TournamentOption } from '../../../services/groupApi';
+import { TournamentRulesetSection } from './TournamentRulesetSection';
 
 type GroupTournamentsSectionProps = {
   groupId: string;
@@ -23,6 +25,7 @@ type GroupTournamentsSectionProps = {
   onSelectTournament: (value: string) => void;
   onResetTournamentFeedback: () => void;
   onRemoveTournament: (tournament: GroupTournamentResponse) => void;
+  onRulesSaved: () => void;
 };
 
 export function GroupTournamentsSection({
@@ -43,9 +46,15 @@ export function GroupTournamentsSection({
   onSelectTournament,
   onResetTournamentFeedback,
   onRemoveTournament,
+  onRulesSaved,
 }: GroupTournamentsSectionProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [openRulesetTournamentId, setOpenRulesetTournamentId] = useState<string | null>(null);
+
+  function toggleRuleset(tournamentId: string) {
+    setOpenRulesetTournamentId((current) => (current === tournamentId ? null : tournamentId));
+  }
 
   function getTournamentDetailsPath(competitionCode: string) {
     return ROUTE_PATHS.groupTournamentDetails
@@ -90,8 +99,8 @@ export function GroupTournamentsSection({
       {!isLoadingTournaments && !tournamentsError && tournaments.length > 0 && (
         <ul className="space-y-2.5">
           {tournaments.map((tournament) => (
+            <Fragment key={tournament.id}>
             <li
-              key={tournament.id}
               onClick={(event) => {
                 if (shouldIgnoreRowNavigation(event.target)) {
                   return;
@@ -148,6 +157,17 @@ export function GroupTournamentsSection({
                     {t('groups.tournamentsSection.unavailable')}
                   </span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => toggleRuleset(tournament.id)}
+                  className={`rounded-lg border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+                    openRulesetTournamentId === tournament.id
+                      ? 'border-slate-300 bg-slate-200 text-slate-700 hover:bg-slate-300'
+                      : 'border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {t('groups.ruleset.title')}
+                </button>
                 {isAdmin && (
                   <button
                     type="button"
@@ -162,6 +182,15 @@ export function GroupTournamentsSection({
                 )}
               </div>
             </li>
+            {openRulesetTournamentId === tournament.id && (
+              <TournamentRulesetSection
+                groupId={groupId}
+                tournamentId={tournament.id}
+                isAdmin={isAdmin}
+                onRulesSaved={onRulesSaved}
+              />
+            )}
+            </Fragment>
           ))}
         </ul>
       )}

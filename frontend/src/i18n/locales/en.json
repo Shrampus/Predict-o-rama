@@ -168,6 +168,24 @@
       "emptyOptions": "No additional tournaments available to link.",
       "adminOnlyAction": "Admin-only action: adding tournaments is only available to group admins."
     },
+    "ruleset": {
+      "title": "Rules",
+      "loading": "Loading rules...",
+      "saveButton": "Save rules",
+      "saved": "Saved",
+      "saving": "Saving...",
+      "saveSuccess": "Rules saved. Leaderboard updating…",
+      "loadFailed": "Failed to load rules.",
+      "saveFailed": "Failed to save rules.",
+      "invalidPoints": "All enabled rules must have a point value of at least 1.",
+      "points": "pts",
+      "readOnly": "Rules are set by the group admin.",
+      "rules": {
+        "CORRECT_WINNER": "Correct winner",
+        "EXACT_SCORE": "Exact score",
+        "CORRECT_GOAL_DIFFERENCE": "Correct goal difference"
+      }
+    },
     "leaderboardsSection": {
       "title": "Leaderboards",
       "loadingLeaderboards": "Loading leaderboards...",

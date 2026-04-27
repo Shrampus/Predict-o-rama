@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.Set;
 
@@ -12,7 +13,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class Ruleset {
     private UUID id;
-    private String name;
-    private Set<String> ruleNames;
+    private Map<String, Integer> rulePoints;
 
 }

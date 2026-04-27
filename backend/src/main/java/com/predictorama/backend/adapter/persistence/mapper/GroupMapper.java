@@ -12,7 +12,6 @@ public class GroupMapper {
                 .inviteCode(entity.getInviteCode())
                 .name(entity.getName())
                 .description(entity.getDescription())
-                .rulesetId(entity.getRulesetId())
                 .build();
     }
 
@@ -23,7 +22,6 @@ public class GroupMapper {
                 .inviteCode(group.getInviteCode())
                 .name(group.getName())
                 .description(group.getDescription())
-                .rulesetId(group.getRulesetId())
                 .build();
     }
 }

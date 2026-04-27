@@ -168,6 +168,24 @@
       "emptyOptions": "Seostamiseks pole rohkem turniire saadaval.",
       "adminOnlyAction": "Ainult adminitele: turniiride lisamine on saadaval ainult grupi adminitele."
     },
+    "ruleset": {
+      "title": "Reeglid",
+      "loading": "Reeglite laadimine...",
+      "saveButton": "Salvesta reeglid",
+      "saved": "Salvestatud",
+      "saving": "Salvestamine...",
+      "saveSuccess": "Reeglid salvestatud. Edetabel uuendatakse…",
+      "loadFailed": "Reeglite laadimine ebaõnnestus.",
+      "saveFailed": "Reeglite salvestamine ebaõnnestus.",
+      "invalidPoints": "Kõigil aktiivsetel reeglitel peab olema vähemalt 1 punkt.",
+      "points": "pts",
+      "readOnly": "Reeglid on seatud grupi admini poolt.",
+      "rules": {
+        "CORRECT_WINNER": "Õige võitja",
+        "EXACT_SCORE": "Täpne skoor",
+        "CORRECT_GOAL_DIFFERENCE": "Õige väravate vahe"
+      }
+    },
     "leaderboardsSection": {
       "title": "Edetabelid",
       "loadingLeaderboards": "Edetabelite laadimine...",

@@ -18,8 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -83,6 +86,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TournamentNotLinkedException.class)
     public ResponseEntity<ApiErrorResponse> handleTournamentNotLinked(TournamentNotLinkedException ex) {
         return error(HttpStatus.NOT_FOUND, "TOURNAMENT_NOT_LINKED", ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getAllErrors().stream()
+                .map(e -> e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return error(HttpStatus.BAD_REQUEST, "INVALID_INPUT", message);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

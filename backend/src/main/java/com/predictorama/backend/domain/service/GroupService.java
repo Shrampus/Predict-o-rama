@@ -1,11 +1,6 @@
 package com.predictorama.backend.domain.service;
 
-import com.predictorama.backend.domain.entity.Group;
-import com.predictorama.backend.domain.entity.GroupMember;
-import com.predictorama.backend.domain.entity.Match;
-import com.predictorama.backend.domain.entity.Prediction;
-import com.predictorama.backend.domain.entity.Role;
-import com.predictorama.backend.domain.entity.Tournament;
+import com.predictorama.backend.domain.entity.*;
 import com.predictorama.backend.domain.entity.aggregate.GroupDetailsView;
 import com.predictorama.backend.domain.entity.aggregate.GroupLeaderboardView;
 import com.predictorama.backend.domain.entity.aggregate.GroupMemberView;
@@ -46,6 +41,8 @@ public class GroupService {
     private final GroupTournamentRepositoryPort groupTournamentRepository;
     private final MatchRepositoryPort matchRepository;
     private final PredictionRepositoryPort predictionRepository;
+    private final AccessService accessService;
+    private final RulesetService rulesetService;
 
     @Transactional
     public Group createGroup(UUID ownerId, String name, String description) {
@@ -94,19 +91,19 @@ public class GroupService {
     }
 
     public GroupDetailsView getGroupDetails(UUID userId, UUID groupId) {
-        Group group = requireExistingGroup(groupId);
-        GroupMember membership = requireActiveMembership(userId, groupId);
+        Group group = accessService.requireExistingGroup(groupId);
+        GroupMember membership = accessService.requireActiveMembership(userId, groupId);
         return new GroupDetailsView(group, membership.getMemberRole());
     }
 
     public List<GroupMemberView> getGroupMembers(UUID userId, UUID groupId) {
-        requireActiveMembership(userId, groupId);
+        accessService.requireActiveMembership(userId, groupId);
         return groupMemberRepository.findByGroupIdWithUsernames(groupId);
     }
 
     @Transactional
     public GroupMember addMemberByEmail(UUID adminUserId, UUID groupId, String email) {
-        requireAdminMembership(adminUserId, groupId);
+        accessService.requireAdminMembership(adminUserId, groupId);
         UUID userIdToAdd = userRepository.findByEmail(email)
                 .map(user -> user.getId())
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -127,7 +124,7 @@ public class GroupService {
 
     @Transactional
     public void removeMember(UUID adminUserId, UUID groupId, UUID memberUserId) {
-        requireAdminMembership(adminUserId, groupId);
+        accessService.requireAdminMembership(adminUserId, groupId);
 
         if (adminUserId.equals(memberUserId)) {
             throw new IllegalArgumentException("Admins cannot remove themselves.");
@@ -148,7 +145,7 @@ public class GroupService {
     }
 
     public List<Tournament> getGroupTournaments(UUID userId, UUID groupId) {
-        requireActiveMembership(userId, groupId);
+        accessService.requireActiveMembership(userId, groupId);
         return groupTournamentRepository.findTournamentIdsByGroupId(groupId).stream()
                 .map(tournamentId -> tournamentRepository.findById(tournamentId)
                         .orElseThrow(() -> new TournamentNotFoundException(tournamentId)))
@@ -156,7 +153,7 @@ public class GroupService {
     }
 
     public List<GroupLeaderboardView> getGroupLeaderboards(UUID userId, UUID groupId) {
-        requireActiveMembership(userId, groupId);
+        accessService.requireActiveMembership(userId, groupId);
 
         List<GroupMemberView> activeMembers = groupMemberRepository.findByGroupIdWithUsernames(groupId).stream()
                 .filter(memberView -> memberView.member().getStatus() == GroupMember.MemberStatus.ACTIVE)
@@ -170,7 +167,7 @@ public class GroupService {
 
     @Transactional
     public void addTournamentToGroup(UUID adminUserId, UUID groupId, UUID tournamentId) {
-        requireAdminMembership(adminUserId, groupId);
+        accessService.requireAdminMembership(adminUserId, groupId);
         tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
@@ -179,11 +176,12 @@ public class GroupService {
         }
 
         groupTournamentRepository.save(groupId, tournamentId);
+        rulesetService.setDefaultRulesetForGroupTournament(groupId, tournamentId);
     }
 
     @Transactional
     public void removeTournamentFromGroup(UUID adminUserId, UUID groupId, UUID tournamentId) {
-        requireAdminMembership(adminUserId, groupId);
+        accessService.requireAdminMembership(adminUserId, groupId);
         if (!groupTournamentRepository.existsByGroupIdAndTournamentId(groupId, tournamentId)) {
             throw new TournamentNotLinkedException(groupId, tournamentId);
         }
@@ -261,24 +259,5 @@ public class GroupService {
                 scoredPredictions,
                 predictions.size()
         );
-    }
-
-    private GroupMember requireActiveMembership(UUID userId, UUID groupId) {
-        requireExistingGroup(groupId);
-        return groupMemberRepository.findByGroupIdAndUserId(groupId, userId)
-                .filter(membership -> membership.getStatus() == GroupMember.MemberStatus.ACTIVE)
-                .orElseThrow(() -> new GroupAccessDeniedException(userId, groupId));
-    }
-
-    private void requireAdminMembership(UUID userId, UUID groupId) {
-        GroupMember membership = requireActiveMembership(userId, groupId);
-        if (membership.getMemberRole() != Role.ADMIN) {
-            throw new GroupAccessDeniedException(userId, groupId);
-        }
-    }
-
-    private Group requireExistingGroup(UUID groupId) {
-        return groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundException(groupId));
     }
 }

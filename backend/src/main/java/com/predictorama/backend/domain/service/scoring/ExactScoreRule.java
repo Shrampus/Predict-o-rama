@@ -7,16 +7,16 @@ import com.predictorama.backend.domain.entity.Winner;
 public class ExactScoreRule implements ScoringRule {
 
     @Override
-    public int evaluate(Prediction prediction, Score actualScore, Winner actualWinner) {
+    public boolean matches(Prediction prediction, Score actualScore, Winner actualWinner) {
         Score predictedScore = prediction.primaryPredictedScore().orElse(null);
         if (predictedScore == null) {
-            return 0;
+            return false;
         }
         if (predictedScore.getHomeScore().equals(actualScore.getHomeScore())
                 && predictedScore.getAwayScore().equals(actualScore.getAwayScore())) {
-            return 3;
+            return true;
         }
-        return 0;
+        return false;
     }
 
     @Override
