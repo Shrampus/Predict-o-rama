@@ -42,6 +42,7 @@
   },
   "tabs": {
     "matches": "Матчи",
+    "results": "Результаты",
     "standings": "Таблица"
   },
   "matchCard": {

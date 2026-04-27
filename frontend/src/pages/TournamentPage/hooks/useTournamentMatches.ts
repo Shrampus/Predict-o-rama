@@ -7,6 +7,7 @@ import type { SavedPredictionPayload } from './usePredictionSaver';
 
 type UseTournamentMatchesResult = {
     matches: TournamentMatchPrediction[];
+    completedMatches: TournamentMatchPrediction[];
     tournamentName: string;
     seasonLabel: string;
     phaseLabel: string;
@@ -74,8 +75,11 @@ export function useTournamentMatches(competition: string, groupId: string): UseT
         );
     }, []);
 
+    const completedMatches = matches.filter((m) => m.matchStatus === 'COMPLETED');
+
     return {
         matches,
+        completedMatches,
         tournamentName,
         seasonLabel,
         phaseLabel,

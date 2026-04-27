@@ -42,6 +42,7 @@
   },
   "tabs": {
     "matches": "Matches",
+    "results": "Results",
     "standings": "Standings"
   },
   "matchCard": {
