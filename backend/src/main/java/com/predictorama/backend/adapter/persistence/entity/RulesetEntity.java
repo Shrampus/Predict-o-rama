@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,12 +23,10 @@ public class RulesetEntity extends BaseEntity {
     @Id
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String name;
-
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "ruleset_rules", joinColumns = @JoinColumn(name = "ruleset_id"))
-    @Column(name = "rule_name")
-    private Set<String> ruleNames;
+    @MapKeyColumn(name = "rule_name")
+    @Column(name = "points")
+    private Map<String, Integer> rulePoints;
 
 }

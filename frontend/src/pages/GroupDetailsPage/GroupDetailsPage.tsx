@@ -53,6 +53,7 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
     isAddingTournament,
     removingTournamentId,
     isAdmin,
+    refreshLeaderboards,
     handleAddMember,
     handleAddTournament,
     handleRemoveMember,
@@ -94,6 +95,7 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
         onSelectTournament={handleTournamentSelectionChange}
         onResetTournamentFeedback={resetTournamentFeedback}
         onRemoveTournament={(tournament) => void handleRemoveTournament(tournament)}
+        onRulesSaved={() => void refreshLeaderboards()}
       />
 
       <GroupPredictionResultsSection

@@ -13,7 +13,6 @@ public class Group {
     private UUID id;
     private UUID ownerId;
     private UUID inviteCode;
-    private UUID rulesetId;
     private String name;
     private String description;
 

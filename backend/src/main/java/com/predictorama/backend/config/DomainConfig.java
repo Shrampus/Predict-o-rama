@@ -9,10 +9,13 @@ import com.predictorama.backend.domain.port.persistence.MatchRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.PredictionRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.TournamentRepositoryPort;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
+import com.predictorama.backend.domain.service.AccessService;
 import com.predictorama.backend.domain.service.AuthService;
 import com.predictorama.backend.domain.service.GroupService;
+import com.predictorama.backend.domain.service.RulesetService;
 import com.predictorama.backend.domain.service.TournamentService;
 import com.predictorama.backend.domain.service.UserService;
+import com.predictorama.backend.domain.service.scoring.CorrectGoalDifferenceRule;
 import com.predictorama.backend.domain.service.scoring.CorrectWinnerRule;
 import com.predictorama.backend.domain.service.scoring.ExactScoreRule;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +42,9 @@ public class DomainConfig {
             TournamentRepositoryPort tournamentRepository,
             GroupTournamentRepositoryPort groupTournamentRepository,
             MatchRepositoryPort matchRepository,
-            PredictionRepositoryPort predictionRepository
+            PredictionRepositoryPort predictionRepository,
+            AccessService accessService,
+            RulesetService rulesetService
     ) {
         return new GroupService(
                 groupRepository,
@@ -48,7 +53,9 @@ public class DomainConfig {
                 tournamentRepository,
                 groupTournamentRepository,
                 matchRepository,
-                predictionRepository
+                predictionRepository,
+                accessService,
+                rulesetService
         );
     }
 
@@ -70,5 +77,10 @@ public class DomainConfig {
     @Bean
     public ExactScoreRule exactScoreRule() {
         return new ExactScoreRule();
+    }
+
+    @Bean
+    public CorrectGoalDifferenceRule correctGoalDifferenceRule() {
+        return new CorrectGoalDifferenceRule();
     }
 }

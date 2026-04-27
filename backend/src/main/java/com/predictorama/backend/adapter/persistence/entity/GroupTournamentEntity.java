@@ -33,4 +33,7 @@ public class GroupTournamentEntity {
     @Id
     @Column(name = "tournament_id", nullable = false)
     private UUID tournamentId;
+
+    @Column(name = "ruleset_id")
+    private UUID rulesetId;
 }

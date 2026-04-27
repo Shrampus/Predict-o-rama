@@ -50,6 +50,7 @@ type UseGroupDetailsReturn = {
   isAddingTournament: boolean;
   removingTournamentId: string | null;
   isAdmin: boolean;
+  refreshLeaderboards: () => Promise<void>;
   handleAddMember: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleAddTournament: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleRemoveMember: (member: GroupMemberResponse) => Promise<void>;
@@ -281,6 +282,22 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     };
   }, [groupId, isAdmin, t]);
 
+  async function refreshLeaderboards() {
+    if (!groupId) return;
+    setIsLoadingLeaderboards(true);
+    setLeaderboardsError('');
+    try {
+      const data = await getGroupLeaderboards(groupId);
+      setLeaderboards(data);
+    } catch (err) {
+      setLeaderboardsError(
+        err instanceof Error ? err.message : t('groups.groupErrors.failedToLoadLeaderboards'),
+      );
+    } finally {
+      setIsLoadingLeaderboards(false);
+    }
+  }
+
   async function handleAddMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!groupId || group?.id !== groupId || memberEmail.trim().length === 0) {
@@ -438,6 +455,7 @@ export function useGroupDetails(groupId: string | undefined): UseGroupDetailsRet
     isAddingTournament,
     removingTournamentId,
     isAdmin,
+    refreshLeaderboards,
     handleAddMember,
     handleAddTournament,
     handleRemoveMember,

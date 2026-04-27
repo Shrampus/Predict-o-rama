@@ -8,16 +8,14 @@ public class RulesetMapper {
     public static Ruleset toDomain(RulesetEntity rulesetEntity) {
         return Ruleset.builder()
                 .id(rulesetEntity.getId())
-                .name(rulesetEntity.getName())
-                .ruleNames(rulesetEntity.getRuleNames())
+                .rulePoints(rulesetEntity.getRulePoints())
                 .build();
     }
 
     public static RulesetEntity toEntity(Ruleset ruleset) {
         return RulesetEntity.builder()
                 .id(ruleset.getId())
-                .name(ruleset.getName())
-                .ruleNames(ruleset.getRuleNames())
+                .rulePoints(ruleset.getRulePoints())
                 .build();
     }
 }

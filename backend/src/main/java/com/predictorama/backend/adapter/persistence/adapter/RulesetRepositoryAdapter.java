@@ -1,15 +1,18 @@
 package com.predictorama.backend.adapter.persistence.adapter;
 
+import com.predictorama.backend.adapter.persistence.entity.RulesetEntity;
 import com.predictorama.backend.adapter.persistence.mapper.RulesetMapper;
+import com.predictorama.backend.adapter.persistence.repository.GroupTournamentJpaRepository;
 import com.predictorama.backend.adapter.persistence.repository.RulesetJpaRepository;
 import com.predictorama.backend.domain.entity.Ruleset;
 import com.predictorama.backend.domain.port.persistence.RulesetRepositoryPort;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,30 +23,37 @@ public class RulesetRepositoryAdapter implements RulesetRepositoryPort {
     private static final Logger log = LoggerFactory.getLogger(RulesetRepositoryAdapter.class);
 
     private final RulesetJpaRepository jpaRepository;
+    private final GroupTournamentJpaRepository groupTournamentJpaRepository;
 
+    @Transactional
     @Override
-    public Ruleset save(Ruleset ruleset) {
-        log.debug("Saving ruleset - id={}, name={}", ruleset.getId(), ruleset.getName());
-        Ruleset saved = RulesetMapper.toDomain(jpaRepository.save(RulesetMapper.toEntity(ruleset)));
-        log.debug("Ruleset saved - id={}", saved.getId());
-        return saved;
+    public Optional<Ruleset> findByGroupIdAndTournamentId(UUID groupId, UUID tournamentId) {
+        return groupTournamentJpaRepository
+                .findRulesetIdByGroupIdAndTournamentId(groupId, tournamentId)
+                .flatMap(jpaRepository::findById)
+                .map(RulesetMapper::toDomain);
     }
 
+    @Transactional
     @Override
-    public Optional<Ruleset> findById(UUID id) {
-        log.debug("Finding ruleset by id - id={}", id);
-        return jpaRepository.findById(id).map(RulesetMapper::toDomain);
-    }
+    public Ruleset upsertForGroupTournament(UUID groupId, UUID tournamentId,  Map<String, Integer> rulePoints) {
+        log.debug("Upserting ruleset - groupId={}, tournamentId={}", groupId, tournamentId);
 
-    @Override
-    public Optional<Ruleset> findByName(String name) {
-        log.debug("Finding ruleset by name - name={}", name);
-        return jpaRepository.findByName(name).map(RulesetMapper::toDomain);
-    }
+        Optional<UUID> rulesetId = groupTournamentJpaRepository.findRulesetIdByGroupIdAndTournamentId(groupId, tournamentId);
 
-    @Override
-    public List<Ruleset> findAll() {
-        log.debug("Finding all rulesets");
-        return jpaRepository.findAll().stream().map(RulesetMapper::toDomain).toList();
+        RulesetEntity entity;
+        if (rulesetId.isPresent()) {
+            entity = jpaRepository.findById(rulesetId.get()).orElseThrow();
+            entity.setRulePoints(rulePoints);
+        } else {
+            entity = RulesetEntity.builder()
+                    .id(UUID.randomUUID())
+                    .rulePoints(rulePoints)
+                    .build();
+            jpaRepository.saveAndFlush(entity);
+            groupTournamentJpaRepository.updateRulesetId(groupId, tournamentId, entity.getId());
+        }
+
+        return RulesetMapper.toDomain(entity);
     }
 }
