@@ -45,6 +45,7 @@ function TournamentPage() {
 
     const {
         matches,
+        upcomingMatches,
         completedMatches,
         tournamentName,
         seasonLabel: responseSeasonLabel,
@@ -117,11 +118,11 @@ function TournamentPage() {
 
                         {isLoading && <p>{t('tournament.loadingMatches')}</p>}
                         {error && <p className="text-red-500">{error}</p>}
-                        {!isLoading && !error && matches.length === 0 && <p>{t('tournament.noMatches')}</p>}
+                        {!isLoading && !error && upcomingMatches.length === 0 && <p>{t('tournament.noMatches')}</p>}
 
                         {!isLoading &&
                             !error &&
-                            matches.map((match: TournamentMatchPrediction) => (
+                            upcomingMatches.map((match: TournamentMatchPrediction) => (
                                 <MatchCard
                                     key={match.matchId}
                                     match={match}
