@@ -9,6 +9,7 @@ import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
 import com.predictorama.backend.adapter.rest.mapper.TournamentPredictionsRestMapper;
 import com.predictorama.backend.config.AuthUtils;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
+import com.predictorama.backend.domain.service.AccessService;
 import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
 import com.predictorama.backend.domain.service.TournamentPredictionQueryService;
@@ -33,6 +34,7 @@ public class GroupController {
     private static final Logger log = LoggerFactory.getLogger(GroupController.class);
 
     private final GroupService groupService;
+    private final AccessService accessService;
     private final UserRepositoryPort userRepository;
     private final CompetitionCatalog competitionCatalog;
     private final TournamentPredictionQueryService tournamentPredictionQueryService;
@@ -184,6 +186,7 @@ public class GroupController {
     ) {
         var requestingUserId = AuthUtils.currentUserId();
         groupService.getGroupDetails(requestingUserId, groupId);
+        accessService.requireActiveMembership(targetUserId, groupId);
         TournamentPredictionsResponse response = TournamentPredictionsRestMapper.toResponse(
                 tournamentPredictionQueryService.getTournamentPredictions(competition, targetUserId, groupId, Instant.EPOCH)
         );
