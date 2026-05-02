@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class TournamentPredictionQueryService {
             UUID userId,
             UUID groupId
     ) {
-        return getTournamentPredictions(competition, userId, groupId, Instant.now().minus(14, ChronoUnit.DAYS));
+        return getTournamentPredictions(competition, userId, groupId, Instant.EPOCH);
     }
 
     public TournamentPredictionsView getTournamentPredictions(
@@ -104,12 +103,10 @@ public class TournamentPredictionQueryService {
     }
 
     private List<Match> getTournamentMatches(String competition, Tournament tournament, Instant from) {
-        Instant in28Days = Instant.now().plus(28, ChronoUnit.DAYS);
-
         List<Match> matches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
                 from,
-                in28Days
+                Instant.MAX
         );
 
         log.info(
