@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import PredictionResultsCard from '../../../components/predictionResults/PredictionResultsCard';
-import { getMemberPredictions } from '../../../services/groupApi';
-import type { TournamentMatchPrediction } from '../../../services/predictionsApi';
+import { useUserPredictions } from '../hooks/useUserPredictions';
 
 interface Props {
   groupId: string;
@@ -16,16 +14,7 @@ interface Props {
 
 function UserPredictionsModal({ groupId, userId, userName, competitionCode, tournamentName, onClose }: Props) {
   const { t } = useTranslation();
-  const [matches, setMatches] = useState<TournamentMatchPrediction[] | null>(null);
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    getMemberPredictions(groupId, userId, competitionCode)
-      .then((response) => {
-        setMatches(response.matches.filter((m) => m.matchStatus === 'COMPLETED'));
-      })
-      .catch(() => setHasError(true));
-  }, [groupId, userId, competitionCode]);
+  const { matches, hasError } = useUserPredictions(groupId, userId, competitionCode);
 
   return (
     <div

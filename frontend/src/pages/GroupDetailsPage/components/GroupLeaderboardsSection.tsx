@@ -1,15 +1,8 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { GroupLeaderboardResponse } from '../../../services/groupApi';
+import { useLeaderboardModal } from '../hooks/useLeaderboardModal';
 import UserPredictionsModal from './UserPredictionsModal';
-
-type SelectedUser = {
-  userId: string;
-  userName: string;
-  competitionCode: string;
-  tournamentName: string;
-};
 
 type GroupLeaderboardsSectionProps = {
   groupId: string;
@@ -25,7 +18,7 @@ export function GroupLeaderboardsSection({
   leaderboardsError,
 }: GroupLeaderboardsSectionProps) {
   const { t } = useTranslation();
-  const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
+  const { selectedUser, selectUser, clearSelectedUser } = useLeaderboardModal();
 
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
@@ -60,7 +53,7 @@ export function GroupLeaderboardsSection({
                     tabIndex={leaderboard.competitionCode ? 0 : -1}
                     onClick={() =>
                       leaderboard.competitionCode &&
-                      setSelectedUser({
+                      selectUser({
                         userId: entry.userId,
                         userName: entry.name,
                         competitionCode: leaderboard.competitionCode!,
@@ -70,7 +63,7 @@ export function GroupLeaderboardsSection({
                     onKeyDown={(e) => {
                       if ((e.key === 'Enter' || e.key === ' ') && leaderboard.competitionCode) {
                         e.preventDefault();
-                        setSelectedUser({
+                        selectUser({
                           userId: entry.userId,
                           userName: entry.name,
                           competitionCode: leaderboard.competitionCode,
@@ -112,7 +105,7 @@ export function GroupLeaderboardsSection({
           userName={selectedUser.userName}
           competitionCode={selectedUser.competitionCode}
           tournamentName={selectedUser.tournamentName}
-          onClose={() => setSelectedUser(null)}
+          onClose={clearSelectedUser}
         />
       )}
     </section>
