@@ -71,7 +71,7 @@ function PredictionResultsCard({ matches, tournamentName }: Props) {
                   {t('predictionResults.actual')}
                 </span>
                 <span className="font-black text-lg tabular-nums">
-                  {match.actualHomeScore ?? '?'} – {match.actualAwayScore ?? '?'}
+                  {match.actualHomeScore ?? '?'} {t('predictionResults.scoreSeparator')} {match.actualAwayScore ?? '?'}
                 </span>
               </div>
 
@@ -89,7 +89,7 @@ function PredictionResultsCard({ matches, tournamentName }: Props) {
                 {match.predictionId ? (
                   <>
                     <span className="font-medium tabular-nums">
-                      {match.predictedHomeScore ?? '?'} – {match.predictedAwayScore ?? '?'}
+                      {match.predictedHomeScore ?? '?'} {t('predictionResults.scoreSeparator')} {match.predictedAwayScore ?? '?'}
                     </span>
                     <WinnerLabel winner={match.predictedWinner} />
                   </>

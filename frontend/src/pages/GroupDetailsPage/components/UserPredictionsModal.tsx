@@ -17,14 +17,14 @@ interface Props {
 function UserPredictionsModal({ groupId, userId, userName, competitionCode, tournamentName, onClose }: Props) {
   const { t } = useTranslation();
   const [matches, setMatches] = useState<TournamentMatchPrediction[] | null>(null);
-  const [error, setError] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     getMemberPredictions(groupId, userId, competitionCode)
       .then((response) => {
         setMatches(response.matches.filter((m) => m.matchStatus === 'COMPLETED'));
       })
-      .catch(() => setError(true));
+      .catch(() => setHasError(true));
   }, [groupId, userId, competitionCode]);
 
   return (
@@ -43,20 +43,20 @@ function UserPredictionsModal({ groupId, userId, userName, competitionCode, tour
           <button
             onClick={onClose}
             className="ml-4 shrink-0 text-slate-400 hover:text-slate-600 text-xl font-bold leading-none"
-            aria-label="Close"
+            aria-label={t('common.close')}
           >
-            ×
+            {t('common.closeIcon')}
           </button>
         </div>
 
         <div className="overflow-y-auto p-4">
-          {error && (
+          {hasError && (
             <p className="text-sm text-red-500 p-2">{t('tournament.fetchError')}</p>
           )}
-          {!error && matches === null && (
+          {!hasError && matches === null && (
             <p className="text-sm text-slate-400 p-2">{t('predictionResults.loading')}</p>
           )}
-          {!error && matches !== null && (
+          {!hasError && matches !== null && (
             <PredictionResultsCard matches={matches} tournamentName={tournamentName} />
           )}
         </div>

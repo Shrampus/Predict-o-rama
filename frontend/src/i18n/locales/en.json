@@ -198,6 +198,10 @@
       "viewPredictions": "{{name}}'s predictions"
     }
   },
+  "common": {
+    "close": "Close",
+    "closeIcon": "×"
+  },
   "predictionResults": {
     "title": "My Results",
     "selectGroup": "Select a group",
@@ -209,7 +213,8 @@
     "yourPrediction": "Your prediction",
     "actual": "Result",
     "points": "pts",
-    "pending": "–"
+    "pending": "–",
+    "scoreSeparator": "–"
   },
   "invite": {
     "loading": "Loading group info...",

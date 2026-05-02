@@ -203,6 +203,10 @@
       "viewPredictions": "Прогнозы {{name}}"
     }
   },
+  "common": {
+    "close": "Закрыть",
+    "closeIcon": "×"
+  },
   "predictionResults": {
     "title": "Мои результаты",
     "selectGroup": "Выберите группу",
@@ -214,7 +218,8 @@
     "yourPrediction": "Ваш прогноз",
     "actual": "Результат",
     "points": "очк.",
-    "pending": "–"
+    "pending": "–",
+    "scoreSeparator": "–"
   },
   "invite": {
     "loading": "Загрузка информации о группе...",

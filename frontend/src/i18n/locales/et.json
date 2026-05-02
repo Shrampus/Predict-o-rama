@@ -198,6 +198,10 @@
       "viewPredictions": "{{name}} ennustused"
     }
   },
+  "common": {
+    "close": "Sulge",
+    "closeIcon": "×"
+  },
   "predictionResults": {
     "title": "Minu tulemused",
     "selectGroup": "Vali grupp",
@@ -209,7 +213,8 @@
     "yourPrediction": "Sinu ennustus",
     "actual": "Tulemus",
     "points": "pts",
-    "pending": "–"
+    "pending": "–",
+    "scoreSeparator": "–"
   },
   "invite": {
     "loading": "Laen grupi infot...",
