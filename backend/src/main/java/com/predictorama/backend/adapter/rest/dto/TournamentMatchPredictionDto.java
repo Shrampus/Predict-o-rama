@@ -32,4 +32,9 @@ public class TournamentMatchPredictionDto {
     private Integer predictedHomeScore;
     private Integer predictedAwayScore;
     private Winner predictedWinner;
+
+    private Integer actualHomeScore;
+    private Integer actualAwayScore;
+    private Winner actualWinner;
+    private Integer predictionResult;
 }

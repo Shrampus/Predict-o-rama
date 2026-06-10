@@ -21,6 +21,10 @@ function makeMatch(overrides: Partial<TournamentMatchPrediction> = {}): Tourname
     predictedHomeScore: null,
     predictedAwayScore: null,
     predictedWinner: null,
+    actualHomeScore: null,
+    actualAwayScore: null,
+    actualWinner: null,
+    predictionResult: null,
     ...overrides,
   };
 }

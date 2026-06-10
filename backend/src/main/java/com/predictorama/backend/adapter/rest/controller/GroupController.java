@@ -6,10 +6,13 @@ import static com.predictorama.backend.config.ApiPaths.V1;
 import com.predictorama.backend.adapter.rest.dto.*;
 import com.predictorama.backend.adapter.rest.mapper.GroupMemberMapper;
 import com.predictorama.backend.adapter.rest.mapper.GroupMapper;
+import com.predictorama.backend.adapter.rest.mapper.TournamentPredictionsRestMapper;
 import com.predictorama.backend.config.AuthUtils;
 import com.predictorama.backend.domain.port.persistence.UserRepositoryPort;
+import com.predictorama.backend.domain.service.AccessService;
 import com.predictorama.backend.domain.service.CompetitionCatalog;
 import com.predictorama.backend.domain.service.GroupService;
+import com.predictorama.backend.domain.service.TournamentPredictionQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,8 +34,10 @@ public class GroupController {
     private static final Logger log = LoggerFactory.getLogger(GroupController.class);
 
     private final GroupService groupService;
+    private final AccessService accessService;
     private final UserRepositoryPort userRepository;
     private final CompetitionCatalog competitionCatalog;
+    private final TournamentPredictionQueryService tournamentPredictionQueryService;
 
     private String resolveMemberName(UUID userId) {
         return userRepository.findById(userId)
@@ -168,6 +174,29 @@ public class GroupController {
                                         ))
                                         .toList()
                         ))
+                        .toList()
+        );
+    }
+
+    @GetMapping("/{groupId}/members/{targetUserId}/predictions")
+    public TournamentPredictionsResponse getMemberPredictions(
+            @PathVariable UUID groupId,
+            @PathVariable UUID targetUserId,
+            @RequestParam String competition
+    ) {
+        var requestingUserId = AuthUtils.currentUserId();
+        groupService.getGroupDetails(requestingUserId, groupId);
+        accessService.requireActiveMembership(targetUserId, groupId);
+        TournamentPredictionsResponse response = TournamentPredictionsRestMapper.toResponse(
+                tournamentPredictionQueryService.getTournamentPredictions(competition, targetUserId, groupId, Instant.EPOCH)
+        );
+        return new TournamentPredictionsResponse(
+                response.getTournamentName(),
+                response.getSeasonIdentifier(),
+                response.getSeasonLabel(),
+                response.getPhaseLabel(),
+                response.getMatches().stream()
+                        .filter(m -> "COMPLETED".equals(m.getMatchStatus()))
                         .toList()
         );
     }

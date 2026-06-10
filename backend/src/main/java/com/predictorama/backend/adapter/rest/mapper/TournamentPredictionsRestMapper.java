@@ -39,6 +39,10 @@ public final class TournamentPredictionsRestMapper {
                 .predictedHomeScore(view.getPredictedHomeScore())
                 .predictedAwayScore(view.getPredictedAwayScore())
                 .predictedWinner(view.getPredictedWinner())
+                .actualHomeScore(view.getActualHomeScore())
+                .actualAwayScore(view.getActualAwayScore())
+                .actualWinner(view.getActualWinner())
+                .predictionResult(view.getPredictionResult())
                 .build();
     }
 }

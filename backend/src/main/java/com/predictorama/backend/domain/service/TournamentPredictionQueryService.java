@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -36,14 +35,22 @@ public class TournamentPredictionQueryService {
             UUID userId,
             UUID groupId
     ) {
+        return getTournamentPredictions(competition, userId, groupId, Instant.EPOCH);
+    }
+
+    public TournamentPredictionsView getTournamentPredictions(
+            String competition,
+            UUID userId,
+            UUID groupId,
+            Instant from
+    ) {
         if (!competitionCatalog.isSupportedCompetition(competition)) {
             log.warn("Rejected unsupported competition code={} on tournament predictions request", competition);
             throw new InvalidPredictionException("Unsupported competition code: " + competition);
         }
 
         Tournament tournament = predictionFixtureImportService.getOrCreateTournament(competition);
-        List<Match> matches = getTournamentMatches(competition, tournament);
-        Tournament refreshedTournament = predictionFixtureImportService.getOrCreateTournament(competition);
+        List<Match> matches = getTournamentMatches(competition, tournament, from);
         Map<UUID, Prediction> predictionsByMatchId =
                 predictionService.getPredictionsByUserAndGroup(userId, groupId);
 
@@ -54,8 +61,8 @@ public class TournamentPredictionQueryService {
 
         return new TournamentPredictionsView(
                 competitionCatalog.toTournamentName(competition),
-                refreshedTournament.getSeasonIdentifier(),
-                resolveSeasonLabel(competition, refreshedTournament),
+                tournament.getSeasonIdentifier(),
+                resolveSeasonLabel(competition, tournament),
                 competitionCatalog.toPhaseLabel(competition),
                 responseMatches
         );
@@ -63,6 +70,7 @@ public class TournamentPredictionQueryService {
 
     private TournamentMatchPredictionView toView(Match match, Prediction prediction) {
         Score primaryPredictedScore = prediction != null ? prediction.primaryPredictedScore().orElse(null) : null;
+        Score actualScore = match.primaryScore().orElse(null);
 
         return TournamentMatchPredictionView.builder()
                 .matchId(match.getId())
@@ -80,6 +88,10 @@ public class TournamentPredictionQueryService {
                 .predictedHomeScore(primaryPredictedScore != null ? primaryPredictedScore.getHomeScore() : null)
                 .predictedAwayScore(primaryPredictedScore != null ? primaryPredictedScore.getAwayScore() : null)
                 .predictedWinner(prediction != null ? prediction.getPredictedWinner() : null)
+                .actualHomeScore(actualScore != null ? actualScore.getHomeScore() : null)
+                .actualAwayScore(actualScore != null ? actualScore.getAwayScore() : null)
+                .actualWinner(match.getWinner())
+                .predictionResult(prediction != null ? prediction.getResult() : null)
                 .build();
     }
 
@@ -90,14 +102,11 @@ public class TournamentPredictionQueryService {
         return competitionCatalog.toSeasonLabel(competition);
     }
 
-    private List<Match> getTournamentMatches(String competition, Tournament tournament) {
-        Instant now = Instant.now();
-        Instant in28Days = now.plus(28, ChronoUnit.DAYS);
-
+    private List<Match> getTournamentMatches(String competition, Tournament tournament, Instant from) {
         List<Match> matches = matchRepositoryPort.findByTournamentIdAndKickoffTimeBetween(
                 tournament.getId(),
-                now,
-                in28Days
+                from,
+                Instant.MAX
         );
 
         log.info(

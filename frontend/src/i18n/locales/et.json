@@ -42,10 +42,13 @@
   },
   "tabs": {
     "matches": "Mängud",
+    "results": "Tulemused",
     "standings": "Tabeliseis"
   },
   "matchCard": {
     "vs": "vs",
+    "home": "Kodu",
+    "away": "Külas",
     "draw": "Viik",
     "saving": "Salvestamine...",
     "saved": "✓ Salvestatud",
@@ -191,8 +194,27 @@
       "loadingLeaderboards": "Edetabelite laadimine...",
       "emptyLeaderboards": "Seo turniir, et näha siin grupi punkte.",
       "scoredPredictions": "{{scored}}/{{total}} punktidega ennustust",
-      "points": "pts"
+      "points": "pts",
+      "viewPredictions": "{{name}} ennustused"
     }
+  },
+  "common": {
+    "close": "Sulge",
+    "closeIcon": "×"
+  },
+  "predictionResults": {
+    "title": "Minu tulemused",
+    "selectGroup": "Vali grupp",
+    "selectTournament": "Vali turniir",
+    "loading": "Tulemuste laadimine...",
+    "noGroups": "Sa ei ole veel ühegi grupi liige.",
+    "noTournaments": "Sellel grupil pole seotud turniire.",
+    "noResults": "Pole veel lõppenud mänge.",
+    "yourPrediction": "Sinu ennustus",
+    "actual": "Tulemus",
+    "points": "pts",
+    "pending": "–",
+    "scoreSeparator": "–"
   },
   "invite": {
     "loading": "Laen grupi infot...",

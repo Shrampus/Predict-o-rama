@@ -98,6 +98,7 @@ function GroupDetailsPageContent({ groupId }: { groupId: string }) {
       />
 
       <GroupLeaderboardsSection
+        groupId={groupId}
         leaderboards={leaderboards}
         isLoadingLeaderboards={isLoadingLeaderboards}
         leaderboardsError={leaderboardsError}

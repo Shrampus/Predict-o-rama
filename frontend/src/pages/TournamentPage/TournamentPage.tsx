@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 
@@ -9,6 +10,7 @@ import { useTournamentMatches } from './hooks/useTournamentMatches';
 import type { WinningTeam } from './TournamentConstants';
 import type { PredictActionResult } from './types/predictionActions';
 import { ROUTE_PATHS } from '../../app/routePaths';
+import PredictionResultsCard from '../../components/predictionResults/PredictionResultsCard';
 import type { TournamentMatchPrediction } from '../../services/predictionsApi';
 
 type TournamentRouteState = {
@@ -39,8 +41,12 @@ function TournamentPage() {
     const resolvedTournament = tournament ?? '';
     const routeState = isTournamentRouteState(location.state) ? location.state : null;
 
+    const [activeTab, setActiveTab] = useState<'matches' | 'results'>('matches');
+
     const {
         matches,
+        upcomingMatches,
+        completedMatches,
         tournamentName,
         seasonLabel: responseSeasonLabel,
         phaseLabel: responsePhaseLabel,
@@ -98,40 +104,43 @@ function TournamentPage() {
                 liveMatchCount={liveMatchCount}
             />
 
-            <Tabs />
+            <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-            <div className="grid grid-cols-1 laptop:grid-cols-12 gap-8">
-                <div className="laptop:col-span-8 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-black text-slate-900">
-                            {phaseLabel}{' '}
-                            <span className="text-slate-400 font-normal ml-2">{t('tournament.upcoming')}</span>
-                        </h2>
-                        {/* <span className="text-green-700 font-bold text-sm cursor-pointer hover:underline">
-                            {t('tournament.viewCalendar')}
-                        </span> */}
+            {activeTab === 'matches' && (
+                <div className="grid grid-cols-1 laptop:grid-cols-12 gap-8">
+                    <div className="laptop:col-span-8 space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-black text-slate-900">
+                                {phaseLabel}{' '}
+                                <span className="text-slate-400 font-normal ml-2">{t('tournament.upcoming')}</span>
+                            </h2>
+                        </div>
+
+                        {isLoading && <p>{t('tournament.loadingMatches')}</p>}
+                        {error && <p className="text-red-500">{error}</p>}
+                        {!isLoading && !error && upcomingMatches.length === 0 && <p>{t('tournament.noMatches')}</p>}
+
+                        {!isLoading &&
+                            !error &&
+                            upcomingMatches.map((match: TournamentMatchPrediction) => (
+                                <MatchCard
+                                    key={match.matchId}
+                                    match={match}
+                                    onPredict={handlePredict}
+                                    isSaving={isSavingMatch(match.matchId)}
+                                />
+                            ))}
                     </div>
 
-                    {isLoading && <p>{t('tournament.loadingMatches')}</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-                    {!isLoading && !error && matches.length === 0 && <p>{t('tournament.noMatches')}</p>}
-
-                    {!isLoading &&
-                        !error &&
-                        matches.map((match: TournamentMatchPrediction) => (
-                            <MatchCard
-                                key={match.matchId}
-                                match={match}
-                                onPredict={handlePredict}
-                                isSaving={isSavingMatch(match.matchId)}
-                            />
-                        ))}
+                    <div className="laptop:col-span-4 space-y-6">
+                        {/* <BentoBoxes /> */}
+                    </div>
                 </div>
+            )}
 
-                <div className="laptop:col-span-4 space-y-6">
-                    {/* <BentoBoxes /> */}
-                </div>
-            </div>
+            {activeTab === 'results' && (
+                <PredictionResultsCard matches={completedMatches} tournamentName={tournamentName} />
+            )}
         </div>
     );
 }

@@ -42,10 +42,13 @@
   },
   "tabs": {
     "matches": "Матчи",
+    "results": "Результаты",
     "standings": "Таблица"
   },
   "matchCard": {
     "vs": "vs",
+    "home": "Хозяева",
+    "away": "Гости",
     "draw": "Ничья",
     "saving": "Сохранение...",
     "saved": "Сохранено",
@@ -196,8 +199,27 @@
       "loadingLeaderboards": "Загрузка таблиц лидеров...",
       "emptyLeaderboards": "Привяжите турнир, чтобы увидеть здесь очки группы.",
       "scoredPredictions": "{{scored}}/{{total}} оцененных прогнозов",
-      "points": "очк"
+      "points": "очк",
+      "viewPredictions": "Прогнозы {{name}}"
     }
+  },
+  "common": {
+    "close": "Закрыть",
+    "closeIcon": "×"
+  },
+  "predictionResults": {
+    "title": "Мои результаты",
+    "selectGroup": "Выберите группу",
+    "selectTournament": "Выберите турнир",
+    "loading": "Загрузка результатов...",
+    "noGroups": "Вы пока не являетесь членом ни одной группы.",
+    "noTournaments": "К этой группе ещё не привязаны турниры.",
+    "noResults": "Завершённых матчей пока нет.",
+    "yourPrediction": "Ваш прогноз",
+    "actual": "Результат",
+    "points": "очк.",
+    "pending": "–",
+    "scoreSeparator": "–"
   },
   "invite": {
     "loading": "Загрузка информации о группе...",

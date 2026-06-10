@@ -411,6 +411,25 @@ export async function removeGroupTournament(groupId: string, tournamentId: strin
   }
 }
 
+/** Fetch completed match predictions for a specific group member. */
+export async function getMemberPredictions(
+  groupId: string,
+  userId: string,
+  competition: string,
+): Promise<import('./predictionsApi').TournamentPredictionsResponse> {
+  const response = await apiFetch(
+    getApiUrl(
+      `/api/groups/${groupId}/members/${userId}/predictions?competition=${encodeURIComponent(competition)}`,
+    ),
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch member predictions (${response.status})`);
+  }
+
+  return response.json();
+}
+
 /** Fetch available tournaments for selection. */
 export async function getTournaments(): Promise<TournamentOption[]> {
   const response = await apiFetch(getApiUrl(`${API_PREFIX}/tournaments`));

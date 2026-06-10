@@ -42,10 +42,13 @@
   },
   "tabs": {
     "matches": "Matches",
+    "results": "Results",
     "standings": "Standings"
   },
   "matchCard": {
     "vs": "vs",
+    "home": "Home",
+    "away": "Away",
     "draw": "Draw",
     "saving": "Saving...",
     "saved": "✓ Saved",
@@ -191,8 +194,27 @@
       "loadingLeaderboards": "Loading leaderboards...",
       "emptyLeaderboards": "Link a tournament to see group scores here.",
       "scoredPredictions": "{{scored}}/{{total}} scored predictions",
-      "points": "pts"
+      "points": "pts",
+      "viewPredictions": "{{name}}'s predictions"
     }
+  },
+  "common": {
+    "close": "Close",
+    "closeIcon": "×"
+  },
+  "predictionResults": {
+    "title": "My Results",
+    "selectGroup": "Select a group",
+    "selectTournament": "Select a tournament",
+    "loading": "Loading results...",
+    "noGroups": "You are not a member of any groups yet.",
+    "noTournaments": "No tournaments linked to this group yet.",
+    "noResults": "No completed matches yet.",
+    "yourPrediction": "Your prediction",
+    "actual": "Result",
+    "points": "pts",
+    "pending": "–",
+    "scoreSeparator": "–"
   },
   "invite": {
     "loading": "Loading group info...",
